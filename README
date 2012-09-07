@@ -1,0 +1,58 @@
+geogrid
+=======
+
+INSTALLATION
+------------
+
+The installation requires that you first install the PROJ4 library for
+the map projections. This can be obtained from 
+http://www.remotesensing.org/proj/
+
+############################
+
+Changes
+-------
+
+2.3 : Changed the installation procedure (Makevars in stead of a Makefile)
+
+2.4 : - New routines for creation of domains (Make.lccdomain)
+      - Bugfixes
+
+2.5 : - Bugfixes and more bugfixes
+      - Corrections to vectplot: assume aspect ratio=1 (conformal), and do
+            a local correction with cos(lat) in LatLon graphs.
+      - "Make.domain" : includes mercator projection -> more general
+      than Make.lccdomain
+      - added "gridpoints": indicate some given points on a map.
+      - map4, map.grid4 : a port of the standard map function, but
+      using PROJ4 projections.
+      - "orthoglobe": a simple orthographic plot of the world.
+      - "regrid" for simple interpolation to other grid
+      - "interp.point", "laloclick"
+      - Rotated LatLon projection (not in proj4 library, so coded here)
+2.6 : - use the CRAN package proj4 as interface (slightly cleaner than mine)
+      - use package "fields" for bilinear interpolation in "regrid" (much faster)
+      - NOT FULLY BACKWARD COMPATIBLE! Some external routines and data sets
+        fail. e.g. calling "iview" with an old-style projection.
+      - There is a conversion utility, and any new files should be read OK.
+3.0 : - Very much improved legend support with new graphical function "limage".
+      - Code cleaning.
+      - C-code for "map.restrict": clean restriction of a map to the margins.
+      - mapreso (map resolution) is now a real number. Resolution is finally flexible!
+      - mask option for iview, cview and fcview (3.0.3)
+      - use worldNew by default.
+      - seamask() for clearing all oceans. Some side-effects, but it works.
+        THIS DOESN'T WORK WHEN PRINTING. I DON'T KNOW WHY.
+      - Many bugfixes and improvements for Rotated Mercator support.
+      - Bugfix for contour.geofield(drawmap=FALSE). Reported by Luc Gerard.
+
+3.1 : - MANY more fixes
+      - adapt for R 2.14
+### FUTURE:
+4.0:  - move main graphical tools to the "Lattice" package to take advantage of         better legend tools.
+
+ISSUES:
+
+- "seamask" only works on screen, not when printing.
+- Some special cases of combined graphs, especially linked to the differences in domain size (dx) between "iview" and "fcview".
+

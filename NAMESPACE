@@ -1,0 +1,14 @@
+# Default NAMESPACE created by R
+# Remove the previous line if you edit this file
+
+# Export all names
+exportPattern(".")
+# exportPattern("^Domain")
+# S3method(as,geofield)
+
+# export(i2a,matsum,laloclick,orthoglobe,as.ocean,box.resize,seamask,irainbow,grainbow)
+# exportPattern("^col")
+
+# 
+useDynLib("geogrid")
+

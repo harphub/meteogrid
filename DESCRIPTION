@@ -1,0 +1,11 @@
+Package: geogrid
+Version: 3.1.2.4
+Date: 16/07/2012
+Title: geogrid
+Author: Alex Deckmyn <Alex.Deckmyn@meteo.be>.
+Maintainer: Alex Deckmyn <Alex.Deckmyn@meteo.be>
+Depends: mapNew
+Suggest: RColorBrewer,fields
+Description: Viewing (projected) grid map data
+License: GPL-3
+URL:

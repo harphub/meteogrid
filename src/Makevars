@@ -1,0 +1,6 @@
+ifeq ($(PROJDIR),)
+  PKG_LIBS = -lproj
+else
+  PKG_CPPFLAGS = -I$(PROJDIR)/include
+  PKG_LIBS = -L$(PROJDIR)/lib -lproj
+endif
