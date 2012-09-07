@@ -315,9 +315,9 @@ lalopoint <- function(data,lon,lat,minimise='lalo',mask=NULL){
   else stop("unknown minimisation.")
 
   if (!is.null(mask)) {
-      if (is.character(mask)) 
+      if (is.character(mask))
           mask <- eval(parse(text = mask))
-      else if (is.expression(mask)) 
+      else if (is.expression(mask))
           mask <- eval(mask)
       dist[eval(expression(mask))] <- NA
   }
@@ -563,7 +563,7 @@ project <- function(x,y,proj=.Last.domain$projection,inv=FALSE)
   else  {
     npoints <- as.integer(length(x))
     npar <- as.integer(length(proj))
-    par=paste(names(proj),lapply(proj,function(x) if(is.na(x)) "" else paste("=",x,sep="")),sep="")
+    par <- paste(names(proj),lapply(proj,function(x) if(is.na(x)) "" else paste("=",x,sep="")),sep="")
 ### SIMPLER: par=paste(names(proj),'=',proj,sep='')
 ### but this doesn't allow options without =x value
 
