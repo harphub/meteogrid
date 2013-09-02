@@ -55,6 +55,9 @@
 ### 29/05/2012 : add useRaster=TRUE as an option to iview.
 ###              Check that version>=2.13 before calling image.
 ### 29/06/2012 : Add "mask" option to lalopoint (e.g. to find closest LAND point)
+### 21/03/2013 : New regrid implementation:
+###              Bilinear, Nearest neighbour and bicubic spline interpolations.
+### 11/07/2013 : Replace "mapNew" by a simple lat/lon table, so yo udon't need "maps".
 ##########################################
 
 is.geofield <- function(x){
@@ -248,11 +251,10 @@ zoomgrid <- function(infield,x,y,zoom=50){
 }
 
 
-##############################
-### INTERPOLATION          ###
-##############################
 
-regrid <- function (infield, newdomain=.Last.domain)
+########## OLD INTERPOLATION ROUTINES :
+
+regrid.old <- function (infield, newdomain=.Last.domain)
 {
 ### Bilinear interpolation to different grid
   require(fields)
@@ -270,7 +272,7 @@ regrid <- function (infield, newdomain=.Last.domain)
               domain = newdomain,time=attr(infield,"time"),info=attr(infield,"info"))
 }
 
-point.interp <- function(lon,lat,infield){
+point.interp.old <- function(lon,lat,infield){
 ### interpolate to a given (set of) point(s):
   require(fields)
   gdomain <- attr(infield, "domain")
@@ -285,12 +287,12 @@ point.interp <- function(lon,lat,infield){
   result
 }
 
-point.closest <- function(lon,lat,infield,...){
+point.closest.old <- function(lon,lat,infield,...){
 ### simply return value of the closest grid points
 ### as calculated by lalopoint
   n <- length(lon)
-  x <- rep(NA,nx)
-  for(i in 1:nx) x[i] <- lalopoint(infield,lon[i],lat[i],...)$data
+  x <- rep(NA,n)
+  for(i in 1:n) x[i] <- lalopoint(infield,lon[i],lat[i],...)$data
   x
 }
 
@@ -511,26 +513,7 @@ MakeRLL <- function(Lon1,Lat1,SPlon,SPlat,SPangle=0,nxny,dxdy){
   result
 }
 
-######################
-### periodicity depends on the projection
-### may be 360, 2*pi or ~40.000 in Mercator !
-### a non-periodic LatLon domain still has a "period" of 360 !
-map.restrict1 <- function(bx,by,xlim,xperiod=NA_real_,xfrac=0.5){
-  lx <- length(bx)
 
-  result <- .C("maprestrict1",bx=as.double(bx),by=as.double(by),lx=as.integer(lx),
-            x0=as.double(xlim[1]),x1=as.double(xlim[2]),
-            nx=double(2*lx),ny=double(2*lx),
-            newlen=integer(1),xperiod=as.numeric(xperiod),
-            xfrac=as.numeric(xfrac),NAOK=TRUE)
-  list(x=result$nx[2:result$newlen],y=result$ny[2:result$newlen])
-}
-
-map.restrict <- function(bxy,xlim,ylim,xperiod=NA_real_,xfrac=0.5,yperiod=NA_real_,yfrac=NA_real_){
-  bxy <- map.restrict1(bxy$x,bxy$y,xlim,xperiod,xfrac)
-  byx <- map.restrict1(bxy$y,bxy$x,ylim,yperiod,yfrac)
-  list(x=byx$y,y=byx$x)
-}
 
 ##################################
 ### Interface to PROJ4 library ###
@@ -540,7 +523,8 @@ project <- function(x,y,proj=.Last.domain$projection,inv=FALSE)
 {
 
   if(missing(y)){
-    if(is.list(x)) {y <- x$y;x <- x$x}
+# apparantly, is.list gives TRUE for data.frames, but lets be careful:
+    if(is.list(x) | is.data.frame(x)) {y <- x$y;x <- x$x}
     else if(is.vector(x)) {y <- x[2];x <- x[1]}
     else {y <- x[,2];x <- x[,1]}
   }

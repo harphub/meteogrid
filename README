@@ -8,6 +8,8 @@ The installation requires that you first install the PROJ4 library for
 the map projections. This can be obtained from 
 http://www.remotesensing.org/proj/
 
+The (free) worldmap datasets are imported from http://www.naturalearthdata.com
+
 ############################
 
 Changes
@@ -48,6 +50,8 @@ Changes
 
 3.1 : - MANY more fixes
       - adapt for R 2.14
+
+3.2 : - replace mapNew by a simple table with decent boundaries.
 ### FUTURE:
 4.0:  - move main graphical tools to the "Lattice" package to take advantage of         better legend tools.
 

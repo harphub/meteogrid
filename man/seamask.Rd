@@ -6,7 +6,7 @@
 These routines allow you to plot the ocean as a polygon (in stead of the land surface), which may be useful for some graphs. This routine is rather experimental and will not work under all circumstances! }
 
 \usage{
-seamask(col='white',add.dx=TRUE,drawmap=TRUE,map.database='worldNew')
+seamask(col='white',add.dx=TRUE,drawmap=TRUE,map.database='worldcoast')
 as.ocean(data,XYLIM=par('usr'))
 }
 \arguments{

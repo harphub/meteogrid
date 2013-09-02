@@ -12,11 +12,11 @@ laloclick = function(n=1,type='n',...){
 }
 
 ### For fun: plot an orthographic projection of the world.
-orthoglobe = function(reflon=0,reflat=90,...){
+orthoglobe = function(reflon=0,reflat=90,map.database="worldmap",...){
   projection = list(proj="ortho",lon_0=reflon,lat_0=reflat,a=6371229.0,es=0.0)
-
-  boundaries = map("worldNew",plot=FALSE)
-    geo = project(boundaries, proj =projection,inv = FALSE)
+  if(!exists(map.database)) data(list=map.database)
+  boundaries <- worldmap
+  geo = project(boundaries, proj =projection,inv = FALSE)
 
   plot(geo,type="l",xlab="",ylab="",axes=FALSE,...)
   box()
@@ -67,7 +67,7 @@ box.resize=function(glim){
 }
 
 seamask=function(col='white',add.dx=TRUE,
-                 drawmap=TRUE,map.database='worldNew'){
+                 drawmap=TRUE,map.database='worldcoast'){
 # This doesn't work very well!!!
   domain=.Last.domain
   opar=par('plt','usr')
@@ -75,9 +75,13 @@ seamask=function(col='white',add.dx=TRUE,
   LXY=c(glimits$x0,glimits$x1,glimits$y0,glimits$y1)
   if(add.dx) LXY=LXY+c(-glimits$dx,glimits$dx,-glimits$dy,glimits$dy)/2
 
-  borders=project(map(map.database,xlim=glimits$lonlim,ylim=glimits$latlim,
-                      plot=FALSE,fill=TRUE),
-                  proj=domain$projection)
+  if(!exists(map.database)) data(list=map.database)
+  map <- eval(parse(text=map.database))
+  boundaries <- map[map$x >= glimits$lonlim[1] &
+                    map$x <= glimits$lonlim[2] &
+                    map$y >= glimits$latlim[1] &
+                    map$y <= glimits$latlim[2] ,] 
+  borders=project(boundaries,proj=domain$projection)
   box.resize(LXY)
   invborders=as.ocean(borders)
   polygon(invborders,col=col,border=FALSE)
@@ -141,5 +145,3 @@ col.cloud=function(n) rgb(1,1,1,(0:(n-1))/(n-1))
   if (n<0) grey(seq(1,0,length=-n))
   else grey(seq(0,1,length=n))
 }
-
-

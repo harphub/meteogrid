@@ -2,15 +2,16 @@
 /* Can be optimised...                       */
 
 #include <stdio.h>
-#include "projects.h"
 #include "R.h"
+
+#include "proj_api.h"
 
 
 void Rproj4(double*,double*,int*,char**,int*,int*);
 
 
 void Rproj4(double* u,double* v,int*npoints,char** parms,int* nparms,int* inverse){
-  PJ *ref;
+  projPJ *ref;
   projUV data;
   int i;
 
@@ -19,9 +20,6 @@ void Rproj4(double* u,double* v,int*npoints,char** parms,int* nparms,int* invers
     for(i=0;i<*nparms;i++) printf("%s ",parms[i]);
     exit(1);
   }
-  /*    for(i=0;i<*nparms;i++) printf("%s\n",parms[i]);
-        printf("nparms= %d\n",*nparms);
-        printf("npoints= %d\n",*npoints);*/
   for(i=0;i< *npoints;i++){
       if(R_FINITE(data.u = u[i]) && R_FINITE(data.v = v[i])) {
       data = (*inverse) ? pj_inv(data,ref) : pj_fwd(data,ref) ;

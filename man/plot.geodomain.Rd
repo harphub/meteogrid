@@ -7,13 +7,12 @@
 plot.geodomain=function(x=.Last.domain,add=T,
              maplwd=1,mapcol='light grey',
              add.dx=T,drawmap=!add, box=drawmap,
-             mapreso=0.02,map.database='worldHires',...)
+             map.database='worldmap',...)
 }
 \arguments{
 \item{domain}{A \code{geodomain} format. Default is the last domain plotted.}
 \item{mapcol}{Colour of the map contours. }
-\item{mapreso}{Map resolution factor. The full map database is "thinned" by this factor. 0 gives highest resolution. For large domains, higher value (e.g. .1 or more) will improve plotting speed. For backward compatibility, mapreso may also be a character string, in which case it is interpreted as the map database (usually 'world' or 'worldHires'), but this should now be set using map.database .}
-\item{map.database}{A character string for the map database. The map package allows "world" (very coarse resolution when for small local domains) and "worldHires". When using a high resolution set, mapreso may have to be increased.}
+\item{map.database}{A character string for the map database. "worldmap" and "worldcoast" are included.}
 \item{drawmap}{If TRUE, the map contours are superposed on the data plot.}
 \item{maplwd}{Line width of the map.}
 \item{add.dx}{If TRUE, the domain size is extended by half a grid interval in all directions, i.e. the co-ordinates are treated as the centers of grid boxes.}

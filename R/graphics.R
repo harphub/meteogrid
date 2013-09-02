@@ -7,8 +7,7 @@
 "vecplot"  <- function(U,...) UseMethod("vecplot")
 
 vecplot.geofield = function(U,V,add=FALSE,aspcorrect=TRUE,
-                     drawmap=TRUE,mapcol="black",mapreso=.02,maplwd=.5,
-                     map.interior=TRUE,...){
+                     drawmap=TRUE,mapcol="black",maplwd=.5,...){
 
   gdomain=attr(U,"domain")
   glimits <- DomainExtent(gdomain)
@@ -38,7 +37,7 @@ vecplot.geofield = function(U,V,add=FALSE,aspcorrect=TRUE,
   }
 
   if (drawmap)
-    plot(gdomain,mapreso=mapreso,maplwd=maplwd,mapcol=mapcol,add=add,box=!add,add.dx=TRUE,map.interior=map.interior)
+    plot(gdomain,maplwd=maplwd,mapcol=mapcol,add=add,box=!add,add.dx=TRUE)
 
   vecplot(U=U[1:gdomain$nx,1:gdomain$ny],
           V=V[1:gdomain$nx,1:gdomain$ny],x=x,y=y,add=TRUE,...)
@@ -105,7 +104,7 @@ limage  <- function(x,...) UseMethod("limage")
 
 limage.geofield=function(field,smooth=FALSE,drawmap=TRUE,
                    maplwd=.5,mapcol='black',
-                   mapreso=.02,map.database="worldNew",map.interior=TRUE,...){
+                   map.database="worldmap",...){
   gdomain=attr(field,"domain")
   glimits <- DomainExtent(gdomain)
   x = seq(glimits$x0,glimits$x1,length=glimits$nx)
@@ -122,7 +121,7 @@ limage.geofield=function(field,smooth=FALSE,drawmap=TRUE,
   if(drawmap)
     plot(gdomain,add=TRUE,drawmap=TRUE,
          add.dx=!smooth,box=TRUE,maplwd=maplwd,mapcol=mapcol,
-         mapreso=mapreso,map.database=map.database,map.interior=map.interior)
+         map.database=map.database)
 }
 
 limage.default <-
@@ -157,7 +156,10 @@ limage.default <-
     if(smooth){
       plot.new()
       plot.window(xlim, ylim, "", xaxs="i", yaxs="i", asp=asp)
-      .Internal(filledcontour(x,y,z,as.double(levels),col = col ))
+      if(as.numeric(R.Version()$major) < 3)
+        .Internal(filledcontour(x,y,z,as.double(levels),col = col ))
+      else
+        .filled.contour(x,y,z,as.double(levels),col)
     }
     else {
 ### useRaster is available from v 2.13.0 on. It improves the quality enormously.
@@ -226,15 +228,15 @@ limage.default <-
 
 "contour.geofield" <-
 function(field,mapcol="black",add=FALSE,drawmap=!add,maplwd=.5,
-         mapreso=0.02,map.database="worldNew",map.interior=TRUE,...){
+         map.database="worldmap",...){
   gdomain=attr(field,"domain")
   glimits <- DomainExtent(gdomain)
   x <- seq(glimits$x0,glimits$x1,length=gdomain$nx)
   y <- seq(glimits$y0,glimits$y1,length=gdomain$ny)
 
   if(drawmap)
-      plot(gdomain,mapreso=mapreso,maplwd=maplwd,mapcol=mapcol,add=add,
-           drawmap=drawmap,map.database=map.database,map.interior=map.interior)
+      plot(gdomain,maplwd=maplwd,mapcol=mapcol,add=add,
+           drawmap=drawmap,map.database=map.database)
 ### a future using lattice:
 #  contourplot(x, y, field[1:gdomain$nx, 1:gdomain$ny],
 #          xlab = "", ylab = "", axes = FALSE, add = ifelse(drawmap,TRUE,add), ...)
@@ -268,8 +270,7 @@ iview2 = function(x,nlevels=15,color.palette=irainbow,
           breaks=seq(min(x,na.rm=TRUE),max(x,na.rm=TRUE),length=nlevels),
           asp=1,mask=NULL,
           drawmap=TRUE,maplwd=.5,mapcol='black',
-          mapreso=.02,map.database="worldNew",map.interior=TRUE,
-          ...){
+          map.database="worldmap", ...){
   require(lattice)
   if(!is.null(mask)){
     if(is.character(mask)) mask=eval(parse(text=mask))
@@ -296,7 +297,7 @@ iview2 = function(x,nlevels=15,color.palette=irainbow,
   print(ppp)
     if(drawmap)    plot(gdomain,add=TRUE,drawmap=TRUE,
          add.dx=TRUE,box=TRUE,maplwd=maplwd,mapcol=mapcol,
-         mapreso=mapreso,map.database=map.database,map.interior=map.interior)
+         map.database=map.database)
 
 }
 
@@ -336,7 +337,7 @@ vview <- function(U,V,...){
 plot.geodomain <- function(x=.Last.domain,add=TRUE,
              maplwd=1,mapcol='black',
              add.dx=TRUE,drawmap=!add, box=drawmap,
-             mapreso=0.02,map.database='worldNew',map.interior=TRUE,...){
+             map.database="worldmap",...){
 ### consistency
 
   if(add) domain=.Last.domain
@@ -346,10 +347,6 @@ plot.geodomain <- function(x=.Last.domain,add=TRUE,
   }
 
 ### for backward compatibility
-  if(is.character(mapreso)){
-    map.database=mapreso
-    mapreso=0
-  }
   glimits <- DomainExtent(domain)
 
   if(!add.dx){
@@ -369,9 +366,16 @@ plot.geodomain <- function(x=.Last.domain,add=TRUE,
   }
 
   if(drawmap){
-    boundaries <- map(database=map.database, xlim = glimits$lonlim, ylim = glimits$latlim,
-                    plot = FALSE,interior = map.interior)
-    boundaries=mapthin(boundaries,mapreso)
+    if(!exists(map.database)) data(list=map.database)
+    map <- eval(parse(text=map.database))
+### BUG: this simple restriction may leave artificial lines!
+#    boundaries <- map[map$x >= glimits$lonlim[1] &
+#                    map$x <= glimits$lonlim[2] &
+#                    map$y >= glimits$latlim[1] &
+#                    map$y <= glimits$latlim[2] ,]
+# SO: first call to map.restrict is to reduce the number points to project.
+# there may be more subtle/efficient ways to do this, but at least it works.
+    boundaries <- map.restrict(map,xlim=glimits$lonlim,ylim=glimits$latlim)
     geo <- project(boundaries, proj = domain$projection,inv = FALSE)
     xyper <- periodicity(domain)
 ### make sure that no points fall outside the map domain.
@@ -395,7 +399,27 @@ plot.geodomain <- function(x=.Last.domain,add=TRUE,
 plot.geofield=function(field,...){
   plot(attr(field,"domain"),...)
 }
+######################
+### periodicity depends on the projection
+### may be 360, 2*pi or ~40.000 in Mercator !
+### a non-periodic LatLon domain still has a "period" of 360 !
 
+map.restrict1 <- function(bx,by,xlim,xperiod=NA_real_,xfrac=0.5){
+  lx <- length(bx)
+
+  result <- .C("maprestrict1",bx=as.double(bx),by=as.double(by),lx=as.integer(lx),
+            x0=as.double(xlim[1]),x1=as.double(xlim[2]),
+            nx=double(2*lx),ny=double(2*lx),
+            newlen=integer(1),xperiod=as.numeric(xperiod),
+            xfrac=as.numeric(xfrac),NAOK=TRUE)
+  data.frame(x=result$nx[2:result$newlen],y=result$ny[2:result$newlen])
+}
+
+map.restrict <- function(bxy,xlim,ylim,xperiod=NA_real_,xfrac=0.5,yperiod=NA_real_,yfrac=NA_real_){
+  bxy <- map.restrict1(bxy$x,bxy$y,xlim,xperiod,xfrac)
+  byx <- map.restrict1(bxy$y, bxy$x, ylim, yperiod, yfrac)
+  list(x = byx$y, y = byx$x)
+}
 
 #####################################################
 ### plotting the frame of a domain on another map ###
@@ -434,7 +458,7 @@ domainbox <-
 ############################
 ### this will plot point values on a map
 ### with a colour function
-obsplot <- function(x,y,data,breaks=5,pretty=TRUE,legend.pos=NULL,add=TRUE,domain=.Last.domain,col=irainbow,...){
+obsplot <- function(x,y,z,breaks=5,pretty=TRUE,legend.pos=NULL,add=TRUE,domain=.Last.domain,col=irainbow,...){
   if (length(breaks) == 1L & pretty) breaks <- pretty(z,breaks)
   bins <- cut(z,breaks,include.lowest=TRUE,right=FALSE)
 
