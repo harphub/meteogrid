@@ -7,9 +7,6 @@
 #        output as speed/direction?
 
 ### rotate model wind to geographic wind
-### We do this for a set of indices i,j (may be vectors!)
-### u and v are also vectors (wind AT THE POINT i,j)
-### If u and v are "geofield" objects,
 ### the conversion is done for the whole domain
 
 ### 1. very basic functions for (u,v) <-> (wdir,wspeed)
@@ -39,31 +36,33 @@ wind.uv <- function(wdir,wspeed,fieldname=c("U","V")){
 
 ### 2. main routine for rotation grid axes <-> N/E axes
 
-geowind <- function(U,V,inv=FALSE){
-  domain <- attributes(U)$domain
-  ppp <- domain$projection
-  if (ppp$proj=="ob_tran") ww <- geowind.RLL(domain)
-  else if(ppp$proj=="lcc") ww <- geowind.LCC(domain)
-  else if(ppp$proj=="stere") ww <- geowind.PS(domain)
-  else if(ppp$proj=="omerc") ww <- geowind.RM(domain) # TODO: may also be tmerc,somerc,merc
-  else error("unimplemented projection")
+geowind <- function(u,v,inv=FALSE){
+  domain <- attributes(u)$domain
+
+  ww <- switch(domain$projection$proj,
+          "ob_tran" = geowind.RLL(domain),
+          "lcc" = geowind.LCC(domain),
+          "stere" = geowind.PS(domain),
+          "omerc" = geowind.RM(domain),
+          stop(paste("unimplemented projection: ",domain$projection$proj))
+         )
 
   if(inv) {
     ww$angle <- -ww$angle
     ww$mapfactor <- 1/ww$mapfactor
   }
-  U <- (cos(ww$angle) * U - sin(ww$angle) * V) * ww$mapfactor
-  V <- (sin(ww$angle) * U + cos(ww$angle) * V) * ww$mapfactor
+  U <- (cos(ww$angle) * u - sin(ww$angle) * v) * ww$mapfactor
+  V <- (sin(ww$angle) * u + cos(ww$angle) * v) * ww$mapfactor
   if(!inv){
-    attributes(U)$info$name <- paste(attributes(U)$info$name, 
+    attributes(U)$info$name <- paste(attributes(u)$info$name, 
             "Rotated to N/E axes.")
-    attributes(V)$info$name <- paste(attributes(V)$info$name, 
+    attributes(V)$info$name <- paste(attributes(v)$info$name, 
             "Rotated to N/E axes.")
   }
   else {
-    attributes(U)$info$name <- paste(attributes(U)$info$name, 
+    attributes(U)$info$name <- paste(attributes(u)$info$name, 
             "grid axes.")
-    attributes(V)$info$name <- paste(attributes(V)$info$name, 
+    attributes(V)$info$name <- paste(attributes(v)$info$name, 
             "grid axes.")
   }
   list(U=U,V=V)
@@ -79,8 +78,15 @@ geowind.RLL <- function(domain){
   cosP <- cos( (SPlat + 90) * rad )
 
   lalo <- DomainPoints(domain,"lalo")
+  Rlalo <- DomainPoints(domain,"xy")
 
-# sinRY <- cosP*sinY + sinP*cosY*cosX
+  sinRX <- sin(Rlalo$x)
+  cosRX <- cos(Rlalo$x)
+  cosRY <- cos(Rlalo$y)
+
+  lon0 <- rad*(lalo$lon - SPlon)
+  sinX0 <- sin(lon0)
+  cosX0 <- cos(lon0)
 
   sinA <- sinP*sinX0/cosRY
   cosA <- cosP*sinX0*sinRX + cosX0*cosRX
