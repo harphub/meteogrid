@@ -12,12 +12,15 @@
 ### 1. very basic functions for (u,v) <-> (wdir,wspeed)
 wind.dirspeed <- function(u,v,fieldname=c("Wind direction","Wind speed")){
   MINSPEED <- 10E-6
+
   wspeed <- sqrt(u^2 + v^2)
   wdir <- ifelse(abs(u)>MINSPEED,
                       ( -180 - atan(v/u) * 180/pi + sign(u)*90 ) %% 360,
                       ifelse(abs(v)<MINSPEED,NA, ifelse(v>0,180,0) ) )
   if(is.geofield(u)) {
+    attributes(wdir) <- attributes(u)
     attributes(wdir)$info$name <- fieldname[1]
+    attributes(wspeed) <- attributes(u)
     attributes(wspeed)$info$name <- fieldname[2]
   }
   list(wdir=wdir,wspeed=wspeed)

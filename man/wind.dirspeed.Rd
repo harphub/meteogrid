@@ -25,7 +25,8 @@ Wind direction is given in degrees. If the wind speed is lower than 10E-6, the r
 \examples{
   u <- FAdec('ICMSHABOF+0001',"S020WIND.U")
   v <- FAdec('ICMSHABOF+0001',"S020WIND.V")
-  DS <- wind.dirspeed(geowind(u,v)) ### a list containg 2 geofield objects
+  UV <- geowind(u,v)
+  DS <- wind.dirspeed(UV$U,UV$V) ### a list containg 2 geofield objects
 
 }
 \keyword{file}
