@@ -5,9 +5,40 @@
 # TO DO: add more projections? (rotated) mercator, polar-sterographic
 #        check mapfactor
 #        output as speed/direction?
-#        RLL can be simplified A LOT: the GL code is insanely complex
 
-### write functions that calculate anngle and mapfactor
+### rotate model wind to geographic wind
+### We do this for a set of indices i,j (may be vectors!)
+### u and v are also vectors (wind AT THE POINT i,j)
+### If u and v are "geofield" objects,
+### the conversion is done for the whole domain
+
+### 1. very basic functions for (u,v) <-> (wdir,wspeed)
+wind.dirspeed <- function(u,v,fieldname=c("Wind direction","Wind speed")){
+  MINSPEED <- 10E-6
+  wspeed <- sqrt(u^2 + v^2)
+  wdir <- ifelse(abs(u)>MINSPEED,
+                      ( -180 - atan(v/u) * 180/pi + sign(u)*90 ) %% 360,
+                      ifelse(abs(v)<MINSPEED,NA, ifelse(v>0,180,0) ) )
+  if(is.geofield(u)) {
+    attributes(wdir)$info$name <- fieldname[1]
+    attributes(wspeed)$info$name <- fieldname[2]
+  }
+  list(wdir=wdir,wspeed=wspeed)
+}
+
+wind.uv <- function(wdir,wspeed,fieldname=c("U","V")){
+  u <- wspeed*cos(wdir)
+  v <- wspeed*sin(wdir)
+  if(is.geofield(wdir)) {
+    attributes(u)$info$name <- fieldname[1]
+    attributes(v)$info$name <- fieldname[2]
+  }
+  list(U=u,V=v)
+}
+
+
+### 2. main routine for rotation grid axes <-> N/E axes
+
 geowind <- function(U,V,inv=FALSE){
   domain <- attributes(U)$domain
   ppp <- domain$projection
@@ -37,6 +68,8 @@ geowind <- function(U,V,inv=FALSE){
   }
   list(U=U,V=V)
 }
+
+### 3. functions that calculate local rotation angle and mapfactor
 
 geowind.RLL <- function(domain){
   rad <- pi/180.
@@ -72,7 +105,6 @@ geowind.LCC <- function(domain){
   mapfactor <- (refcos/cos(lalo$lat * rad))^(1 - refcos) * ((1 + refsin)/(1 + sin(lalo$lat * rad)))^refsin
   angle <- -refsin * (lalo$lon - reflon) * rad
   list(angle=angle,mapfactor=mapfactor)
-  list(U=U,V=V)
 }
 
 geowind.LCC2 <- function(domain){
@@ -125,6 +157,7 @@ geowind.RM <- function(domain){
 geowind.RLL0 <- function(U,V,inv=FALSE) {
 ### transform wind field from Rotated LatLon to normal (or back)
 ### R version of the code in GL: a bit complex...
+### only temporarily, for reference
    rad <- pi/180.
   domain <- attributes(U)$domain
   SPlat <- -domain$projection$o_lat_p

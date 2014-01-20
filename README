@@ -52,6 +52,7 @@ Changes
       - adapt for R 2.14
 
 3.2 : - replace mapNew by a simple table with decent boundaries.
+      - geowind: wind rotation for a few projections
 ### FUTURE:
 4.0:  - move main graphical tools to the "Lattice" package to take advantage of         better legend tools.
 
