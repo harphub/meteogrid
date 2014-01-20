@@ -10,9 +10,10 @@ geowind(U, V, inv=FALSE)
 }
 
 \arguments{
-\item{U,V}{ u and v components of the model wind. These must be \code{geofield} objects.
-\item{inv} { if inv=TRUE, the vector is rotated from N/E back to the grid axes.
-   }
+\item{U,V}{ u and v components of the model wind. These must be \code{geofield} objects.}
+\item{inv}{ if inv=TRUE, the vector is rotated from N/E back to the grid axes.
+}
+}
 \value{
 A list with components \code{U,V} that have the same type as the input. The wind vectot has been rotated to the geographical N/E axes, or inverse. }
 \details{
