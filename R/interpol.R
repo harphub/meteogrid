@@ -143,7 +143,6 @@ point.closest.init <- function(lon,lat,domain,mask=NULL) {
   i[(i<1)|(i>nx)] <- NA
   j[(j<1)|(j>ny)] <- NA
 
-  result <- infield[cbind(i,j)]
   if(!is.null(mask)){
 # with a mask, we need a bit more work
 # we do this only for those points where the closest point is masked...
