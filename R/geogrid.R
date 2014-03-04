@@ -354,6 +354,7 @@ DrawLatLon <- function(nx=9,ny=9,labels=TRUE,pretty=TRUE,
 
 ### adapted from "map.grid" in mapproj library
 ### uses map.wrap from maps library
+  require(maps)
   pretty.range <- function(lim,...) {
     # like pretty but ensures that the range is identical:
     # range(pretty.range(x)) == range(x)

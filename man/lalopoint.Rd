@@ -3,7 +3,7 @@
 \title{Find the grid point that is closest to given co-ordinates.}
 \description{
   In the given grid, the point closest to the (Lon,Lat) co-ordinates is
-  found. 
+  found. OBSOLETE! Use \code{point.interp}.
 }
 \usage{
 lalopoint(geofield,lon,lat,minimise='lalo')
@@ -19,5 +19,5 @@ lalopoint(geofield,lon,lat,minimise='lalo')
   \item{i,j}{The matrix indices of the chosen grid point.}
 }
 \seealso{
-  \code{\link{DomainPoints}}
-  }
+  \code{point.interp}
+}

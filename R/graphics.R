@@ -366,6 +366,7 @@ plot.geodomain <- function(x=.Last.domain,add=TRUE,
   }
 
   if(drawmap){
+#    require(maps)
     if(!exists(map.database)) data(list=map.database)
     map <- eval(parse(text=map.database))
 ### BUG: this simple restriction may leave artificial lines!

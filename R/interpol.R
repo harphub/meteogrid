@@ -46,6 +46,7 @@ regrid <- function (infield, newdomain=.Last.domain,method="bilinear",
 ############ METHODS #############
 
 ### fractional indices of points whithin a grid
+### clip 
 point.index <- function(lon,lat,domain,clip=FALSE){
   if(is.geofield(domain)) domain <- attributes(domain)$domain
 
@@ -119,12 +120,9 @@ point.bilin <- function(lon,lat,infield,mask=NULL,init=FALSE,weights=NULL)
 ### How to introduce a L/S mask? Must adapt weights.
 ### That would be slow in R.
   if(is.null(weights)){ 
-    domain <- attributes(infield)$domain
-    weights <- point.bilin.init(lon,lat,domain,mask=mask)
+    weights <- point.bilin.init(lon,lat,infield,mask=mask)
     if(init) return(weights)
   }
-#  return(w00*infield[cbind(fi,fj)] + w01*infield[cbind(fi,cj)] +
-#         w10*infield[cbind(ci,fj)] + w11*infield[cbind(ci,cj)])
 
   return(weights$w00*infield[weights$F00] + weights$w01*infield[weights$F01] +
          weights$w10*infield[weights$F10] + weights$w11*infield[weights$F11])
@@ -182,8 +180,7 @@ point.closest <- function(lon,lat,infield,mask=NULL,init=FALSE,weights=NULL){
 ### where mask=FALSE: take next closest point
 ### but only from the four closest !
   if(is.null(weights)){
-    domain <- attributes(infield)$domain
-    weights <- point.closest.init(lon,lat,domain,mask)
+    weights <- point.closest.init(lon,lat,infield,mask)
     if(init) return(weights)
   }
   return(infield[weights$index])
@@ -255,8 +252,7 @@ point.bicubic.init <- function(lon,lat,domain,mask=NULL){
 
 point.bicubic <- function(lon,lat,infield,init=FALSE,weights=NULL,mask=NULL){
   if(is.null(weights)){
-    domain <- attributes(infield)$domain
-    weights <- point.bicubic.init(lon,lat,domain,mask)
+    weights <- point.bicubic.init(lon,lat,infield,mask)
     if(init) return(weights)
   }
     
