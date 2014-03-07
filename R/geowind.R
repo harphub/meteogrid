@@ -39,17 +39,26 @@ wind.uv <- function(wdir,wspeed,fieldname=c("U","V")){
 
 ### 2. main routine for rotation grid axes <-> N/E axes
 
-geowind <- function(u,v,inv=FALSE){
-  domain <- attributes(u)$domain
+geowind <- function(u,v,inv=FALSE,init=FALSE,angle=NULL){
+### if init==TRUE, v may be missing and u may be a geodomain object.
+  if(init | is.null(angle) ){
+    if(is.geodomain(u)) domain <- u
+    else domain <- attributes(u)$domain
 
-  ww <- switch(domain$projection$proj,
+    ww <- switch(domain$projection$proj,
           "ob_tran" = geowind.RLL(domain),
           "lcc" = geowind.LCC(domain),
           "stere" = geowind.PS(domain),
           "omerc" = geowind.RM(domain),
           stop(paste("unimplemented projection: ",domain$projection$proj))
          )
-
+  }
+  else{
+    ww <- angle
+  }
+  
+  if(init) return(ww)
+  
   if(inv) {
     ww$angle <- -ww$angle
     ww$mapfactor <- 1/ww$mapfactor
