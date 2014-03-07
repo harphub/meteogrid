@@ -10,7 +10,11 @@
 ### the conversion is done for the whole domain
 
 ### 1. very basic functions for (u,v) <-> (wdir,wspeed)
-wind.dirspeed <- function(u,v,fieldname=c("Wind direction","Wind speed")){
+wind.dirspeed <- function(u,v,fieldname=c("Wind direction","Wind speed"),rad=TRUE,){
+  if(missing(v) & is.list(u)) {
+    v <- u[[2]]
+    u <- u[[1]]
+  }
   MINSPEED <- 10E-6
 
   wspeed <- sqrt(u^2 + v^2)
@@ -23,10 +27,16 @@ wind.dirspeed <- function(u,v,fieldname=c("Wind direction","Wind speed")){
     attributes(wspeed) <- attributes(u)
     attributes(wspeed)$info$name <- fieldname[2]
   }
-  list(wdir=wdir,wspeed=wspeed)
+  if(rad) wdir <- wdir*pi/180.
+  return(list(wdir=wdir,wspeed=wspeed))
 }
 
-wind.uv <- function(wdir,wspeed,fieldname=c("U","V")){
+wind.uv <- function(wspeed,wdir,fieldname=c("U","V"),rad=TRUE)
+  if(missing(wdir) & is.list(wspeed)){
+    wdir <- wspeed$wdir
+    wspeed <- wspeed$wspeed
+  }
+  if(!rad) wdir <- wdir*pi/180.
   u <- wspeed*cos(wdir)
   v <- wspeed*sin(wdir)
   if(is.geofield(wdir)) {
