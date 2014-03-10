@@ -10,7 +10,7 @@
 ### the conversion is done for the whole domain
 
 ### 1. very basic functions for (u,v) <-> (wdir,wspeed)
-wind.dirspeed <- function(u,v,fieldname=c("Wind direction","Wind speed"),rad=TRUE,){
+wind.dirspeed <- function(u,v,fieldname=c("Wind direction","Wind speed"),rad=TRUE){
   if(missing(v) & is.list(u)) {
     v <- u[[2]]
     u <- u[[1]]
@@ -31,7 +31,7 @@ wind.dirspeed <- function(u,v,fieldname=c("Wind direction","Wind speed"),rad=TRU
   return(list(wdir=wdir,wspeed=wspeed))
 }
 
-wind.uv <- function(wspeed,wdir,fieldname=c("U","V"),rad=TRUE)
+wind.uv <- function(wspeed,wdir,fieldname=c("U","V"),rad=TRUE){
   if(missing(wdir) & is.list(wspeed)){
     wdir <- wspeed$wdir
     wspeed <- wspeed$wspeed
