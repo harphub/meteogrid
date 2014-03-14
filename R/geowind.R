@@ -10,7 +10,7 @@
 ### the conversion is done for the whole domain
 
 ### 1. very basic functions for (u,v) <-> (wdir,wspeed)
-wind.dirspeed <- function(u,v,fieldname=c("Wind direction","Wind speed"),rad=TRUE){
+wind.dirspeed <- function(u,v,fieldname=c("Wind direction","Wind speed"),rad=FALSE){
   if(missing(v) & is.list(u)) {
     v <- u[[2]]
     u <- u[[1]]
@@ -31,7 +31,7 @@ wind.dirspeed <- function(u,v,fieldname=c("Wind direction","Wind speed"),rad=TRU
   return(list(wdir=wdir,wspeed=wspeed))
 }
 
-wind.uv <- function(wspeed,wdir,fieldname=c("U","V"),rad=TRUE){
+wind.uv <- function(wspeed,wdir,fieldname=c("U","V"),rad=FALSE){
   if(missing(wdir) & is.list(wspeed)){
     wdir <- wspeed$wdir
     wspeed <- wspeed$wspeed
@@ -49,25 +49,11 @@ wind.uv <- function(wspeed,wdir,fieldname=c("U","V"),rad=TRUE){
 
 ### 2. main routine for rotation grid axes <-> N/E axes
 
-geowind <- function(u,v,inv=FALSE,init=FALSE,angle=NULL){
-### if init==TRUE, v may be missing and u may be a geodomain object.
-  if(init | is.null(angle) ){
-    if(is.geodomain(u)) domain <- u
-    else domain <- attributes(u)$domain
-
-    ww <- switch(domain$projection$proj,
-          "ob_tran" = geowind.RLL(domain),
-          "lcc" = geowind.LCC(domain),
-          "stere" = geowind.PS(domain),
-          "omerc" = geowind.RM(domain),
-          stop(paste("unimplemented projection: ",domain$projection$proj))
-         )
+geowind <- function(u,v,inv=FALSE,init=NULL){
+  if( is.null(init) ){
+    domain <- attributes(u)$domain
+    ww <- geowind.init(domain)
   }
-  else{
-    ww <- angle
-  }
-  
-  if(init) return(ww)
   
   if(inv) {
     ww$angle <- -ww$angle
@@ -88,6 +74,18 @@ geowind <- function(u,v,inv=FALSE,init=FALSE,angle=NULL){
             "grid axes.")
   }
   list(U=U,V=V)
+}
+
+geowind.init <- function(domain){
+  if(is.geofield(domain)) domain <- attributes(domain)$domain
+  ww <- switch(domain$projection$proj,
+          "ob_tran" = geowind.RLL(domain),
+          "lcc" = geowind.LCC(domain),
+          "stere" = geowind.PS(domain),
+          "omerc" = geowind.RM(domain),
+          stop(paste("unimplemented projection: ",domain$projection$proj))
+        )
+  ww
 }
 
 ### 3. functions that calculate local rotation angle and mapfactor
@@ -116,6 +114,7 @@ geowind.RLL <- function(domain){
   cosA[which(cosA > 1)] <- 1
   cosA[which(cosA < -1)] <- -1
   angle <- acos(cosA) * (2*(sinA>=0)-1)
+# the result has domain ]-PI,+PI[
   list(angle=angle,mapfactor=1)
 }
 

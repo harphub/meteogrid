@@ -29,6 +29,5 @@ point.index(lon,lat,domain,clip=FALSE)
 }
 \examples{
 }
-\seealso{\code{\link[geogrid]{regrid}}, }
-}
+\seealso{\code{\link[geogrid]{regrid}} }
 \keyword{file}
