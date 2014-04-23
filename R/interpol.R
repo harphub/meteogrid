@@ -47,9 +47,19 @@ regrid <- function (infield, newdomain=.Last.domain,method="bilinear",
 
 ### fractional indices of points whithin a grid
 ### clip 
-point.index <- function(lon,lat,domain,clip=FALSE){
+point.index <- function(lon,lat,domain=.Last.domain,clip=FALSE){
   if(is.geofield(domain)) domain <- attributes(domain)$domain
-
+  if(missing(lat)){
+    if(is.matrix(lon)){
+      lat <- lon[,2]
+      lon <- lon[,1]
+    }
+    else if(is.list(lon)){
+      lat <- lon[[2]]
+      lon <- lon[[1]]
+    }
+    else stop("lat is missing!")
+  }
   glimits <- DomainExtent(domain)
   projpoints <- project(list(x=lon,y=lat),
                         proj = domain$projection)
@@ -60,7 +70,7 @@ point.index <- function(lon,lat,domain,clip=FALSE){
     i[i<0.5 | i>glimits$nx+1/2] <- NA
     j[j<0.5 | j>glimits$ny+1/2] <- NA
   }
-  list(i=i,j=j)
+  data.frame(i=i,j=j)
 }
 
 
@@ -72,7 +82,7 @@ point.interp <- function(lon,lat,method="bilin",...){
 }
   
 ### bilinear interpolation
-point.bilin.init <- function(lon,lat,domain,mask=NULL){
+point.bilin.init <- function(lon,lat,domain=.Last.domain,mask=NULL){
   if(is.geofield(domain)) domain <- attributes(domain)$domain
   nx <- domain$nx
   ny <- domain$ny
@@ -120,7 +130,9 @@ point.bilin <- function(lon,lat,infield,mask=NULL,init=FALSE,weights=NULL)
 ### How to introduce a L/S mask? Must adapt weights.
 ### That would be slow in R.
   if(is.null(weights)){ 
-    weights <- point.bilin.init(lon,lat,infield,mask=mask)
+## for gaussian grid: call different init function!
+    if(inherits(infield,"gaussian")) weights <- point.bilin.gaussian.init(lon,lat,infield)
+    else weights <- point.bilin.init(lon,lat,infield,mask=mask)
     if(init) return(weights)
   }
 
@@ -129,7 +141,7 @@ point.bilin <- function(lon,lat,infield,mask=NULL,init=FALSE,weights=NULL)
 }
 
 ### nearest neighbour (closest point)
-point.closest.init <- function(lon,lat,domain,mask=NULL) {
+point.closest.init <- function(lon,lat,domain=.Last.domain,mask=NULL) {
   if(is.geofield(domain)) domain <- attributes(domain)$domain
   nx <- domain$nx
   ny <- domain$ny
@@ -212,7 +224,7 @@ interp.cubic <- function(i,data){
   return(result)
 }
 
-point.bicubic.init <- function(lon,lat,domain,mask=NULL){
+point.bicubic.init <- function(lon,lat,domain=.Last.domain,mask=NULL){
 ### there's actually not much initialisation that you can do
 ### "weights" in fact only contains the index of neighbouring points
 ### because the weights are computed from the field values.

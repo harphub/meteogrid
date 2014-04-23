@@ -28,7 +28,7 @@ wind.dirspeed <- function(u,v,fieldname=c("Wind direction","Wind speed"),rad=FAL
     attributes(wspeed)$info$name <- fieldname[2]
   }
   if(rad) wdir <- wdir*pi/180.
-  return(list(wdir=wdir,wspeed=wspeed))
+  return(data.frame(wdir=wdir,wspeed=wspeed))
 }
 
 wind.uv <- function(wspeed,wdir,fieldname=c("U","V"),rad=FALSE){
@@ -43,7 +43,7 @@ wind.uv <- function(wspeed,wdir,fieldname=c("U","V"),rad=FALSE){
     attributes(u)$info$name <- fieldname[1]
     attributes(v)$info$name <- fieldname[2]
   }
-  list(U=u,V=v)
+  data.frame(U=u,V=v)
 }
 
 
@@ -73,11 +73,11 @@ geowind <- function(u,v,inv=FALSE,init=NULL){
     attributes(V)$info$name <- paste(attributes(v)$info$name, 
             "grid axes.")
   }
-  list(U=U,V=V)
+  data.frame(U=U,V=V)
 }
 
 geowind.init <- function(domain){
-  if(is.geofield(domain)) domain <- attributes(domain)$domain
+  if (is.geofield(domain)) domain <- attributes(domain)$domain
   ww <- switch(domain$projection$proj,
           "ob_tran" = geowind.RLL(domain),
           "lcc" = geowind.LCC(domain),
