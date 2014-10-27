@@ -6,6 +6,17 @@ void maprestrict1(double* bx,double* by,int* lx,
                double* x0,double* x1,
                double* nx,double* ny,int* newlength,
                double* xperiod, double* xfrac);
+
+void gridindex(double* inlat, double* inlon, int* nx, double* gridlat, int* nlon,
+               int* nlat, double* iout1, double* iout2, double* jout);
+
+
+void legendre_init1(double *x, int *NSMAX,double* legendre);
+void legendre_init2(double *lat, int *NSMAX,double* legendre);
+void legendre_reorder(double *indata,double *outdata, int *nsmax);
+void legendre_reorder_inv(double *indata,double *outdata, int *nsmax);
+
+
 /* A routine to make sure that a given map does not extend beyond the borders of the domain in the x direction */
 /* because when drawing the lines, you may go outside the domain. */
 /*

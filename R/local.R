@@ -97,7 +97,6 @@ DomainBel4 <-  structure(
                          class = "geodomain")
 
 
-
 DomainFra <-  structure(
                         list(projection = list(proj="lcc", lon_0=2.57831001000000, lat_1=46.4688491800000,
                                                lat_2=46.4688491800000,a=6371229.0,es=0.0),
@@ -139,6 +138,31 @@ DomainGLAMEPSv1 <- structure(
                SW = c( -23.7829009341615 , 15.7785734266855 ),
                NE = c( 81.2229530812028 , 77.6998129394985 )),
           class = "geodomain")
+
+DomainGLAMEPSv2 <- structure(
+          list(projection = list(proj = "ob_tran",
+                                 o_proj = "latlong", o_lat_p = 46,
+                                 o_lon_p = 0, lon_0 = 30),
+               nx = 870, ny = 660,
+               SW = c( -23.7829009341615 , 15.7785734266855 ),
+               NE = c( 84.0654800534012 , 77.55966361171726)),
+          class = "geodomain")
+
+### BUG: at install time, Make.domain etc. can't run yet. So this crashes installation.
+#DomainGLAMEPSv2.ald  <- Make.domain("lambert",dxdy=c(8900,8900),nxny=c(853,709),
+#                            clonlat = c(-3.514364, 55.229520),
+#                            reflat=42.8,reflon=28)
+#DomainINDRAv1=subgrid(DomainGLAMEPSv1,x1=335,x2=390,y1=170,y2=230)
+#DomainINDRAv2=subgrid(DomainGLAMEPSv2,x1=446,x2=521,y1=226,y2=307)
+
+DomainGLAMEPSv1.ald <- structure(
+           list(projection = list(proj = "lcc", 
+                                  lon_0 = 28,lat_1 = 42.8, lat_2 = 42.8,
+                                  a = 6371229, es = 0), 
+                nx = 629, ny=529,
+                SW = c(336.268176218338, 15.1916592437107),
+                NE = c(85.3445190672328, 78.2862682959375)),
+           class = "geodomain")
 
 
 `DomainGLAMEPS12fa.bad` <-

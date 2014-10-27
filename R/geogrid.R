@@ -560,7 +560,7 @@ project <- function(x,y,proj=.Last.domain$projection,inv=FALSE)
       else y <- -y
     }
     result <- .C("Rproj4",x=x,y=y,npoints=npoints,par=par,
-                 npar=npar,inv=as.integer(inv),NAOK=TRUE)
+                 npar=npar,inv=as.integer(inv),NAOK=TRUE,PACKAGE="geogrid")
 ### again the same proj.4 bug:
     if(proj$proj=='omerc' & !inv){
       if (proj$alpha<0 ) result$x <- -result$x

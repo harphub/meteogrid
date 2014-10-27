@@ -13,7 +13,7 @@ point.index.gaussian <- function(lon,lat,domain){
     lon <- lon %% 360
     INDEX=.C("gridindex",inlat=lat,inlon=lon,nx=as.integer(NX),
              gridlat=domain$latlist,nlon=domain$nlon,nlat=as.integer(length(domain$latlist)),
-             iout1=numeric(NX),iout2=numeric(NX),jout=numeric(NX))
+             iout1=numeric(NX),iout2=numeric(NX),jout=numeric(NX),PACKAGE="geogrid")
     list(iout1=INDEX$iout1,iout2=INDEX$iout2,jout=INDEX$jout)
 }
 
@@ -72,7 +72,7 @@ legendre.init <- function(lat,nsmax){
   legendre <- numeric(((nsmax+1)*(nsmax+2))/2)
 #  cat("length=",length(legendre),"\n")
   result <- .C("legendre_init",x=lat,nsmax=as.integer(nsmax),
-                legendre=legendre)
+                legendre=legendre,PACKAGE="geogrid")
   result$legendre
 }
 
@@ -99,7 +99,7 @@ legendre.init2 <- function(lat,nsmax){
   legendre <- numeric(NX*(nsmax+1)*(nsmax+2)/2)
   cat("length=",length(legendre),"\n")
   result <- .C("legendre_init2",x=lat,nx=as.integer(NX),nsmax=as.integer(nsmax),
-                legendre=legendre)
+                legendre=legendre,PACKAGE="geogrid")
   matrix(result$legendre,nrow=NX,byrow=FALSE)
 }
 
@@ -107,7 +107,7 @@ legendre.reorder <- function(indata,nsmax){
   NX=length(indata)
   if(NX != ((nsmax+1)*(nsmax+2))/2) stop("NSMAX inconsistent with data length.")
   .C("legendre_reorder",indata=indata,nsmax=as.integer(nsmax),
-     outdata=numeric(NX))$outdata
+     outdata=numeric(NX),PACKAGE="geogrid")$outdata
 }
 
 
