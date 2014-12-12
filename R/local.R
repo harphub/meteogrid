@@ -7,8 +7,8 @@
   if(is.geofield(x)) x
   else {
     if(is.geodomain(x)) {
-      domain=x
-      x=array(NA,dim=c(domain$nx,domain$ny))
+      domain <- x
+      x <- array(NA,dim=c(domain$nx,domain$ny))
     }
     else {
 ### no domain is given, so we start guessing...
@@ -113,6 +113,14 @@ DomainFRBE <-  structure(
                              NE = c(18.1316332893156 ,57.5314314771777)),
                         class = "geodomain")
 
+DomainFRBE2 <-  structure(
+                        list(projection = list(proj="lcc", lon_0=2.57831001000000, lat_1=46.4688491800000,
+                                              lat_2=46.4688491800000,a=6371229.0,es=0.0),
+                             nx = 289, ny = 349,
+                             SW = c(343.343048103504 , 41.6493913129657),
+                             NE = c( 30.782850082984 , 70.428851485199)),
+                        class = "geodomain")
+
 DomainGLAMEPS <- structure(
                         list(projection = list(proj = "ob_tran",
                                               o_proj = "latlong", o_lat_p = 40, o_lon_p = 0, lon_0 = 22),
@@ -175,7 +183,7 @@ structure(list(projection = list(proj = "lcc", lon_0 = 35.0, lat_1 = 45,lat_2 = 
 
 
 
-DomainERA10km = structure(
+DomainERA10km <- structure(
                        list(projection = list(proj="lcc", lon_0=4.55361516, lat_1=50.56989865,
                                               lat_2=50.56989865, a=6371229.0, es=0.0),
                             nx = 67, ny = 67,

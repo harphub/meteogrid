@@ -6,10 +6,10 @@
 ### don't expect too much...
 "vecplot"  <- function(U,...) UseMethod("vecplot")
 
-vecplot.geofield = function(U,V,add=FALSE,aspcorrect=TRUE,
+vecplot.geofield <- function(U,V,add=FALSE,aspcorrect=TRUE,
                      drawmap=TRUE,mapcol="black",maplwd=.5,...){
 
-  gdomain=attr(U,"domain")
+  gdomain <- attr(U,"domain")
   glimits <- DomainExtent(gdomain)
   x <- seq(glimits$x0,glimits$x1,length=gdomain$nx)
   y <- seq(glimits$y0,glimits$y1,length=gdomain$ny)
@@ -19,9 +19,9 @@ vecplot.geofield = function(U,V,add=FALSE,aspcorrect=TRUE,
 
 #    if ( attr(U,"domain")$projection[1]=="proj=lalo" & (aspcorrect) ){
 
-  ppp=gdomain$projection
-  if(is.list(ppp)) proj=ppp$proj
-  else proj=substr(ppp[1],5,nchar(ppp[1]))
+  ppp <- gdomain$projection
+  if(is.list(ppp)) proj <- ppp$proj
+  else proj <- substr(ppp[1],5,nchar(ppp[1]))
   if ( aspcorrect & (proj=="lalo" | proj=="rotlalo") ){
     print("LatLon domain: rescaling U components to correct for local aspect ratio U -> U / cos(lat).")
 #      aspect=cos(glimits$clonlat[2])
@@ -92,7 +92,8 @@ function(U,V,x=1:dim(U)[1],y=1:dim(U)[2],thinx=10,thiny=thinx,aspect=1,
 ### create a plot area
   if(!add) plot(c(x[1],x[length(x)]),c(y[1],y[length(y)]),col=0,axes=FALSE,xlab=xlab,ylab=ylab,...)
 ### at last, the vectors...
-  arrows(x,y,u,v,length=arrowsize,col=arrowcolor,lwd=lwd)
+### avoid a list of warnings when wind speed is 0...
+  suppressWarnings(arrows(x,y,u,v,length=arrowsize,col=arrowcolor,lwd=lwd))
   if(!add) box()
 }
 ###################################
@@ -102,14 +103,14 @@ function(U,V,x=1:dim(U)[1],y=1:dim(U)[2],thinx=10,thiny=thinx,aspect=1,
 
 limage  <- function(x,...) UseMethod("limage")
 
-limage.geofield=function(field,smooth=FALSE,drawmap=TRUE,
+limage.geofield <- function(field,smooth=FALSE,drawmap=TRUE,
                    maplwd=.5,mapcol='black',
                    map.database="worldmap",...){
-  gdomain=attr(field,"domain")
+  gdomain <- attr(field,"domain")
   glimits <- DomainExtent(gdomain)
-  x = seq(glimits$x0,glimits$x1,length=glimits$nx)
-  y = seq(glimits$y0,glimits$y1,length=glimits$ny)
-  z = field[1:gdomain$nx,1:gdomain$ny]
+  x <- seq(glimits$x0,glimits$x1,length=glimits$nx)
+  y <- seq(glimits$y0,glimits$y1,length=glimits$ny)
+  z <- field[1:gdomain$nx,1:gdomain$ny]
 
   limage.default(x=x,y=y,z=z,smooth=smooth,...)
 
@@ -135,24 +136,24 @@ limage.default <-
            plot.title,title.adjust=TRUE,
            legend.title,
            asp=1, useRaster=TRUE, ...){
-    zlim=range(z,finite=TRUE)
-    ncol=length(levels)-1
+    zlim <- range(z,finite=TRUE)
+    ncol <- length(levels)-1
     if(smooth){
-      xlim=range(x)
-      ylim=range(y)
+      xlim <- range(x)
+      ylim <- range(y)
     }
     else {
-      dx=diff(x)[1]
-      dy=diff(y)[1]
-      xlim=c(min(x)-dx/2,max(x)+dx/2)
-      ylim=c(min(y)-dy/2,max(y)+dy/2)
+      dx <- diff(x)[1]
+      dy <- diff(y)[1]
+      xlim <- c(min(x)-dx/2,max(x)+dx/2)
+      ylim <- c(min(y)-dy/2,max(y)+dy/2)
     }
-    mapxlim=xlim
-    mapylim=ylim
+    mapxlim <- xlim
+    mapylim <- ylim
 
-    if(legend)xlim[2]=xlim[1]+(xlim[2]-xlim[1])/(1-legend.width)
+    if(legend)xlim[2] <- xlim[1]+(xlim[2]-xlim[1])/(1-legend.width)
 
-    nlevels=length(levels)
+    nlevels <- length(levels)
     if(smooth){
       plot.new()
       plot.window(xlim, ylim, "", xaxs="i", yaxs="i", asp=asp)
@@ -175,24 +176,24 @@ limage.default <-
     }
 
     if(legend){
-      legendlevels=levels
+      legendlevels <- levels
 #      if(legendlevels[1]<min(z,na.rm=TRUE))legendlevels[1]=min(z,na.rm=TRUE)
 #      if(legendlevels[(ncol+1)]>max(z,na.rm=TRUE))
 #            legendlevels[(ncol+1)]=max(z,na.rm=TRUE)
-      legw=legend.width*(mapxlim[2]-mapxlim[1])
+      legw <- legend.width*(mapxlim[2]-mapxlim[1])
 
-      legxlim=mapxlim[2]+legw*legend.sep
-      ybreaks=seq(ylim[1],ylim[2],length=ncol+1)
+      legxlim <- mapxlim[2]+legw*legend.sep
+      ybreaks <- seq(ylim[1],ylim[2],length=ncol+1)
       rect(xleft=rep(legxlim[1],ncol),xright=rep(legxlim[2],ncol),
            ybottom=ybreaks[1:ncol],ytop=ybreaks[2:(ncol+1)],
            col=col)
 
-      text.x=legxlim[2]+(xlim[2]-legxlim[2])/6
-      text.y=c(ylim[1],ybreaks[2:ncol],ylim[2])
+      text.x <- legxlim[2]+(xlim[2]-legxlim[2])/6
+      text.y <- c(ylim[1],ybreaks[2:ncol],ylim[2])
 
       text(x=text.x,y=ylim[1],labels=format(min(legendlevels),digits=5),
            cex=legend.cex,adj=c(0,0))
-      y.index=seq(1+legend.skip,ncol,by=legend.skip)
+      y.index <- seq(1+legend.skip,ncol,by=legend.skip)
       if(ncol+1-y.index[length(y.index)]<legend.skip/2)
         y.index=y.index[-length(y.index)]
       text(x=text.x,y=text.y[y.index],
@@ -202,8 +203,8 @@ limage.default <-
       text(x=text.x,y=ylim[2],labels=format(max(legendlevels),digits=5),
            cex=legend.cex,adj=c(0,1))
       if(!missing(legend.title)){
-        oadj = par("adj")
-        nadj = oadj+oadj*(1-legend.width)
+        oadj <- par("adj")
+        nadj <- oadj+oadj*(1-legend.width)
         par(adj=nadj)
         legend.title
         par(adj = oadj)
@@ -212,8 +213,8 @@ limage.default <-
     }
     if(!missing(plot.title)){
       if(legend & title.adjust){
-        oadj = par("adj")
-        nadj = oadj*(1-legend.width)
+        oadj <- par("adj")
+        nadj <- oadj*(1-legend.width)
         par(adj=nadj)
       }
       plot.title
@@ -229,7 +230,7 @@ limage.default <-
 "contour.geofield" <-
 function(field,mapcol="black",add=FALSE,drawmap=!add,maplwd=.5,
          map.database="worldmap",...){
-  gdomain=attr(field,"domain")
+  gdomain <- attr(field,"domain")
   glimits <- DomainExtent(gdomain)
   x <- seq(glimits$x0,glimits$x1,length=gdomain$nx)
   y <- seq(glimits$y0,glimits$y1,length=gdomain$ny)
@@ -249,14 +250,14 @@ contour(x, y, field[1:gdomain$nx, 1:gdomain$ny],
 ### SHORTCUTS            ###
 ############################
 
-iview = function(x,nlevels=15,color.palette=irainbow,
+iview <- function(x,nlevels=15,color.palette=irainbow,
           title=paste(attr(x,"info")$name,"\n",attr(x,"time")),
           legend=FALSE,breaks=seq(min(x,na.rm=TRUE),max(x,na.rm=TRUE),
           length=nlevels),mask=NULL,...){
   if(!is.null(mask)){
-    if(is.character(mask)) mask=eval(parse(text=mask))
-    else if (is.expression(mask)) mask=eval(mask)
-    x[eval(expression(mask))]=NA
+    if(is.character(mask)) mask <- eval(parse(text=mask))
+    else if (is.expression(mask)) mask <- eval(mask)
+    x[eval(expression(mask))] <- NA
   }
   limage(as.geofield(x),color.palette=color.palette,
       plot.title=title(main=title),
@@ -264,7 +265,7 @@ iview = function(x,nlevels=15,color.palette=irainbow,
 }
 
 ### a new version using Lattice (experimental)
-iview2 = function(x,nlevels=15,color.palette=irainbow,
+iview2 <- function(x,nlevels=15,color.palette=irainbow,
           title=paste(attr(x,"info")$name,"\n",attr(x,"time")),
           legend=list(space="right",width=1,labels=list(cex=0.8)),
           breaks=seq(min(x,na.rm=TRUE),max(x,na.rm=TRUE),length=nlevels),
@@ -273,29 +274,29 @@ iview2 = function(x,nlevels=15,color.palette=irainbow,
           map.database="worldmap", ...){
   require(lattice)
   if(!is.null(mask)){
-    if(is.character(mask)) mask=eval(parse(text=mask))
-    else if (is.expression(mask)) mask=eval(mask)
-    x[eval(expression(mask))]=NA
+    if(is.character(mask)) mask <- eval(parse(text=mask))
+    else if (is.expression(mask)) mask <- eval(mask)
+    x[eval(expression(mask))] <- NA
   }
-  gdomain=attributes(x)$domain
+  gdomain <- attributes(x)$domain
   glimits <- DomainExtent(gdomain)
-  xc = seq(glimits$x0,glimits$x1,length=glimits$nx)
-  yc = seq(glimits$y0,glimits$y1,length=glimits$ny)
-  grid=expand.grid(x=xc,y=yc)
-  grid$z = as.vector(x[1:gdomain$nx,1:gdomain$ny])
+  xc <- seq(glimits$x0,glimits$x1,length=glimits$nx)
+  yc <- seq(glimits$y0,glimits$y1,length=glimits$ny)
+  grid <- expand.grid(x=xc,y=yc)
+  grid$z <- as.vector(x[1:gdomain$nx,1:gdomain$ny])
 
   if(is.null(breaks)) breaks=pretty(grid$z,nlevels)
   assign(".Last.domain",gdomain,envir=globalenv())
 
 
-  ppp=levelplot(z~x*y,data=grid,col.regions=color.palette(2*nlevels),
+  ppp <- levelplot(z~x*y,data=grid,col.regions=color.palette(2*nlevels),
          main=list(label=title),
          colorkey=legend,cuts=nlevels,
          scales=list(draw=FALSE),xlab="",ylab="",at=breaks,asp=asp,,...)
 ### problem: the levelplot is only "printed" if it is the last statement of the function...
 ### and now we should add the map...
   print(ppp)
-    if(drawmap)    plot(gdomain,add=TRUE,drawmap=TRUE,
+    if(drawmap) plot(gdomain,add=TRUE,drawmap=TRUE,
          add.dx=TRUE,box=TRUE,maplwd=maplwd,mapcol=mapcol,
          map.database=map.database)
 
@@ -305,9 +306,9 @@ cview <- function(x,nlevels=15,
            title=paste(attr(x,"info")$name,"\n",attr(x,"time")),
            mask=NULL,...){
   if(!is.null(mask)){
-    if(is.character(mask)) mask=eval(parse(text=mask))
-    else if (is.expression(mask)) mask=eval(mask)
-    x[eval(expression(mask))]=NA
+    if(is.character(mask)) mask <- eval(parse(text=mask))
+    else if (is.expression(mask)) mask <- eval(mask)
+    x[eval(expression(mask))] <- NA
   }
 
   contour(as.geofield(x),nlevels=nlevels,main=title,...)
@@ -340,22 +341,22 @@ plot.geodomain <- function(x=.Last.domain,add=TRUE,
              map.database="worldmap",...){
 ### consistency
 
-  if(add) domain=.Last.domain
+  if(add) domain <- .Last.domain
   else {
-    domain=x
-    add.dx=TRUE
+    domain <- x
+    add.dx <- TRUE
   }
 
 ### for backward compatibility
   glimits <- DomainExtent(domain)
 
   if(!add.dx){
-    xlim=c(glimits$x0,glimits$x1)
-    ylim=c(glimits$y0,glimits$y1)
+    xlim <- c(glimits$x0,glimits$x1)
+    ylim <- c(glimits$y0,glimits$y1)
   }
   else {
-    xlim=c(glimits$x0-glimits$dx/2,glimits$x1+glimits$dx/2)
-    ylim=c(glimits$y0-glimits$dy/2,glimits$y1+glimits$dy/2)
+    xlim <- c(glimits$x0-glimits$dx/2,glimits$x1+glimits$dx/2)
+    ylim <- c(glimits$y0-glimits$dy/2,glimits$y1+glimits$dy/2)
   }
 
   if(!add){
@@ -397,7 +398,7 @@ plot.geodomain <- function(x=.Last.domain,add=TRUE,
 #  trellis.unfocus()
 }
 
-plot.geofield=function(field,...){
+plot.geofield <- function(field,...){
   plot(attr(field,"domain"),...)
 }
 ######################
@@ -434,12 +435,12 @@ domainbox <-
 
   glimits <- DomainExtent(domain)
   if (!add.dx) {
-    xlim = c(glimits$x0, glimits$x1)
-    ylim = c(glimits$y0, glimits$y1)
+    xlim <- c(glimits$x0, glimits$x1)
+    ylim <- c(glimits$y0, glimits$y1)
   }
   else {
-    xlim = c(glimits$x0 - glimits$dx/2, glimits$x1 + glimits$dx/2)
-    ylim = c(glimits$y0 - glimits$dy/2, glimits$y1 + glimits$dy/2)
+    xlim <- c(glimits$x0 - glimits$dx/2, glimits$x1 + glimits$dx/2)
+    ylim <- c(glimits$y0 - glimits$dy/2, glimits$y1 + glimits$dy/2)
   }
 
 

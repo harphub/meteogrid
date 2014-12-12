@@ -1,3 +1,9 @@
+#--------------------------------------#
+# Part of R-package geogrid            #
+# © Alex Deckmyn                       #
+# Released under GPL-3 license         #
+#--------------------------------------#
+
 # geowind: rotation of wind fields
 # not easy to do in a generic way, so we only implement for a few projections:
 # rotated LatLon and Lambert.
@@ -21,14 +27,15 @@ wind.dirspeed <- function(u,v,fieldname=c("Wind direction","Wind speed"),rad=FAL
   wdir <- ifelse(abs(u)>MINSPEED,
                       ( -180 - atan(v/u) * 180/pi + sign(u)*90 ) %% 360,
                       ifelse(abs(v)<MINSPEED,NA, ifelse(v>0,180,0) ) )
+  if(rad) wdir <- wdir*pi/180.
   if(is.geofield(u)) {
     attributes(wdir) <- attributes(u)
     attributes(wdir)$info$name <- fieldname[1]
     attributes(wspeed) <- attributes(u)
     attributes(wspeed)$info$name <- fieldname[2]
   }
-  if(rad) wdir <- wdir*pi/180.
-  return(data.frame(wdir=wdir,wspeed=wspeed))
+  if(is.vector(u)) return(data.frame(wdir=wdir,wspeed=wspeed))
+  else return(list(wdir=wdir,wspeed=wspeed))
 }
 
 wind.uv <- function(wspeed,wdir,fieldname=c("U","V"),rad=FALSE){
@@ -43,7 +50,8 @@ wind.uv <- function(wspeed,wdir,fieldname=c("U","V"),rad=FALSE){
     attributes(u)$info$name <- fieldname[1]
     attributes(v)$info$name <- fieldname[2]
   }
-  data.frame(U=u,V=v)
+  if(is.vector(wspeed)) return(data.frame(U=u,V=v))
+  else return(list(U=u,V=v))
 }
 
 
@@ -54,13 +62,14 @@ geowind <- function(u,v,inv=FALSE,init=NULL){
     domain <- attributes(u)$domain
     ww <- geowind.init(domain)
   }
-  
+  else ww <- init
+
   if(inv) {
     ww$angle <- -ww$angle
     ww$mapfactor <- 1/ww$mapfactor
   }
-  U <- (cos(ww$angle) * u - sin(ww$angle) * v) * ww$mapfactor
-  V <- (sin(ww$angle) * u + cos(ww$angle) * v) * ww$mapfactor
+  U <- ( cos(ww$angle) * u + sin(ww$angle) * v) * ww$mapfactor
+  V <- (-sin(ww$angle) * u + cos(ww$angle) * v) * ww$mapfactor
   if(!inv){
     attributes(U)$info$name <- paste(attributes(u)$info$name, 
             "Rotated to N/E axes.")
@@ -73,10 +82,15 @@ geowind <- function(u,v,inv=FALSE,init=NULL){
     attributes(V)$info$name <- paste(attributes(v)$info$name, 
             "grid axes.")
   }
-  data.frame(U=U,V=V)
+  if(is.vector(u)) data.frame(U=U,V=V)
+  else list(U=U,V=V)
 }
 
 geowind.init <- function(domain){
+### ATTENTION: in the output
+### $angle is the angle that must be added to the wind direction (=wind origin!) from grid
+### to get the actual geographic value
+### checked for LCC,RLL
   if (is.geofield(domain)) domain <- attributes(domain)$domain
   ww <- switch(domain$projection$proj,
           "ob_tran" = geowind.RLL(domain),
@@ -115,11 +129,13 @@ geowind.RLL <- function(domain){
   cosA[which(cosA < -1)] <- -1
   angle <- acos(cosA) * (2*(sinA>=0)-1)
 # the result has domain ]-PI,+PI[
-  list(angle=angle,mapfactor=1)
+## ATTENTION: angle calculated here is for the wind origin
+  list(angle = angle,mapfactor = 1)
 }
 
 geowind.LCC <- function(domain){
 ### version in Rfa (based on Luc Gerard?)
+### 12/2014: change sign of angle for consistency
   rad <- pi/180.
 
   reflat <- domain$projection$lat_1
@@ -130,7 +146,7 @@ geowind.LCC <- function(domain){
   lalo <- DomainPoints(domain,"lalo")
 
   mapfactor <- (refcos/cos(lalo$lat * rad))^(1 - refcos) * ((1 + refsin)/(1 + sin(lalo$lat * rad)))^refsin
-  angle <- -refsin * (lalo$lon - reflon) * rad
+  angle <- refsin * (lalo$lon - reflon) * rad
   list(angle=angle,mapfactor=mapfactor)
 }
 
@@ -156,6 +172,7 @@ geowind.LCC2 <- function(domain){
 
 # Polar Stereographic
 geowind.PS <- function(domain){
+  warning("Polar Stereographic wind rotation: unvalidated!!!")
   rad <- pi/180.
   lalo <- DomainPoints(domain,"lalo")
 
@@ -171,6 +188,7 @@ geowind.PS <- function(domain){
 
 # Rotated Mercator
 geowind.RM <- function(domain){
+  stop("Rotated Mercator wind rotation: unfinished!!!")
   rad <- pi/180.
   lalo <- DomainPoints(domain,"lalo")
 # TO DO
@@ -181,53 +199,3 @@ geowind.RM <- function(domain){
 }
 
 
-geowind.RLL0 <- function(U,V,inv=FALSE) {
-### transform wind field from Rotated LatLon to normal (or back)
-### R version of the code in GL: a bit complex...
-### only temporarily, for reference
-   rad <- pi/180.
-  domain <- attributes(U)$domain
-  SPlat <- -domain$projection$o_lat_p
-  SPlon <- domain$projection$lon_0
-  sinP <- sin( (SPlat + 90) * rad )
-  cosP <- cos( (SPlat + 90) * rad )
-
-  lalo <- DomainPoints(U,"lalo")
-  Rlalo <- DomainPoints(U,"xy")
-  Rlalo$lat <- Rlalo$y * 180/pi
-  Rlalo$lon <- Rlalo$x * 180/pi
-
-#  sinX <- sin(lalo$lon * rad)
-#  cosX <- cos(lalo$lon * rad)
-  sinY <- sin(lalo$lat * rad)
-  cosY <- cos(lalo$lat * rad)
-
-  sinRX <- sin(Rlalo$lon * rad)
-  cosRX <- cos(Rlalo$lon * rad)
-  sinRY <- sin(Rlalo$lat * rad)
-  cosRY <- cos(Rlalo$lat * rad)
-
-  lon0 <- rad*(lalo$lon - SPlon)
-  sinX0 <- sin(lon0)
-  cosX0 <- cos(lon0)
-
-### these should be competely inverse. Are they? RX <-> X etc?
-### This doesn't look like a rotation at all...
-### IN FACT: A==D,C==-B , and for (inv) it's just a matter of C -> -C
-### so we can simplify a lot!!!
-### just find rotation angle: angle=acos(A) * sign2(B) |sign2(0)=1 sign2(x)= 2*(x>=0)-1
-  if(inv){ # from latlon to RotLatLon
-    A <- cosP*sinX0*sinRX + cosX0*cosRX
-    B <- cosP*cosX0*sinY*sinRX - sinP*cosY*sinRX - sinX0*sinY*cosRX
-    C <- sinP*sinX0/cosRY
-    D <- (sinP*cosX0*sinY + cosP*cosY)/cosRY
-  }
-  else { # from RotLatLon to LatLon
-    A <- cosP*sinX0*sinRX + cosX0*cosRX
-    B <- cosP*sinX0*cosRX*sinRY + sinP*sinX0*cosRY - cosX0*sinRX*sinRY
-    C <- -sinP*sinRX/cosY
-    D <- (cosP*cosRY - sinP*cosRX*sinRY)/cosY
-  }
-  result <- list(U= A*U + B*V, V=C*U+D*V)
-  result
-}
