@@ -5,8 +5,8 @@
 ### regrid is a function for interpolating data from one grid to another
 ### It simply considers the new grid as a set of lat/lon points for interpolation.
 ### "init" allows you to return the indices and weights for the interpolation
-### "weights" : if this is profided, they are not re-calculated. 
-### "mask" lets you define a land/sea mask. only points where mask==TRUE are used. 
+### "weights" : if this is profided, they are not re-calculated.
+### "mask" lets you define a land/sea mask. only points where mask==TRUE are used.
 ###             (FIX ME: not implemented for bicubic)
 regrid <- function (infield, newdomain=.Last.domain,method="bilinear",
                     mask=NULL,init=FALSE,weights=NULL)
@@ -46,7 +46,7 @@ regrid <- function (infield, newdomain=.Last.domain,method="bilinear",
 ############ METHODS #############
 
 ### fractional indices of points whithin a grid
-### clip 
+### clip
 point.index <- function(lon,lat,domain=.Last.domain,clip=FALSE){
   if(is.geofield(domain)) domain <- attributes(domain)$domain
   if(missing(lat)){
@@ -66,7 +66,7 @@ point.index <- function(lon,lat,domain=.Last.domain,clip=FALSE){
   i <- (projpoints$x - glimits$x0)/glimits$dx + 1
   j <- (projpoints$y - glimits$y0)/glimits$dy + 1
 
-  if(clip) { 
+  if(clip) {
     i[i<0.5 | i>glimits$nx+1/2] <- NA
     j[j<0.5 | j>glimits$ny+1/2] <- NA
   }
@@ -80,7 +80,7 @@ point.interp <- function(lon,lat,method="bilin",...){
   else if (substring(method,1,1)=="n" | substring(method,1,1)=="c") point.closest(lon,lat,...)
   else stop(paste("Unknown interpolation method",method))
 }
-  
+
 ### bilinear interpolation
 point.bilin.init <- function(lon,lat,domain=.Last.domain,mask=NULL){
   if(is.geofield(domain)) domain <- attributes(domain)$domain
@@ -103,7 +103,7 @@ point.bilin.init <- function(lon,lat,domain=.Last.domain,mask=NULL){
   w01 <- dj*(1-di)
   w10 <- di*(1-dj)
   w11 <- di*dj
- 
+
   if(!is.null(mask)){
 # if some of the 4 points are masked: set weight to zero, and renormalise the remaining weights to sum=1
     w00[!mask[cbind(fi,fj)]] <- 0
@@ -112,10 +112,10 @@ point.bilin.init <- function(lon,lat,domain=.Last.domain,mask=NULL){
     w11[!mask[cbind(ci,cj)]] <- 0
     wsum <- w00 + w01 + w10 + w11
     wnn <- (wsum>1.E-9)
-    w00[wnn] <- w00[wnn] / wsum[wnn] 
-    w01[wnn] <- w01[wnn] / wsum[wnn] 
-    w10[wnn] <- w10[wnn] / wsum[wnn] 
-    w11[wnn] <- w11[wnn] / wsum[wnn] 
+    w00[wnn] <- w00[wnn] / wsum[wnn]
+    w01[wnn] <- w01[wnn] / wsum[wnn]
+    w10[wnn] <- w10[wnn] / wsum[wnn]
+    w11[wnn] <- w11[wnn] / wsum[wnn]
 # if all weights are 0, make sure the result is NA, not 0:
     w00[!wnn] <- NA
   }
@@ -129,7 +129,7 @@ point.bilin <- function(lon,lat,infield,mask=NULL,init=FALSE,weights=NULL)
 {
 ### How to introduce a L/S mask? Must adapt weights.
 ### That would be slow in R.
-  if(is.null(weights)){ 
+  if(is.null(weights)){
 ## for gaussian grid: call different init function!
     if(inherits(infield,"gaussian")) weights <- point.bilin.gaussian.init(lon,lat,infield)
     else weights <- point.bilin.init(lon,lat,infield,mask=mask)
@@ -149,7 +149,7 @@ point.closest.init <- function(lon,lat,domain=.Last.domain,mask=NULL) {
 # closest point is just a matter of rounding the index to closest integer
   i <- round(index$i)
   j <- round(index$j)
-# boundary issues: 
+# boundary issues:
   i[(i<1)|(i>nx)] <- NA
   j[(j<1)|(j>ny)] <- NA
 
@@ -218,7 +218,7 @@ interp.cubic <- function(i,data){
   cci[cci>nx] <- nx
   ffi[ffi>nx] <- nx
 
-  result <- di*(-di^2/2+di-1/2)*data[ffi] + di^2*(di-1)/2*data[cci] + 
+  result <- di*(-di^2/2+di-1/2)*data[ffi] + di^2*(di-1)/2*data[cci] +
              (1+3/2*di^3 -5/2*di^2) * data[fi] + di*(-3/2*di^2+2*di+1/2)*data[ci]
 
   return(result)
@@ -267,14 +267,14 @@ point.bicubic <- function(lon,lat,infield,init=FALSE,weights=NULL,mask=NULL){
     weights <- point.bicubic.init(lon,lat,infield,mask)
     if(init) return(weights)
   }
-    
-  FFi <-  dj*(-dj^2/2+dj-1/2)*infield[cbind(weights$ffi,weights$ffj)] + 
-          dj^2*(dj-1)/2*infield[cbind(weights$ffi,weights$ccj)] + 
-          (1+3/2*dj^3 -5/2*dj^2) * infield[cbind(weights$ffi,weights$fj)] + 
+
+  FFi <-  dj*(-dj^2/2+dj-1/2)*infield[cbind(weights$ffi,weights$ffj)] +
+          dj^2*(dj-1)/2*infield[cbind(weights$ffi,weights$ccj)] +
+          (1+3/2*dj^3 -5/2*dj^2) * infield[cbind(weights$ffi,weights$fj)] +
           dj*(-3/2*dj^2+2*dj+1/2)*infield[cbind(weights$ffi,weights$cj)]
 
-  Fi <-  dj*(-dj^2/2+dj-1/2)*infield[cbind(weights$fi,weights$ffj)] + 
-         dj^2*(dj-1)/2*infield[cbind(weights$fi,weights$ccj)] + 
+  Fi <-  dj*(-dj^2/2+dj-1/2)*infield[cbind(weights$fi,weights$ffj)] +
+         dj^2*(dj-1)/2*infield[cbind(weights$fi,weights$ccj)] +
          (1+3/2*dj^3 -5/2*dj^2) * infield[cbind(weights$fi,weights$fj)] +
          dj*(-3/2*dj^2+2*dj+1/2)*infield[cbind(weights$fi,weights$cj)]
 
@@ -291,7 +291,7 @@ point.bicubic <- function(lon,lat,infield,init=FALSE,weights=NULL,mask=NULL){
 # For mask, we must calculate the 16 weights, set some to 0, normalise weights to sum=1
 # But how much sence does it make to do masked bicubic?
 
-  result <- di*(-di^2/2+di-1/2)*FFi + di^2*(di-1)/2*CCi + 
+  result <- di*(-di^2/2+di-1/2)*FFi + di^2*(di-1)/2*CCi +
              (1+3/2*di^3 -5/2*di^2) * Fi + di*(-3/2*di^2+2*di+1/2)*Ci
 
   return(result)

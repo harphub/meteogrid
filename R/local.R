@@ -164,9 +164,9 @@ DomainGLAMEPSv2 <- structure(
 #DomainINDRAv2=subgrid(DomainGLAMEPSv2,x1=446,x2=521,y1=226,y2=307)
 
 DomainGLAMEPSv1.ald <- structure(
-           list(projection = list(proj = "lcc", 
+           list(projection = list(proj = "lcc",
                                   lon_0 = 28,lat_1 = 42.8, lat_2 = 42.8,
-                                  a = 6371229, es = 0), 
+                                  a = 6371229, es = 0),
                 nx = 629, ny=529,
                 SW = c(336.268176218338, 15.1916592437107),
                 NE = c(85.3445190672328, 78.2862682959375)),

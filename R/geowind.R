@@ -76,15 +76,15 @@ geowind <- function(u,v,inv=FALSE,init=NULL){
   U <- ( cos(ww$angle) * u + sin(ww$angle) * v) * ww$mapfactor
   V <- (-sin(ww$angle) * u + cos(ww$angle) * v) * ww$mapfactor
   if(!inv){
-    attributes(U)$info$name <- paste(attributes(u)$info$name, 
+    attributes(U)$info$name <- paste(attributes(u)$info$name,
             "Rotated to N/E axes.")
-    attributes(V)$info$name <- paste(attributes(v)$info$name, 
+    attributes(V)$info$name <- paste(attributes(v)$info$name,
             "Rotated to N/E axes.")
   }
   else {
-    attributes(U)$info$name <- paste(attributes(u)$info$name, 
+    attributes(U)$info$name <- paste(attributes(u)$info$name,
             "grid axes.")
-    attributes(V)$info$name <- paste(attributes(v)$info$name, 
+    attributes(V)$info$name <- paste(attributes(v)$info$name,
             "grid axes.")
   }
   if(is.vector(u)) data.frame(U=U,V=V)
@@ -175,7 +175,7 @@ geowind.LCC2 <- function(domain){
   diff <- lalo$lon - lon0
   diff[diff < -180] <- diff[diff < -180]+360
   diff[diff >  180] <- diff[diff >  180]-360
-  alpha <- diff * n * rad * sign(lat1) 
+  alpha <- diff * n * rad * sign(lat1)
   list(angle= -alpha,mapfactor=1)
 }
 
@@ -191,7 +191,7 @@ geowind.PS <- function(domain){
   diff <- (lalo$lon - reflon)%%360
   diff[diff > 180] <- diff[diff > 180]-360
 
-  angle <- diff * rad * (2*(reflat>=0)-1) 
+  angle <- diff * rad * (2*(reflat>=0)-1)
   list(angle=angle,mapfactor=1)
 }
 

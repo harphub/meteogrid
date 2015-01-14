@@ -80,7 +80,7 @@ seamask=function(col='white',add.dx=TRUE,
   boundaries <- map[map$x >= glimits$lonlim[1] &
                     map$x <= glimits$lonlim[2] &
                     map$y >= glimits$latlim[1] &
-                    map$y <= glimits$latlim[2] ,] 
+                    map$y <= glimits$latlim[2] ,]
   borders=project(boundaries,proj=domain$projection)
   box.resize(LXY)
   invborders=as.ocean(borders)
@@ -98,8 +98,8 @@ antipolygon <- function(data,col="white",xylim){
 ### mask=project(map("worldHires","Belgium",fill=0,plot=FALSE))
 ### xylim=DomainExtent(datafield)
 ### antipolygon(mask,xylim=xylim)
-    x <- c(data$x, data$x[1],xylim$x0,xylim$x0,xylim$x1,xylim$x1,xylim$x0) 
-    y <- c(data$y, data$y[1],xylim$y0,xylim$y1,xylim$y1,xylim$y0,xylim$y0) 
+    x <- c(data$x, data$x[1],xylim$x0,xylim$x0,xylim$x1,xylim$x1,xylim$x0)
+    y <- c(data$y, data$y[1],xylim$y0,xylim$y1,xylim$y1,xylim$y0,xylim$y0)
     polygon(x, y, border = col, col = col, xpd = TRUE)
 }
 
