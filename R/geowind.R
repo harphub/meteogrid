@@ -15,7 +15,10 @@
 ### rotate model wind to geographic wind
 ### the conversion is done for the whole domain
 
-### 1. very basic functions for (u,v) <-> (wdir,wspeed)
+###########################################################
+### 1. very basic functions for (u,v) <-> (wdir,wspeed) ###
+###########################################################
+
 wind.dirspeed <- function(u,v,fieldname=c("Wind direction","Wind speed"),rad=FALSE){
   if(missing(v) & is.list(u)) {
     v <- u[[2]]
@@ -55,7 +58,9 @@ wind.uv <- function(wspeed,wdir,fieldname=c("U","V"),rad=FALSE){
 }
 
 
-### 2. main routine for rotation grid axes <-> N/E axes
+###########################################################
+### 2. main routine for rotation grid axes <-> N/E axes ###
+###########################################################
 
 geowind <- function(u,v,inv=FALSE,init=NULL){
   if( is.null(init) ){
@@ -102,8 +107,11 @@ geowind.init <- function(domain){
   ww
 }
 
-### 3. functions that calculate local rotation angle and mapfactor
+######################################################################
+### 3. functions that calculate local rotation angle and mapfactor ###
+######################################################################
 
+## rotated Lat/Lon
 geowind.RLL <- function(domain){
   rad <- pi/180.
   SPlat <- -domain$projection$o_lat_p
@@ -133,6 +141,7 @@ geowind.RLL <- function(domain){
   list(angle = angle,mapfactor = 1)
 }
 
+## Lambert conformal conical
 geowind.LCC <- function(domain){
 ### version in Rfa (based on Luc Gerard?)
 ### 12/2014: change sign of angle for consistency
@@ -170,7 +179,7 @@ geowind.LCC2 <- function(domain){
   list(angle= -alpha,mapfactor=1)
 }
 
-# Polar Stereographic
+## Polar Stereographic
 geowind.PS <- function(domain){
   warning("Polar Stereographic wind rotation: unvalidated!!!")
   rad <- pi/180.
@@ -186,7 +195,7 @@ geowind.PS <- function(domain){
   list(angle=angle,mapfactor=1)
 }
 
-# Rotated Mercator
+## Rotated Mercator
 geowind.RM <- function(domain){
   stop("Rotated Mercator wind rotation: unfinished!!!")
   rad <- pi/180.
