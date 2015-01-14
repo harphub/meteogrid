@@ -1,3 +1,12 @@
+/*
+#--------------------------------------#
+# Part of R-package geogrid            #
+# © Alex Deckmyn                       #
+# RMI Belgium, alex.deckmyn@meteo.be   #
+# Released under GPL-3 license         #
+#--------------------------------------#
+*/
+
 /* Simple wrapper script for proj4 routines. */
 /* Can be optimised...                       */
 

@@ -1,3 +1,9 @@
+#--------------------------------------#
+# Part of R-package geogrid            #
+# © Alex Deckmyn                       #
+# Released under GPL-3 license         #
+#--------------------------------------#
+
 ### format an integer as a string (simplified)
 i2a=function(x,n=ceiling(log(x)/log(10)) )
              formatC(x,width=n,flag=0,format="d")

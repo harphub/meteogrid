@@ -1,3 +1,12 @@
+/*
+#--------------------------------------#
+# Part of R-package geogrid            #
+# © Alex Deckmyn                       #
+# RMI Belgium, alex.deckmyn@meteo.be   #
+# Released under GPL-3 license         #
+#--------------------------------------#
+*/
+
 #include<stdio.h>
 #include<math.h>
 #include<string.h>
