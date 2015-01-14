@@ -250,56 +250,11 @@ zoomgrid <- function(infield,x,y,zoom=50){
   subgrid(infield,xmin,xmax,ymin,ymax,reso=1)
 }
 
-
-
-########## OLD INTERPOLATION ROUTINES :
-
-regrid.old <- function (infield, newdomain=.Last.domain)
-{
-### Bilinear interpolation to different grid
-  require(fields)
-  if(is.geofield(newdomain)) newdomain=attr(newdomain,"domain")
-  newpoints <- DomainPoints(newdomain)
-  projpoints <- project(list(x=as.vector(newpoints$lon), y=as.vector(newpoints$lat)),
-                      proj = attr(infield,"domain")$projection)
-  glimits <- DomainExtent(attr(infield, "domain"))
-  x <- seq(glimits$x0, glimits$x1, length = attr(infield, "domain")$nx)
-  y <- seq(glimits$y0, glimits$y1, length = attr(infield, "domain")$ny)
-
-  result <- interp.surface(list(x=x, y=y, z=infield[1:glimits$nx, 1:glimits$ny]),cbind(projpoints$x,projpoints$y))
-
-  as.geofield(matrix(result, ncol = newdomain$ny, nrow = newdomain$nx),
-              domain = newdomain,time=attr(infield,"time"),info=attr(infield,"info"))
-}
-
-point.interp.old <- function(lon,lat,infield){
-### interpolate to a given (set of) point(s):
-  require(fields)
-  gdomain <- attr(infield, "domain")
-  glimits <- DomainExtent(gdomain)
-  x <- seq(glimits$x0, glimits$x1, length = gdomain$nx)
-  y <- seq(glimits$y0, glimits$y1, length = gdomain$ny)
-
-  projpoints <- project(list(x=lon,y=lat),proj=gdomain$projection)
-
-  result <- interp.surface(list(x=x, y=y, z=infield[1:glimits$nx, 1:glimits$ny]),
-               cbind(projpoints$x,projpoints$y))
-  result
-}
-
-point.closest.old <- function(lon,lat,infield,...){
-### simply return value of the closest grid points
-### as calculated by lalopoint
-  n <- length(lon)
-  x <- rep(NA,n)
-  for(i in 1:n) x[i] <- lalopoint(infield,lon[i],lat[i],...)$data
-  x
-}
-
 lalopoint <- function(data,lon,lat,minimise='lalo',mask=NULL){
 ### find the closest domain point to the given co-ordinates
 ### by minimising distance in either LonLat or projected co-ordinates
 ### This is in fact not exactly the same as minimising geographical distance!
+  warning("This function lalopoint is OBSOLETE! Consider using point.closest in stead.")
   ldata <- is.geofield(data)
   if (ldata) domain <- attr(data, "domain")
   else domain <- data
@@ -442,7 +397,6 @@ DrawLatLon <- function(nx=9,ny=9,labels=TRUE,pretty=TRUE,
 ### CREATE NEW DOMAINS  ###
 ###########################
 
-
 Make.domain <- function(projtype="lambert",clonlat,nxny,dxdy,reflat=clonlat[2],reflon=clonlat[1],tilt){
 ### Lambert (as used in ALADIN: only 1 reference latitude)
   if(length(dxdy)==1) dxdy <- rep(dxdy,2)
@@ -513,8 +467,6 @@ MakeRLL <- function(Lon1,Lat1,SPlon,SPlat,SPangle=0,nxny,dxdy){
   class(result) <- "geodomain"
   result
 }
-
-
 
 ##################################
 ### Interface to PROJ4 library ###
@@ -590,6 +542,4 @@ periodicity <- function(domain=.Last.domain){
   yper <- NA_real_
   list(xper=xper,yper=yper)
 }
-
-
 
