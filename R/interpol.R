@@ -41,8 +41,7 @@ regrid <- function (infield, newdomain=.Last.domain,method="bilin",
   }
   else stop(paste("Unknown interpolation method",method))
 
-  if(init) return(result)
-  else return(
+  return(
     as.geofield(matrix(result, ncol = newdomain$ny, nrow = newdomain$nx),
                 domain = newdomain,time=attr(infield,"time"),
                 info=attr(infield,"info")))
