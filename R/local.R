@@ -20,18 +20,14 @@
 ### no domain is given, so we start guessing...
       if (missing(domain)) {
         ddd <- dim(x)[1]
-        if (ddd == 128 | ddd == 117)
-          domain <- DomainMar
         else if (ddd == 108 | ddd == 97)
           domain <- DomainBel
         else if (ddd == 67 )
           domain <- DomainERA10km
         else if (ddd == 181 | ddd == 192)
-          domain <- DomainFRBE
+          domain <- DomainBel4
         else if (ddd == 240 | ddd == 229)
-          domain <- DomainBel2
-        else if (ddd == 300 | ddd == 289 | ddd == 320)
-          domain <- DomainFra
+          domain <- DomainBel7
         else if (ddd == 291)
           domain <- DomainGLAMEPS
         else if (ddd == 486)
