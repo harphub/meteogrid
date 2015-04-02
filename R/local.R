@@ -20,7 +20,7 @@
 ### no domain is given, so we start guessing...
       if (missing(domain)) {
         ddd <- dim(x)[1]
-        else if (ddd == 108 | ddd == 97)
+        if (ddd == 108 | ddd == 97)
           domain <- DomainBel
         else if (ddd == 67 )
           domain <- DomainERA10km

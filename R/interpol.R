@@ -215,8 +215,10 @@ point.closest.init <- function(lon,lat,domain=.Last.domain,mask=NULL) {
                          d10=ifelse(mask[cbind(ci,fj)],((1-di^2)+dj^2),NA),
                          d11=ifelse(mask[cbind(ci,cj)],((1-di)^2+(1-dj)^2),NA))
       novalue <- is.na(dist$d00) &  is.na(dist$d01) & is.na(dist$d10) & is.na(dist$d11)
-      if(sum(novalue)==nmasked) result[ismasked] <- NA
-      else {
+      if(sum(novalue)==nmasked) {
+        i[ismasked] <- NA
+        j[ismasked] <- NA
+      } else {
         closest <- rep(NA,nmasked)
         closest[!novalue] <- apply(dist[!novalue,],1,which.min)
         mi <- ifelse(closest <= 2,fi,ci)
