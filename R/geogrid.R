@@ -51,7 +51,7 @@
 ###              new function domainbox
 ### 02/02/2009 : bugfix domainbox
 ### ../06/2009 : several fixes for Rotated Mercator.
-### 21/10/2009 : bugfix in lalopoint (Tomasz Kułakowski)
+### 21/10/2009 : bugfix in lalopoint (Tomasz Kulakowski)
 ### 08/03/2010 : bugfix for legend.title in limage.default
 ### 09/06/2010 : bugfix in project - latlong was not processed correctly
 ### 13/12/2010 : bug fix for contour.geofield(drawmap=FALSE) (Luc Gerard)
@@ -74,22 +74,22 @@ is.geodomain <- function(x){
   inherits(x,"geodomain")
 }
 
-"print.geofield" <- function(field){
-  print.noquote(paste(attr(field,"info")$origin,":",attr(field,"info")$name))
-  print.noquote("Time:")
-  print.noquote(attr(field,"time"))
-  print.noquote("Domain summary:")
+print.geofield <- function(field){
+  cat(paste(attr(field,"info")$origin,":",attr(field,"info")$name),"\n")
+  cat("Time:\n")
+  cat(attr(field,"time"),"\n")
+  cat("Domain summary:\n")
   print(attr(field,"domain"))
-  print.noquote("Data summary:")
-  print.noquote(summary(as.vector(field)))
+  cat("Data summary:\n")
+  cat(summary(as.vector(field)),"\n")
 }
 
 print.geodomain = function(domain){
-  print.noquote(paste(domain$nx,"x",domain$ny,"domain"))
-  print.noquote("Projection summary:")
-  print.noquote(paste("proj=",domain$projection$proj))
-  print.noquote(paste("NE = (",domain$NE[1],",",domain$NE[2],")"))
-  print.noquote(paste("SW = (",domain$SW[1],",",domain$SW[2],")"))
+  cat(domain$nx,"x",domain$ny,"domain\n")
+  cat("Projection summary:\n")
+  cat("proj=",domain$projection$proj,"\n")
+  cat("NE = (",domain$NE[1],",",domain$NE[2],")\n")
+  cat("SW = (",domain$SW[1],",",domain$SW[2],")\n")
 #  print.noquote(domain$projection)
 }
 
@@ -109,8 +109,8 @@ DomainExtent <- function(x,...){
   UseMethod("DomainExtent")
 }
 
-DomainExtent.geofield <- function(field){
-  DomainExtent(attr(field,"domain"))
+DomainExtent.geofield <- function(x){
+  DomainExtent(attr(x,"domain"))
 }
 
 DomainExtent.geodomain <- function(domain){

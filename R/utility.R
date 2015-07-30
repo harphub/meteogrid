@@ -130,9 +130,9 @@ col.temp <- function(n){
 }
 
 irainbow=function(n) {
-  if(is.element("package:RColorBrewer",search()))
-    Spectral <- rev(brewer.pal(11,"Spectral"))
-  else Spectral <- colors()[c(107,619,12,105,384,383,38,573,504,35,645)]
+  if(requireNamespace("RColorBrewer",quietly=TRUE)){
+    Spectral <- rev(RcolorBrewer::brewer.pal(11,"Spectral"))
+  } else Spectral <- colors()[c(107,619,12,105,384,383,38,573,504,35,645)]
 
   if (n>0) colorRampPalette(Spectral)(n)
   else rev(colorRampPalette(Spectral)(-n))
