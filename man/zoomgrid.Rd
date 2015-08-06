@@ -1,5 +1,7 @@
 \name{subgrid}
 \alias{subgrid}
+\alias{subgrid.geofield}
+\alias{subgrid.geodomain}
 \alias{zoomgrid}
 \title{Defining subdomains}
 \description{These functions may be used to define subdomains (i.e. a

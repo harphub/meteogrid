@@ -1,6 +1,6 @@
 #--------------------------------------#
 # Part of R-package geogrid            #
-# © Alex Deckmyn                       #
+# Copyright Alex Deckmyn               #
 # Released under GPL-3 license         #
 #--------------------------------------#
 
@@ -14,7 +14,7 @@
 ### "weights" : if this is profided, they are not re-calculated.
 ### "mask" lets you define a land/sea mask. only points where mask==TRUE are used.
 ###             (FIX ME: not implemented for bicubic)
-regrid <- function (infield, newdomain=.Last.domain,method="bilin",
+regrid <- function (infield, newdomain=.Last.domain(),method="bilin",
                     mask=NULL,weights=NULL)
 {
 ### regridding: bilinear, bi-cubic or nearest neighbour
@@ -47,7 +47,7 @@ regrid <- function (infield, newdomain=.Last.domain,method="bilin",
                 info=attr(infield,"info")))
 }
 
-regrid.init <- function (olddomain, newdomain=.Last.domain,method="bilin",mask=NULL)
+regrid.init <- function (olddomain, newdomain=.Last.domain(),method="bilin",mask=NULL)
 {
 ### regridding: either bilinear of nearest neighbour
 ### olddomain and newdomain may be geofields 
@@ -81,7 +81,7 @@ regrid.init <- function (olddomain, newdomain=.Last.domain,method="bilin",mask=N
 
 ### fractional indices of points whithin a grid
 ### clip means: only consider points that are less than half a grid box out of the domain
-point.index <- function(lon,lat,domain=.Last.domain,clip=TRUE){
+point.index <- function(lon,lat,domain=.Last.domain(),clip=TRUE){
   if(is.geofield(domain)) domain <- attributes(domain)$domain
   if(missing(lat)){
     if(is.matrix(lon)){
@@ -124,7 +124,7 @@ point.interp.init <- function(lon,lat,method="bilin",...){
 
 
 ### bilinear interpolation
-point.bilin.init <- function(lon,lat,domain=.Last.domain,mask=NULL){
+point.bilin.init <- function(lon,lat,domain=.Last.domain(),mask=NULL){
   if(is.geofield(domain)) domain <- attributes(domain)$domain
   nx <- domain$nx
   ny <- domain$ny
@@ -182,7 +182,7 @@ point.bilin <- function(lon,lat,infield,mask=NULL,weights=NULL)
 }
 
 ### nearest neighbour (closest point)
-point.closest.init <- function(lon,lat,domain=.Last.domain,mask=NULL) {
+point.closest.init <- function(lon,lat,domain=.Last.domain(),mask=NULL) {
   if(is.geofield(domain)) domain <- attributes(domain)$domain
   nx <- domain$nx
   ny <- domain$ny
@@ -265,7 +265,7 @@ interp.cubic <- function(i,data){
   return(result)
 }
 
-point.bicubic.init <- function(lon,lat,domain=.Last.domain,mask=NULL){
+point.bicubic.init <- function(lon,lat,domain=.Last.domain(),mask=NULL){
 ### there's actually not much initialisation that you can do
 ### "weights" in fact only contains the index of neighbouring points
 ### because the weights are computed from the field values.

@@ -1,11 +1,22 @@
-# Default NAMESPACE created by R
-# Remove the previous line if you edit this file
-
+importFrom("maps","map")
 # Export all names
 exportPattern(".")
 # exportPattern("^Domain")
-# S3method(as,geofield)
-
+S3method(as,geofield)
+S3method(plot,geodomain)
+S3method(plot,geofield)
+S3method(print,geofield)
+S3method(print,geodomain)
+S3method(DomainExtent,geodomain)
+S3method(DomainExtent,geofield)
+S3method(DomainPoints,geodomain)
+S3method(DomainPoints,geofield)
+S3method(subgrid,geodomain)
+S3method(subgrid,geofield)
+S3method(limage,default)
+S3method(limage,geofield)
+S3method(vecplot,default)
+S3method(vecplot,geofield)
 # export(i2a,matsum,laloclick,orthoglobe,as.ocean,box.resize,seamask,irainbow,grainbow)
 # exportPattern("^col")
 

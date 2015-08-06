@@ -4,7 +4,7 @@
 \description{These are class functions for visualising \code{geofield}
   objects. They are derived from the default functions, but add geographical information from the map database. \code{iview} and \code{fcview} are just simple shortcuts for calling \code{limage} with some special settings. }
 \usage{
-limage.geofield(field,smooth=FALSE,drawmap = TRUE, maplwd = 0.5,
+\method{limage}{geofield}(field,smooth=FALSE,drawmap = TRUE, maplwd = 0.5,
       mapcol = "black", 
       map.database="worldmap", ...)
 }
@@ -23,7 +23,9 @@ limage.geofield(field,smooth=FALSE,drawmap = TRUE, maplwd = 0.5,
 \details{There are also shortcuts \code{iview, cview, fcview, vview} that go a little further by interpreting any matrix as a geofield (using the \code{as.geofield} function) and have different colour defaults. 
 }
 \examples{
+\dontrun{
 fcview(ttt,legend=T,legend.title=title(main="meter",cex.main=.6,line=1),legend.width=1/7)
+}
 }
 \seealso{
   \code{\link[base]{image}},\link{iview},\code{\link[base]{filled.contour}},\code{\link{limage}},\code{\link{plot.geodomain}}

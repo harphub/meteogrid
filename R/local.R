@@ -1,6 +1,6 @@
 #--------------------------------------#
 # Part of R-package geogrid            #
-# © Alex Deckmyn                       #
+# Copyright Alex Deckmyn               #
 # Released under GPL-3 license         #
 #--------------------------------------#
 

@@ -34,8 +34,10 @@ point.closest.init(lon,lat,domain=.Last.domain,mask=NULL)
 \code{point.bilin} etc. are called by the main routine \code{point.interp}, depending on the chosen method. You don't really have to call them explicitely.
 }
 \examples{
-w1 <- point.interp.init(lon,lat,method="bilin",domain=.Last.domain)
+\dontrun{
+w1 <- point.interp.init(lon,lat,method="bilin",domain=.Last.domain())
 f1 <- point.interp(lon,lat,method="bilin",infield,weights=w1)
+}
 }
 \seealso{\code{\link[geogrid]{regrid}} }
 \keyword{file}

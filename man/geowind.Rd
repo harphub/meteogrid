@@ -23,8 +23,10 @@ A list with components \code{U,V} that have the same type as the input. The wind
 \seealso{\code{\link{wind.dirspeed}}
 }
 \examples{
+\dontrun{
   u <- FAdec('ICMSHABOF+0001',"S020WIND.U")
   v <- FAdec('ICMSHABOF+0001',"S020WIND.V")
   uvg <- geowind(u,v) ### a list containing 2 geofield objects
+}
 }
 \keyword{file}

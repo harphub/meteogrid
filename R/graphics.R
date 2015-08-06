@@ -1,12 +1,18 @@
 #--------------------------------------#
 # Part of R-package geogrid            #
-# © Alex Deckmyn                       #
+# Copyright Alex Deckmyn               #
 # Released under GPL-3 license         #
 #--------------------------------------#
 
 #####################################
 ### VECTOR FIELDS                 ###
 #####################################
+
+.Last.domain <- local({
+    ldom <- NULL
+    function(new) if(!missing(new)) ldom <<- new else ldom
+})
+
 
 ### plotting a (U,V) vectorfield on a domain !
 ### don't expect too much...
@@ -111,7 +117,7 @@ limage  <- function(x,...) UseMethod("limage")
 
 limage.geofield <- function(field,smooth=FALSE,drawmap=TRUE,
                    maplwd=.5,mapcol='black',
-                   map.database="worldmap",...){
+                   map.database="world",...){
   gdomain <- attr(field,"domain")
   glimits <- DomainExtent(gdomain)
   x <- seq(glimits$x0,glimits$x1,length=glimits$nx)
@@ -124,7 +130,7 @@ limage.geofield <- function(field,smooth=FALSE,drawmap=TRUE,
 ### in fact not!
 ### BUT: for a global, VERTEX CENTERED grid, we should add the last
 
-  assign(".Last.domain",gdomain,envir=globalenv())
+  .Last.domain(gdomain)
   if(drawmap)
     plot(gdomain,add=TRUE,drawmap=TRUE,
          add.dx=!smooth,box=TRUE,maplwd=maplwd,mapcol=mapcol,
@@ -163,22 +169,13 @@ limage.default <-
     if(smooth){
       plot.new()
       plot.window(xlim, ylim, "", xaxs="i", yaxs="i", asp=asp)
-      if(as.numeric(R.Version()$major) < 3)
-        .Internal(filledcontour(x,y,z,as.double(levels),col = col ))
-      else
-        .filled.contour(x,y,z,as.double(levels),col)
+      .filled.contour(x,y,z,as.double(levels),col)
     }
     else {
 ### useRaster is available from v 2.13.0 on. It improves the quality enormously.
 ### but you may not want to use it if you are exporting to some other output device...
-      if(as.numeric(R.Version()$major) + .01*as.numeric(R.Version()$minor) >= 2.13){
-        image(x,y,z,xlab="",ylab="",axes=FALSE,xlim=xlim,col=col,
-          breaks=levels,asp=asp,useRaster=useRaster,...)
-      }
-      else{
-       image(x,y,z,xlab="",ylab="",axes=FALSE,xlim=xlim,col=col,
-          breaks=levels,asp=asp,...)
-      }
+      image(x,y,z,xlab="",ylab="",axes=FALSE,xlim=xlim,col=col,
+            breaks=levels,asp=asp,useRaster=useRaster,...)
     }
 
     if(legend){
@@ -233,22 +230,29 @@ limage.default <-
 ### CONTOUR          ###
 ########################
 
-"contour.geofield" <-
-function(field,mapcol="black",add=FALSE,drawmap=!add,maplwd=.5,
-         map.database="worldmap",...){
+cview <- function(field,nlevels=15,
+           title=paste(attr(x,"info")$name,"\n",attr(x,"time")),
+           mask=NULL,mapcol="black",add=FALSE,drawmap=!add,maplwd=.5,
+           map.database="world",...){
+  if(!inherits(field,"geofield")) field <- as.geofield(geofield)
+  if(!is.null(mask)){
+    if(is.character(mask)) mask <- eval(parse(text=mask))
+    else if (is.expression(mask)) mask <- eval(mask)
+    field[eval(expression(mask))] <- NA
+  }
+
   gdomain <- attr(field,"domain")
   glimits <- DomainExtent(gdomain)
   x <- seq(glimits$x0,glimits$x1,length=gdomain$nx)
   y <- seq(glimits$y0,glimits$y1,length=gdomain$ny)
 
-  if(drawmap)
-      plot(gdomain,maplwd=maplwd,mapcol=mapcol,add=add,
-           drawmap=drawmap,map.database=map.database)
+  if(drawmap) plot(gdomain,maplwd=maplwd,mapcol=mapcol,add=add,
+                   drawmap=drawmap,map.database=map.database)
 ### a future using lattice:
 #  contourplot(x, y, field[1:gdomain$nx, 1:gdomain$ny],
 #          xlab = "", ylab = "", axes = FALSE, add = ifelse(drawmap,TRUE,add), ...)
 
-contour(x, y, field[1:gdomain$nx, 1:gdomain$ny],
+  contour(x, y, field[1:gdomain$nx, 1:gdomain$ny],
           xlab = "", ylab = "", axes = FALSE, add = ifelse(drawmap,TRUE,add), ...)
 }
 
@@ -277,7 +281,7 @@ iview2 <- function(x,nlevels=15,color.palette=irainbow,
           breaks=seq(min(x,na.rm=TRUE),max(x,na.rm=TRUE),length=nlevels),
           asp=1,mask=NULL,
           drawmap=TRUE,maplwd=.5,mapcol='black',
-          map.database="worldmap", ...){
+          map.database="world", ...){
   require(lattice)
   if(!is.null(mask)){
     if(is.character(mask)) mask <- eval(parse(text=mask))
@@ -292,7 +296,7 @@ iview2 <- function(x,nlevels=15,color.palette=irainbow,
   grid$z <- as.vector(x[1:gdomain$nx,1:gdomain$ny])
 
   if(is.null(breaks)) breaks=pretty(grid$z,nlevels)
-  assign(".Last.domain",gdomain,envir=globalenv())
+  .Last.domain(gdomain)
 
 
   ppp <- levelplot(z~x*y,data=grid,col.regions=color.palette(2*nlevels),
@@ -306,18 +310,6 @@ iview2 <- function(x,nlevels=15,color.palette=irainbow,
          add.dx=TRUE,box=TRUE,maplwd=maplwd,mapcol=mapcol,
          map.database=map.database)
 
-}
-
-cview <- function(x,nlevels=15,
-           title=paste(attr(x,"info")$name,"\n",attr(x,"time")),
-           mask=NULL,...){
-  if(!is.null(mask)){
-    if(is.character(mask)) mask <- eval(parse(text=mask))
-    else if (is.expression(mask)) mask <- eval(mask)
-    x[eval(expression(mask))] <- NA
-  }
-
-  contour(as.geofield(x),nlevels=nlevels,main=title,...)
 }
 
 fcview <- function(x,nlevels=15,color.palette=irainbow,
@@ -341,13 +333,13 @@ vview <- function(U,V,...){
 ### PLOTTING A MAP OR FRAME ###
 ###############################
 
-plot.geodomain <- function(x=.Last.domain,add=TRUE,
+plot.geodomain <- function(x=.Last.domain(),add=TRUE,
              maplwd=1,mapcol='black',
              add.dx=TRUE,drawmap=!add, box=drawmap,
-             map.database="worldmap",...){
-### consistency
+             map.database="world",...){
 
-  if(add) domain <- .Last.domain
+### consistency
+  if(add) domain <- .Last.domain()
   else {
     domain <- x
     add.dx <- TRUE
@@ -369,26 +361,15 @@ plot.geodomain <- function(x=.Last.domain,add=TRUE,
      x <- seq(glimits$x0,glimits$x1,length=domain$nx)
      y <- seq(glimits$y0,glimits$y1,length=domain$ny)
      image(x,y,array(0,dim=c(domain$nx,domain$ny)),xlab="",ylab="",axes=FALSE,col=0)
-     assign(".Last.domain",domain,envir=globalenv())
+     .Last.domain(domain)
   }
 
   if(drawmap){
-#    require(maps)
-    if(!exists(map.database)) data(list=map.database)
-    map <- eval(parse(text=map.database))
-### BUG: this simple restriction may leave artificial lines!
-#    boundaries <- map[map$x >= glimits$lonlim[1] &
-#                    map$x <= glimits$lonlim[2] &
-#                    map$y >= glimits$latlim[1] &
-#                    map$y <= glimits$latlim[2] ,]
-# SO: first call to map.restrict is to reduce the number points to project.
-# there may be more subtle/efficient ways to do this, but at least it works.
-    boundaries <- map.restrict(map,xlim=glimits$lonlim,ylim=glimits$latlim)
+    boundaries <- map(database=map.database,xlim=glimits$lonlim,ylim=glimits$latlim,plot=FALSE)
     geo <- project(boundaries, proj = domain$projection,inv = FALSE)
     xyper <- periodicity(domain)
 ### make sure that no points fall outside the map domain.
-#    cat("xlim=",xlim,"\nylim=",ylim,"\n")
-    geo=map.restrict(geo,xlim=xlim,ylim=ylim,xper=xyper$xper,yper=xyper$yper)
+    geo <- map.restrict(geo,xlim=xlim,ylim=ylim,xperiod=xyper$xper,yperiod=xyper$yper)
 #    trellis.focus("panel",1,1)
 #    panel.lines(geo, col = mapcol, lwd = maplwd,...)
 ### or use panel.lines ?
@@ -404,8 +385,8 @@ plot.geodomain <- function(x=.Last.domain,add=TRUE,
 #  trellis.unfocus()
 }
 
-plot.geofield <- function(field,...){
-  plot(attr(field,"domain"),...)
+plot.geofield <- function(x,...){
+  plot(attr(x,"domain"),...)
 }
 ######################
 ### periodicity depends on the projection
@@ -437,7 +418,7 @@ domainbox <-
   function (domain , add.dx = TRUE, ...)
 {
 
-  if(is.geofield(domain)) domain=attributes(domain)$domain
+  if(is.geofield(domain)) domain <- attributes(domain)$domain
 
   glimits <- DomainExtent(domain)
   if (!add.dx) {
@@ -456,8 +437,8 @@ domainbox <-
   domainframe <- cbind(c(rep(xlim[1],length(y)),x,rep(xlim[2],length(y)),rev(x)),
                          c(y,rep(ylim[2],length(x)),rev(y),rep(ylim[1],length(x)) ) )
   domainlalo <- project(domainframe,proj=domain$projection,inv=TRUE)
-
-  lines(project(domainlalo,proj=.Last.domain$projection),...)
+### BUG: what if .Last.domain is still undefined? 
+  lines(project(domainlalo,proj=.Last.domain()$projection),...)
 
 }
 
@@ -466,7 +447,7 @@ domainbox <-
 ############################
 ### this will plot point values on a map
 ### with a colour function
-obsplot <- function(x,y,z,breaks=5,pretty=TRUE,legend.pos=NULL,add=TRUE,domain=.Last.domain,col=irainbow,...){
+obsplot <- function(x,y,z,breaks=5,pretty=TRUE,legend.pos=NULL,add=TRUE,domain=.Last.domain(),col=irainbow,...){
   if (length(breaks) == 1L & pretty) breaks <- pretty(z,breaks)
   bins <- cut(z,breaks,include.lowest=TRUE,right=FALSE)
 

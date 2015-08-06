@@ -1,6 +1,6 @@
 #--------------------------------------#
 # Part of R-package geogrid            #
-# © Alex Deckmyn                       #
+# Copyright Alex Deckmyn               #
 # RMI Belgium, alex.deckmyn@meteo.be   #
 # Released under GPL-3 license         #
 #--------------------------------------#

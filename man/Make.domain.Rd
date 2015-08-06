@@ -18,8 +18,13 @@
 }
 \value{A \code{geodomain} domain.}
 \seealso{}
-\examples{newdom=Make.domain("lambert",clonlat=c(50.5,3.5),nxny=c(128,128),dxdy=c(8500,8500),reflon=50.5,reflat=3.5)
-          plot(newdom)
+\examples{
+## Not run:
+\dontrun{
+newdom <- Make.domain("lambert",clonlat=c(50.5,3.5),nxny=c(128,128),dxdy=c(8500,8500),reflon=50.5,reflat=3.5)
+plot(newdom,add=FALSE)
+}
+## End(Not run)
 }
 \keyword{file}
 

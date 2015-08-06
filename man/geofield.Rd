@@ -3,9 +3,8 @@
 \alias{is.geofield}
 \alias{geofield}
 \title{Geofield data format}
-\description{}
+\description{The main object class for gridded data. Consists of a matrix with a number of attributes.}
 \usage{
-is.geofield(x)
 as.geofield(x, grid, time = "", info = "", domain) 
 }
 \arguments{

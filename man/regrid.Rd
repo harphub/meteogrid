@@ -22,10 +22,12 @@ regrid.init(infield, newdomain=.Last.domain,mask=NULL)
   to a new domain (for instance, different grid resolution, different projection...).
 }
 \examples{
+\dontrun{
 regrid(field1,field2) # this will output the data of field1 interpolated to the grid of field 2
 
 iview(field1)
 cview(regrid(field2),add=TRUE) # add contours of field2, interpolated to the last plotted grid, which is field1.
+}
 }
 \seealso{\code{\link[geogrid]{zoomgrid}},\code{\link[geogrid]{subgrid}},\code{\link[geogrid]{Make.domain}},\code{\link[geogrid]{point.interp}}
 }

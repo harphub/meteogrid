@@ -1,70 +1,12 @@
 #--------------------------------------#
 # Part of R-package geogrid            #
-# © Alex Deckmyn                       #
+# Copyright Alex Deckmyn               #
 # Released under GPL-3 license         #
 #--------------------------------------#
 
 ######################
 ### geogrid
 ######################
-### Alex Deckmyn
-### Royal Meteorological Institute of Belgium
-### alex.deckmyn@oma.be
-######################
-### routines for viewing gridded geographical/meteorological  data
-### uses Proj.4 library . It requires the proj4 package.
-###
-### 03/03/2004 : adapted image.geofield to be closer to image.default
-###              changed proj4 format to resemble mapproject
-###              dropped Rutils dependence
-### 23/06/2004 : adapted DomainLatLon, subdomain, lalopoint
-### 01/07/2004 : changed class name to geofield
-### 22/02/2005 : turn geofield class into a matrix with attributes
-### 05/01/2006 : small changes, DomainPoints function replaces DomainLatLon
-### 08/08/2006 : added easy creation and plotting of domains
-###              (Make.lccdomain, plot.geodomain)
-### 16/08/2006 : bugfix in DomainPoints (Luc Gerard)
-### 14/09/2006 : little fix for titles in cview and fcview
-### 15/09/2006 : assume aspect=1 in vecplot (i.e. the axes have the same scale)
-###              this should correct the direction of the arrows
-###              For Lat-Lon: local correction for aspect ratio!
-### 26/09/2006 : Bugfix in domain2lalo (Luc Gerard)
-### 04/10/2006 : Bugfix in plot.geodomain (Luc Gerard)
-###              + a little bit of cleaning
-###              + renamed DrawLatLon
-### 17/01/2007 : New function Make.domain : includes different (ALADIN) projections
-### 18/01/2007 : Add "orthoglobe" for a nice plot of the globe.
-### 19/01/2007 : Port map (-> "map4")
-###              add little function "gridpoint"
-### 23/02/2007 : Added "regrid": interpolation from one domain to another.
-### 08/05/2007 : Added interp.point (interpolation to 1 lat-lon point)
-### 23/01/2008 : Added Rotated LatLon projection (for Hirlam output)
-###              replace akima by bilinear interpolation (using "fields" library)-> FASTER
-### 24/01/2008 : adapt to CRAN-package "proj4" (so my routine drops out!)
-###              projections are now defined as a list (but backward compatible)
-### xx/xx/2008 : Little improvements to domain plotting: by using "image(col=0)"
-###              you get the exact borders (no more boundary lines beyond the frame)
-### 14/10/2008 : New function "limage" for legend support in image and filled.contour.
-###              Rewrite of iview and fcview for decent legend support.
-###              Code cleaning.
-### 17/11/2008 : Some bug fixes (Jure Cedilnik)
-###              new function domainbox
-### 02/02/2009 : bugfix domainbox
-### ../06/2009 : several fixes for Rotated Mercator.
-### 21/10/2009 : bugfix in lalopoint (Tomasz Kulakowski)
-### 08/03/2010 : bugfix for legend.title in limage.default
-### 09/06/2010 : bugfix in project - latlong was not processed correctly
-### 13/12/2010 : bug fix for contour.geofield(drawmap=FALSE) (Luc Gerard)
-### 21/01/2011 : bugfixes for global maps (reported by Piet Termonia)
-### 03/05/2011 : bugfix as.geofield
-### 16/09/2011 : add compare.geodomain
-### 29/05/2012 : add useRaster=TRUE as an option to iview.
-###              Check that version>=2.13 before calling image.
-### 29/06/2012 : Add "mask" option to lalopoint (e.g. to find closest LAND point)
-### 21/03/2013 : New regrid implementation:
-###              Bilinear, Nearest neighbour and bicubic spline interpolations.
-### 11/07/2013 : Replace "mapNew" by a simple lat/lon table, so yo udon't need "maps".
-##########################################
 
 is.geofield <- function(x){
   inherits(x,"geofield")
@@ -74,22 +16,22 @@ is.geodomain <- function(x){
   inherits(x,"geodomain")
 }
 
-print.geofield <- function(field){
-  cat(paste(attr(field,"info")$origin,":",attr(field,"info")$name),"\n")
+print.geofield <- function(x,...){
+  cat(paste(attr(x,"info")$origin,":",attr(x,"info")$name),"\n")
   cat("Time:\n")
-  cat(attr(field,"time"),"\n")
+  cat(attr(x,"time"),"\n")
   cat("Domain summary:\n")
-  print(attr(field,"domain"))
+  print(attr(x,"domain"))
   cat("Data summary:\n")
-  cat(summary(as.vector(field)),"\n")
+  cat(summary(as.vector(x)),"\n")
 }
 
-print.geodomain = function(domain){
-  cat(domain$nx,"x",domain$ny,"domain\n")
+print.geodomain = function(x,...){
+  cat(x$nx,"x",x$ny,"domain\n")
   cat("Projection summary:\n")
-  cat("proj=",domain$projection$proj,"\n")
-  cat("NE = (",domain$NE[1],",",domain$NE[2],")\n")
-  cat("SW = (",domain$SW[1],",",domain$SW[2],")\n")
+  cat("proj=",x$projection$proj,"\n")
+  cat("NE = (",x$NE[1],",",x$NE[2],")\n")
+  cat("SW = (",x$SW[1],",",x$SW[2],")\n")
 #  print.noquote(domain$projection)
 }
 
@@ -105,15 +47,15 @@ compare.geodomain <- function(domain1,domain2,eps=1e-10){
 
 #####################################
 
-DomainExtent <- function(x,...){
+DomainExtent <- function(geo,...){
   UseMethod("DomainExtent")
 }
 
-DomainExtent.geofield <- function(x){
-  DomainExtent(attr(x,"domain"))
+DomainExtent.geofield <- function(geo,...){
+  DomainExtent(attr(geo,"domain"))
 }
 
-DomainExtent.geodomain <- function(domain){
+DomainExtent.geodomain <- function(geo,...){
 ### We look for the extreme LatLon values of a domain domain
 ### these are useful to select the right part from the world map
 ### first find the SW and NE point, then draw a rectangular box
@@ -121,23 +63,23 @@ DomainExtent.geodomain <- function(domain){
 ### You could use DomainPoints in stead, but then you'd be projecting
 ### all domain points, which is a bit of an overkill...
 ###  if(is.geofield(domain)) domain <- attr(domain,"domain")
-  xy <- project(list(x=c(domain$SW[1], domain$NE[1]),y=c(domain$SW[2], domain$NE[2])),
-                proj=domain$projection)
+  xy <- project(list(x=c(geo$SW[1], geo$NE[1]),y=c(geo$SW[2], geo$NE[2])),
+                proj=geo$projection)
   x0 <- xy$x[1]
   y0 <- xy$y[1]
   x1 <- xy$x[2]
   y1 <- xy$y[2]
-  dx <- (x1-x0)/(domain$nx-1)
-  dy <- (y1-y0)/(domain$ny-1)
+  dx <- (x1-x0)/(geo$nx-1)
+  dy <- (y1-y0)/(geo$ny-1)
   xc <- (x0+x1)/2
   yc <- (y0+y1)/2
 
-  clonlat <- project(list(x=xc,y=yc),proj=domain$projection,inv=TRUE)
-  borders <- project(list(x=c(seq(x0,x1,length=domain$nx),rep(x1,domain$ny),
-                              seq(x0,x1,length=domain$nx),rep(x0,domain$ny)),
-                          y=c(rep(y0,domain$nx),seq(y0,y1,length=domain$ny),
-                              rep(y1,domain$nx),seq(y0,y1,length=domain$ny))),
-                      proj=domain$projection,inv=TRUE)
+  clonlat <- project(list(x=xc,y=yc),proj=geo$projection,inv=TRUE)
+  borders <- project(list(x=c(seq(x0,x1,length=geo$nx),rep(x1,geo$ny),
+                              seq(x0,x1,length=geo$nx),rep(x0,geo$ny)),
+                          y=c(rep(y0,geo$nx),seq(y0,y1,length=geo$ny),
+                              rep(y1,geo$nx),seq(y0,y1,length=geo$ny))),
+                      proj=geo$projection,inv=TRUE)
 ### ATTENTION: if the map crosses or comes close to the date line (meridian 180/-180) this will not
 ### work correctly. In the map command we must then set lonlim=NULL !!!
 
@@ -147,40 +89,40 @@ DomainExtent.geodomain <- function(domain){
 
   list(lonlim = lonlim , latlim = range(borders$y,na.rm=TRUE),
        clonlat=c(clonlat$x,clonlat$y),
-       x0=x0,y0=y0,x1=x1,y1=y1,dx=dx,dy=dy,nx=domain$nx,ny=domain$ny)
+       x0=x0,y0=y0,x1=x1,y1=y1,dx=dx,dy=dy,nx=geo$nx,ny=geo$ny)
 }
 
 ##########################################################
-DomainPoints <- function(x,...){
+DomainPoints <- function(geo,...){
   UseMethod("DomainPoints")
 }
 
-DomainPoints.geofield <- function(field,...){
-  DomainPoints(attr(field,"domain"),...)
+DomainPoints.geofield <- function(geo,...){
+  DomainPoints(attr(geo,"domain"),...)
 }
 
-DomainPoints.geodomain <- function (domain,type="lalo"){
+DomainPoints.geodomain <- function (geo,type="lalo",...){
 ### return lat's and lon's of all domain points (or leave in projection if type = "xy")
 
-  lalo <- list(x=c(domain$SW[1],domain$NE[1]),y=c(domain$SW[2],domain$NE[2]))
-  xy <- project(lalo, proj = domain$projection)
-  xydomain <- expand.grid(x = seq(xy$x[1], xy$x[2], length = domain$nx),
-                          y = seq(xy$y[1], xy$y[2], length = domain$ny))
+  lalo <- list(x=c(geo$SW[1],geo$NE[1]),y=c(geo$SW[2],geo$NE[2]))
+  xy <- project(lalo, proj = geo$projection)
+  xydomain <- expand.grid(x = seq(xy$x[1], xy$x[2], length = geo$nx),
+                          y = seq(xy$y[1], xy$y[2], length = geo$ny))
   if(type=="lalo") {
-    lalolist <- project(xydomain, proj = domain$projection, inv = TRUE)
-    list(lon = matrix(lalolist$x, ncol = domain$ny, nrow = domain$nx),
-         lat = matrix(lalolist$y, ncol = domain$ny, nrow = domain$nx))
+    lalolist <- project(xydomain, proj = geo$projection, inv = TRUE)
+    list(lon = matrix(lalolist$x, ncol = geo$ny, nrow = geo$nx),
+         lat = matrix(lalolist$y, ncol = geo$ny, nrow = geo$nx))
   }
   else if (type=="xy") {
-    list(x=matrix(xydomain$x, ncol = domain$ny, nrow = domain$nx),
-         y=matrix(xydomain$y, ncol = domain$ny, nrow = domain$nx))
+    list(x=matrix(xydomain$x, ncol = geo$ny, nrow = geo$nx),
+         y=matrix(xydomain$y, ncol = geo$ny, nrow = geo$nx))
   }
   else print("Unknown type.")
 }
 
 gridpoints <- function(x,y=NULL,...){
 ### indicate particular grid points on a map (like points, but with grid indices)
-  AllCoords <- DomainPoints(.Last.domain,type="xy")
+  AllCoords <- DomainPoints(.Last.domain(),type="xy")
   xy <- xy.coords(x,y)
 
   xlist <- AllCoords$x[cbind(xy$x,xy$y)]
@@ -205,38 +147,38 @@ domain2lalo <- function(infield){
 ### SUBGRID           ###
 #########################
 
-subgrid <- function(x,...){
+subgrid <- function(geo,...){
   UseMethod("subgrid")
 }
 
-subgrid.geodomain <- function(domain,x1=1,x2=domain$nx,
-                             y1=1,y2=domain$ny,reso=1) {
+subgrid.geodomain <- function(geo,x1=1,x2=geo$nx,
+                             y1=1,y2=geo$ny,reso=1,...) {
   xsub <- seq(x1,x2,by=reso)
   ysub <- seq(y1,y2,by=reso)
   subnx <- length(xsub)
   subny <- length(ysub)
 
-  newlalo <- DomainPoints(domain,"lalo")
+  newlalo <- DomainPoints(geo,"lalo")
   newlalo$lon <- newlalo$lon[xsub,ysub]
   newlalo$lat <- newlalo$lat[xsub,ysub]
-  domain$SW <- c(newlalo$lon[1,1],newlalo$lat[1,1])
-  domain$NE <- c(newlalo$lon[subnx,subny],newlalo$lat[subnx,subny])
+  geo$SW <- c(newlalo$lon[1,1],newlalo$lat[1,1])
+  geo$NE <- c(newlalo$lon[subnx,subny],newlalo$lat[subnx,subny])
 
-  domain$nx <- length(xsub)
-  domain$ny <- length(ysub)
-  domain
+  geo$nx <- length(xsub)
+  geo$ny <- length(ysub)
+  geo
 }
 
-subgrid.geofield <- function(infield,x1=1,x2=attr(infield,"domain")$nx,
-                             y1=1,y2=attr(infield,"domain")$ny,reso=1){
+subgrid.geofield <- function(geo,x1=1,x2=attr(geo,"domain")$nx,
+                             y1=1,y2=attr(geo,"domain")$ny,reso=1,...){
   xsub <- seq(x1,x2,by=reso)
   ysub <- seq(y1,y2,by=reso)
 
-  subfield  <- infield[xsub,ysub]
-  subdomain <- subgrid(attr(infield,"domain"),x1=x1,x2=x2,y1=y1,y2=y2,reso=reso)
+  subfield  <- geo[xsub,ysub]
+  subdomain <- subgrid(attr(geo,"domain"),x1=x1,x2=x2,y1=y1,y2=y2,reso=reso)
 
-  as.geofield(subfield,domain=subdomain,time=attr(infield,"time"),
-             info=c(attr(infield,"info"),extra="SUBFIELD"))
+  as.geofield(subfield,domain=subdomain,time=attr(geo,"time"),
+             info=c(attr(geo,"info"),extra="SUBFIELD"))
 }
 
 ################
@@ -315,7 +257,6 @@ DrawLatLon <- function(nx=9,ny=9,labels=TRUE,pretty=TRUE,
 
 ### adapted from "map.grid" in mapproj library
 ### uses map.wrap from maps library
-  require(maps)
   pretty.range <- function(lim,...) {
     # like pretty but ensures that the range is identical:
     # range(pretty.range(x)) == range(x)
@@ -337,8 +278,8 @@ DrawLatLon <- function(nx=9,ny=9,labels=TRUE,pretty=TRUE,
     s
   }
   # by default, use limits of last map
-  if(!exists(".Last.domain")) stop("Sorry, no projection has been defined.")
-  glimits <- DomainExtent(.Last.domain)
+  if(is.null(.Last.domain())) stop("Sorry, no projection has been defined.")
+  glimits <- DomainExtent(.Last.domain())
   xlim <- glimits$lonlim
   ylim <- glimits$latlim
 
@@ -350,20 +291,20 @@ DrawLatLon <- function(nx=9,ny=9,labels=TRUE,pretty=TRUE,
     y <- seq(ylim[1],ylim[2],len=ny)
   }
   p <- project(expand.grid(x=c(seq(xlim[1],xlim[2],len=100),NA),y=y),
-               proj=.Last.domain$projection)
+               proj=.Last.domain()$projection)
   p <- map.wrap(p)
 
   p <- map.restrict(p , c(glimits$x0,glimits$x1) , c(glimits$y0,glimits$y1),
-                    xper=periodicity()$xper,yper=periodicity()$yper)
+                    xperiod=periodicity()$xper,yperiod=periodicity()$yper)
   lines(p,col=col,lty=lty,...)
 
   p2 <- expand.grid(y = c(seq(ylim[1], ylim[2], len = 100), NA),x=x)
 ### we must put the x and y components in the right order, because "project"
 ### just takes "p[[1]]", not p$x.
   p2 <- list(x=p2$x,y=p2$y)
-  p2 <- project(p2, proj = .Last.domain$projection)
+  p2 <- project(p2, proj = .Last.domain()$projection)
   p2 <- map.restrict(p2, c(glimits$x0, glimits$x1), c(glimits$y0,glimits$y1),
-                    xperiod=periodicity(.Last.domain),yperiod=NA)
+                    xperiod=periodicity(.Last.domain()),yperiod=NA)
   lines(p2, col=col,lty=lty,...)
 
   if(labels) {
@@ -374,7 +315,7 @@ DrawLatLon <- function(nx=9,ny=9,labels=TRUE,pretty=TRUE,
     ty <- y[length(y)-lab.y]
     yinc <- median(diff(y))
     text.coord1 <- project(expand.grid(x = x + xinc * 0.05, y = ty + yinc * 0.5),
-                        proj = .Last.domain$projection)
+                        proj = .Last.domain()$projection)
 ### don't write labels outside the domain
 ### we should include a little buffer zone
 
@@ -389,7 +330,7 @@ DrawLatLon <- function(nx=9,ny=9,labels=TRUE,pretty=TRUE,
          ...)
 
     text.coord2 <- project(expand.grid(x = tx + xinc * 0.5, y = y +
-                             yinc * 0.05), proj = .Last.domain$projection)
+                             yinc * 0.05), proj = .Last.domain()$projection)
     text.coord2$x[(text.coord2$x > (glimits$x1-xbuf))]=NA
     text.coord2$x[(text.coord2$y > (glimits$y1-ybuf))]=NA
 
@@ -478,7 +419,7 @@ MakeRLL <- function(Lon1,Lat1,SPlon,SPlat,SPangle=0,nxny,dxdy){
 ### Interface to PROJ4 library ###
 ##################################
 
-project <- function(x,y,proj=.Last.domain$projection,inv=FALSE)
+project <- function(x,y,proj=.Last.domain()$projection,inv=FALSE)
 {
 
   if(missing(y)){
@@ -489,7 +430,7 @@ project <- function(x,y,proj=.Last.domain$projection,inv=FALSE)
   }
 
   if(missing(proj)){
-    if(exists(".Last.domain")) proj <- .Last.domain$projection
+    if(!is.null(.Last.domain())) proj <- .Last.domain()$projection
     else return("No projection.")
   }
 
@@ -530,7 +471,7 @@ project <- function(x,y,proj=.Last.domain$projection,inv=FALSE)
 
 }
 
-periodicity <- function(domain=.Last.domain){
+periodicity <- function(domain=.Last.domain()){
 ### function that decides whether a domain/projection is periodic.
 ### Note that e.g. in any LatLon domain, the X co-ordinate is periodic
 ### even if the domain does cover the globe.
