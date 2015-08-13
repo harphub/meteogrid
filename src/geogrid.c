@@ -27,9 +27,6 @@ void maprestrict1(double* bx,double* by,int* lx,
 AUTHOR: Alex Deckmyn
 
 */
-/*
-#define DEBUG
-*/
 
 void maprestrict1(double *bx,double *by,int* lx,
                double *x0,double *x1,
@@ -73,8 +70,8 @@ void maprestrict1(double *bx,double *by,int* lx,
 
     }
     if(ISNA(bx[i])) { /* it is a NA entry that separates 2 segments */
-      nx[npos]=NA_REAL;
-      ny[npos++]=NA_REAL;
+      ny[npos] = nx[npos] = NA_REAL;
+      npos++;
       if(npos>=NPOSMAX) Rf_error("overflow\n");
     }
 /* the following should also be done if the point is outside the domain */
@@ -91,8 +88,8 @@ void maprestrict1(double *bx,double *by,int* lx,
 
         nx[npos]   = *x0;
         ny[npos++] = ry;
-        nx[npos]   = NA_REAL;
-        ny[npos++] = NA_REAL;
+        ny[npos] = nx[npos] = NA_REAL;
+        npos++;
         if(bx[i] <= *x1){
           if(npos >= NPOSMAX-2) Rf_error("overflow\n");
           nx[npos]   = *x1;

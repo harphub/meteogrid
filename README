@@ -8,8 +8,6 @@ The installation requires that you first install the PROJ4 library for
 the map projections. This can be obtained from 
 http://www.remotesensing.org/proj/
 
-The (free) worldmap datasets are imported from http://www.naturalearthdata.com
-
 ############################
 
 Changes
@@ -53,11 +51,16 @@ Changes
 
 3.2 : - replace mapNew by a simple table with decent boundaries.
       - geowind: wind rotation for a few projections
+
+3.3 : - Require maps 3.0 (or 2.99 beta) for decent world map.
+
 ### FUTURE:
-4.0:  - move main graphical tools to the "Lattice" package to take advantage of         better legend tools.
+4.0:  - move main graphical tools to the "Lattice" package to take advantage of
+        better legend tools. Only useful for "publication" graphics. Too slow 
+        for interctive.
 
 ISSUES:
 
-- "seamask" only works on screen, not when printing.
+- "seamask" only works on screen, not when printing. Frankly, it's useless.
 - Some special cases of combined graphs, especially linked to the differences in domain size (dx) between "iview" and "fcview".
 

@@ -85,7 +85,7 @@ DomainExtent.geodomain <- function(geo,...){
 
   lonlim <- range(borders$x,na.rm=TRUE)
   llr <- lonlim[2]-lonlim[1]
-  if ( llr <= 1 | llr > 300 ) lonlim <- NULL
+  if (llr <= 1 | llr > 300) lonlim <- NULL
 
   list(lonlim = lonlim , latlim = range(borders$y,na.rm=TRUE),
        clonlat=c(clonlat$x,clonlat$y),
@@ -108,16 +108,17 @@ DomainPoints.geodomain <- function (geo,type="lalo",...){
   xy <- project(lalo, proj = geo$projection)
   xydomain <- expand.grid(x = seq(xy$x[1], xy$x[2], length = geo$nx),
                           y = seq(xy$y[1], xy$y[2], length = geo$ny))
-  if(type=="lalo") {
+  if (type == "lalo") {
     lalolist <- project(xydomain, proj = geo$projection, inv = TRUE)
     list(lon = matrix(lalolist$x, ncol = geo$ny, nrow = geo$nx),
          lat = matrix(lalolist$y, ncol = geo$ny, nrow = geo$nx))
   }
-  else if (type=="xy") {
+  else if (type == "xy") {
     list(x=matrix(xydomain$x, ncol = geo$ny, nrow = geo$nx),
          y=matrix(xydomain$y, ncol = geo$ny, nrow = geo$nx))
+  } else {
+    print("Unknown type.")
   }
-  else print("Unknown type.")
 }
 
 gridpoints <- function(x,y=NULL,...){
@@ -139,7 +140,7 @@ domain2lalo <- function(infield){
 ### You could use this for spatial interpolations...
   lalodomain <- DomainPoints(infield,"lalo")
   data.frame(x=as.vector(lalodomain$lon),y=as.vector(lalodomain$lat),
-        z = as.vector(infield[1:attr(infield,'domain')$nx, 1:attr(infield,'domain')$ny]))
+             z = as.vector(infield[1:attr(infield,'domain')$nx, 1:attr(infield,'domain')$ny]))
 }
 
 
@@ -185,65 +186,17 @@ subgrid.geofield <- function(geo,x1=1,x2=attr(geo,"domain")$nx,
 
 zoomgrid <- function(infield,x,y,zoom=50){
   infield <- as.geofield(infield)
-  if(x-zoom < 1) xmin <- 1
+  if (x-zoom < 1) xmin <- 1
   else if (x+zoom > attr(infield,"domain")$nx) xmin <- attr(infield,"domain")$nx-2*zoom
   else xmin <- x-zoom
 
-  if(y-zoom < 1) ymin <- 1
+  if (y-zoom < 1) ymin <- 1
   else if (y+zoom > attr(infield,"domain")$ny) ymin <- attr(infield,"domain")$ny-2*zoom
   else ymin <- y-zoom
   xmax <- xmin+2*zoom
   ymax <- ymin+2*zoom
 
   subgrid(infield,xmin,xmax,ymin,ymax,reso=1)
-}
-
-lalopoint <- function(data,lon,lat,minimise='lalo',mask=NULL){
-### find the closest domain point to the given co-ordinates
-### by minimising distance in either LonLat or projected co-ordinates
-### This is in fact not exactly the same as minimising geographical distance!
-  warning("This function lalopoint is OBSOLETE! Consider using point.closest in stead.")
-  ldata <- is.geofield(data)
-  if (ldata) domain <- attr(data, "domain")
-  else domain <- data
-
-  lalodomain <- DomainPoints(domain,"lalo")
-  nx <- domain$nx
-  ny <- domain$ny
-
-  if(minimise=='lalo') dist <- sqrt((lalodomain$lon-lon)^2+(lalodomain$lat-lat)^2)
-  else if (minimise=='proj') {
-    xydomain <- DomainPoints(domain, "xy")
-    ppp <- project(list(x=lon,y=lat), proj = domain$projection)
-    dist <- sqrt((xydomain$x - ppp$x)^2 + (xydomain$y - ppp$y)^2)
-  }
-  else stop("unknown minimisation.")
-
-  if (!is.null(mask)) {
-      if (is.character(mask))
-          mask <- eval(parse(text = mask))
-      else if (is.expression(mask))
-          mask <- eval(mask)
-      dist[eval(expression(mask))] <- NA
-  }
-# We wouldn't expect two points to be exactly as close (numerically)
-# But you never know. So in this case we chose at random.
-# Default method is to set the index of both to 1.5, which screws up everything.
-
-#  dist.rank[] <- rank(dist,ties.method="random",na.last=TRUE)
-#  ij <- which(dist.rank==1,arr.ind=TRUE)
-
-  ij <- which(dist==min(dist,na.rm=TRUE),arr.ind=TRUE)
-  i <- ij[1,1]
-  j <- ij[1,2]
-
-  il <- lalodomain$lon[i,j]
-  jl <- lalodomain$lat[i,j]
-
-  if(ldata)
-    list(data = data[i, j], lonlat = c(il, jl), index = c(i,j))
-  else
-    list(data = NA, lonlat = c(il, jl), index = c(i,j) )
 }
 
 
@@ -419,54 +372,64 @@ MakeRLL <- function(Lon1,Lat1,SPlon,SPlat,SPangle=0,nxny,dxdy){
 ### Interface to PROJ4 library ###
 ##################################
 
-project <- function(x,y,proj=.Last.domain()$projection,inv=FALSE)
-{
+project <- function(x,y,proj=.Last.domain()$projection,inv=FALSE) {
 
-  if(missing(y)){
+  if (missing(y)) {
 # apparantly, is.list gives TRUE for data.frames, but lets be careful:
     if(is.list(x) | is.data.frame(x)) {y <- x$y;x <- x$x}
-    else if(is.vector(x)) {y <- x[2];x <- x[1]}
-    else {y <- x[,2];x <- x[,1]}
+    else if(is.vector(x)) {
+      y <- x[2]
+      x <- x[1]
+    } else {
+      y <- x[,2]
+      x <- x[,1]
+    }
   }
 
-  if(missing(proj)){
+  if (missing(proj)) {
     if(!is.null(.Last.domain())) proj <- .Last.domain()$projection
     else return("No projection.")
   }
 
-  if(proj$proj == "latlong")  {
+  if (proj$proj == "latlong") {
 ### longitude should be in the interval [-180,180[
 ### unless e.g. if my global data is on a globe [0,360[
 ### we assume that the meridian = MinLon + 180
 ### so meridian-180 must not be transported.
-    meridian <- ifelse(is.null(proj$lon0),0,proj$lon0)
-    x <- ifelse(x < meridian-180,x+360,x)
-    x <- ifelse(x >= meridian+180,x-360,x)
+    meridian <- if(is.null(proj$lon0)) 0 else proj$lon0
+#    x <- ifelse(x < meridian-180,x+360,x)
+#    x <- ifelse(x >= meridian+180,x-360,x)
+## much faster (!):
+    x[x <  (meridian-180)] <- x[x <  (meridian-180)] + 360
+    x[x >= (meridian+180)] <- x[x >= (meridian+180)] - 360
+    
     data.frame(x=x,y=y)
-  }
-  else  {
+  } else  {
     npoints <- as.integer(length(x))
     npar <- as.integer(length(proj))
     par <- paste(names(proj),lapply(proj,function(x) if(is.na(x)) "" else paste("=",x,sep="")),sep="")
 ### SIMPLER: par=paste(names(proj),'=',proj,sep='')
 ### but this doesn't allow options without =x value
 
-    if(!inv) {x <- x/180*pi ; y <- y/180*pi}
+    if (!inv) {
+      x <- x/180*pi
+      y <- y/180*pi
+    }
 ### to fix what *I think* is a bug in PROJ4 (never had a reply)
 ### If they ever solve this bug, I'll have to change this!
-    if(proj$proj=='omerc' & inv ){
+    if (proj$proj=='omerc' & inv ){
       if (proj$alpha<0 ) x <- -x
       else y <- -y
     }
     result <- .C("Rproj4",x=x,y=y,npoints=npoints,par=par,
                  npar=npar,inv=as.integer(inv),NAOK=TRUE,PACKAGE="geogrid")
 ### again the same proj.4 bug:
-    if(proj$proj=='omerc' & !inv){
+    if (proj$proj=='omerc' & !inv) {
       if (proj$alpha<0 ) result$x <- -result$x
       else result$y <- -result$y
     }
     if (!inv) data.frame(x=result$x,y=result$y)
-    else  data.frame(x=result$x*180/pi,y=result$y*180/pi)
+    else data.frame(x=result$x*180/pi,y=result$y*180/pi)
   }
 
 }
