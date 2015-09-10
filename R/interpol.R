@@ -334,4 +334,4 @@ point.bicubic <- function(lon,lat,infield,weights=NULL,mask=NULL){
 
   return(result)
 }
-##########################################3
+
