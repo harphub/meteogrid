@@ -1,14 +1,39 @@
 # Some obsolete functions I would rather eliminate
 # but which are requested by people too lazy to update their code
-# BUT: they will not be documented!
 
-lalopoint <- function(data,lon,lat,minimise='lalo',mask=NULL){
+lalopoint <- function(data,lon,lat,minimise='proj',mask=NULL){
+### find the closest domain point to the given co-ordinates
+  if (minimise!='proj') return(lalopoint0(data,lon,lat,minimise,mask))
+  ldata <- inherits(data,"geofield")
+
+  if (ldata | inherits(data,"FAfile")) domain <- attr(data, "domain")
+  else if (inherits(data,"FAframe")) domain <- FAdomain(data)
+  else if (inherits(data,"geodomain")) domain <- data
+  else stop("data is not a geographical object. Can not interprete.")
+
+  lalodomain <- DomainPoints(domain,"lalo")
+
+  index <- point.closest.init(lon=lon,lat=lat,domain=domain,mask=mask)$index
+
+  if (ldata) dd <- data[index] else dd <- NA
+  ij <- index
+  ll <- cbind(lalodomain$lon[index],lalodomain$lat[index])
+
+  list(data = dd, lonlat = ll, index = ij)
+} 
+
+### The old legacy code for LatLon minimisation
+### Only on life support because colleagues yell at me.
+lalopoint0 <- function(data,lon,lat,minimise='lalo',mask=NULL){
 ### find the closest domain point to the given co-ordinates
 ### by minimising distance in either LonLat or projected co-ordinates
 ### This is in fact not exactly the same as minimising geographical distance!
-  ldata <- is.geofield(data)
-  if (ldata) domain <- attr(data, "domain")
-  else domain <- data
+  ldata <- inherits(data,"geofield")
+  if (ldata | inherits(data,"FAfile")) domain <- attr(data, "domain")
+  else if (inherits(data,"FAframe")) domain <- FAdomain(data)
+  else if (inherits(data,"geodomain")) domain <- data
+  else stop("data is not a geographical object. Can not interprete.")
+  if(length(lon)!=1) stop("lalopoint0 only accepts a single point.")
 
   lalodomain <- DomainPoints(domain,"lalo")
   nx <- domain$nx
