@@ -400,8 +400,8 @@ project <- function(x,y,proj=.Last.domain()$projection,inv=FALSE) {
 #    x <- ifelse(x < meridian-180,x+360,x)
 #    x <- ifelse(x >= meridian+180,x-360,x)
 ## much faster (!):
-    x[x <  (meridian-180)] <- x[x <  (meridian-180)] + 360
-    x[x >= (meridian+180)] <- x[x >= (meridian+180)] - 360
+    x[which(x <  (meridian-180))] <- x[which(x <  (meridian-180))] + 360
+    x[which(x >= (meridian+180))] <- x[which(x >= (meridian+180))] - 360
     
     data.frame(x=x,y=y)
   } else  {
