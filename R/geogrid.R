@@ -343,7 +343,7 @@ Make.domain <- function(projtype="lambert",clonlat,nxny,dxdy,reflat=clonlat[2],r
   SW <- c(lims$x[1],lims$y[1])
   NE <- c(lims$x[2],lims$y[2])
 ### and the output is...
-  result <- list(projection=projection,nx=nxny[1],ny=nxny[2],SW=SW,NE=NE,center=clonlat)
+  result <- list(projection=projection,nx=nxny[1],ny=nxny[2],dx=dxdy[1],dy=dxdy[2],SW=SW,NE=NE,center=clonlat)
   class(result) <- "geodomain"
   result
 }
