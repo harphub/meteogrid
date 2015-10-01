@@ -467,52 +467,44 @@ obsplot <- function(x,y,z,breaks=5,pretty=TRUE,legend.pos=NULL,add=TRUE,domain=.
 
 DrawLatLon <- function(nx=9, ny=9, labels=TRUE, cex=1, col="grey",
                        lty=2, font=2, lab.x=2, lab.y=2, ...) {
-  if (is.null(.Last.domain())) stop("Sorry, no projcetion has been defined.")
+  if (is.null(.Last.domain())) stop("Sorry, no projection has been defined.")
   glimits <- DomainExtent(.Last.domain())
   xlim <- glimits$lonlim
   ylim <- glimits$latlim
 
   x <- pretty(xlim, nx)
   lonlist <- x[which(x >= xlim[1] & x <= xlim[2])]
+  lonlines <- expand.grid(y=c(seq(ylim[1],ylim[2],len=100),NA),x=lonlist)
 
   y <- pretty(ylim, ny)
   latlist <- y[which(y >= ylim[1] & y <= ylim[2])]
-
   latlines <- expand.grid(x=c(seq(xlim[1],xlim[2],len=100),NA),y=latlist)
-  lonlines <- expand.grid(y=c(seq(ylim[1],ylim[2],len=100),NA),x=lonlist)
 
   lalolines <- rbind(latlines,lonlines)
   plines <- project(lalolines,proj=.Last.domain()$projection)
-
   plines <- map.restrict(plines, c(glimits$x0,glimits$x1),
                                  c(glimits$y0,glimits$y1),
-                                 xperiod=periodicity()$xper)
+                                 xperiod=periodicity(.Last.domain())$xper)
   lines(plines, col=col, lty=lty)
 
   if (labels) {
 # labels on axis
-# so we need to know the location, which is either NA or at the end of a line
-# plines has all the right coordinates, but how to find them...
-
-# a first slow approach:
-# BUG: some lines may not reach the left/bottom so there shouldn't be a lable
-#      minimum must be close to zero
     NN <- 100
-    DX <- diff(glimits$lonlim)/(NN-1)
+    DX <- diff(glimits$lonlim)/(NN-1) # not a good criterion...
     DY <- diff(glimits$latlim)/(NN-1)
+
     tx <- data.frame(x=seq(glimits$x0,glimits$x1,length=NN), y=rep(glimits$y0, NN))
-    ptx <- project(tx,inv=TRUE)
+    ptx <- project(tx,proj=.Last.domain()$projection,inv=TRUE)
     zx <- vapply(lonlist,function(ll) which.min(abs(ptx$x-ll)),1)
     at.x <- ifelse(abs(ptx$x[zx]-lonlist) < DX, tx$x[zx], NA)
 
     ty <- data.frame(x=rep(glimits$x0, NN), y=seq(glimits$y0,glimits$y1,length=NN))
-    pty <- project(ty,inv=TRUE)
+    pty <- project(ty,proj=.Last.domain()$projection,inv=TRUE)
     zy <- vapply(latlist,function(ll) which.min(abs(pty$y-ll)),1)
     at.y <- ifelse(abs(pty$y[zy]-latlist) < DY, ty$y[zy], NA)
-#    at.y <- vapply(latlist,function(ll) ty$y[which.min(abs(pty$y-ll))],1)
 
     axis(1,at=at.x, labels=format(lonlist), tick=FALSE, line=-0.5, col.axis=col)
     axis(2,at=at.y, labels=format(latlist), tick=FALSE, line=-0.5, col.axis=col)
 
-   }
+  }
 } 
