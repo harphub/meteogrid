@@ -1,6 +1,6 @@
 Package: geogrid
-Version: 3.3.1-3
-Date: 2015-09-25
+Version: 3.3.1-4
+Date: 2015-10-01
 Title: Geographical Grids - Mainly Meteorological
 Description: Viewing (projected) grid map data. 
 Author: Alex Deckmyn <Alex.Deckmyn@meteo.be>.

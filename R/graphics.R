@@ -333,13 +333,14 @@ vview <- function(U,V,...){
 ### PLOTTING A MAP OR FRAME ###
 ###############################
 
-plot.geodomain <- function(x=.Last.domain(),add=TRUE,
+plot.geodomain <- function(x=.Last.domain(),
+             add=!is.null(.last.domain),
              maplwd=1,mapcol='black',
              add.dx=TRUE,drawmap=!add, box=drawmap,
              map.database="world",...){
 
 ### consistency
-  if(add) domain <- .Last.domain()
+  if (add) domain <- .Last.domain()
   else {
     domain <- x
     add.dx <- TRUE
