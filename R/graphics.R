@@ -409,7 +409,18 @@ domainbox <-
 ############################
 ### this will plot point values on a map
 ### with a colour function
-obsplot <- function(x,y,z,breaks=5,pretty=TRUE,legend.pos=NULL,add=TRUE,domain=.Last.domain(),col=irainbow,...){
+obsplot <- function(x,y,z,breaks=5,pretty=TRUE,legend.pos=NULL,
+                    add=TRUE,domain=.Last.domain(),col=irainbow,...){
+  if (missing(y)) {
+    if(ncol(x)>1) {
+      y <- x[,2]
+      x <- x[,1]
+    } else {
+     y <- x[2]
+     x <- x[1]
+    }
+  }
+
   if (length(breaks) == 1L & pretty) breaks <- pretty(z,breaks)
   bins <- cut(z,breaks,include.lowest=TRUE,right=FALSE)
 
