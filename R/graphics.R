@@ -380,8 +380,8 @@ map.restrict <- function(bxy,xlim,ylim,xperiod=NA_real_,xfrac=0.5,yperiod=NA_rea
 domainbox <-
   function (domain , add.dx = TRUE, ...)
 {
-
-  if(is.geofield(domain)) domain <- attributes(domain)$domain
+  if (is.null(.Last.domain())) stop("There is no image yet to add the domainbox to.")
+  if (is.geofield(domain)) domain <- attributes(domain)$domain
 
   glimits <- DomainExtent(domain)
   if (!add.dx) {
@@ -400,7 +400,6 @@ domainbox <-
   domainframe <- cbind(c(rep(xlim[1],length(y)),x,rep(xlim[2],length(y)),rev(x)),
                          c(y,rep(ylim[2],length(x)),rev(y),rep(ylim[1],length(x)) ) )
   domainlalo <- project(domainframe,proj=domain$projection,inv=TRUE)
-### BUG: what if .Last.domain is still undefined? 
   lines(project(domainlalo,proj=.Last.domain()$projection),...)
 
 }
