@@ -21,7 +21,7 @@
       if (missing(domain)) {
         ddd <- dim(x)[1]
         if (ddd == 108 | ddd == 97)
-          domain <- DomainBel
+          domain <- DomainBel.old
         else if (ddd == 67 )
           domain <- DomainERA10km
         else if (ddd == 181 | ddd == 192)
@@ -65,14 +65,6 @@ DomainINCA <- structure(list(projection=lambel2008,nx=601,ny=591,
                              SW=c( 0.491815928394773 , 47.896068330561 ),
                              NE=c( 9.0040364775994 , 53.1788068443894 )),
                         class="geodomain")
-
-DomainMar <- structure(
-                       list(projection = list(proj="lcc", lon_0=353, lat_1=31.5605943600000,
-                                              lat_2=31.5605943600000,a=6371229.0,es=0.0),
-                            nx = 117, ny = 117,
-                            SW = c(339.80916592, 18.0573977600000),
-                            NE = c(10.3442195400000,  43.3049020977534)),
-                       class = "geodomain")
 
 DomainBel.old <-  structure(
                         list(projection = list(proj="lcc", lon_0=4.55361516000000, lat_1=50.5698986500001,

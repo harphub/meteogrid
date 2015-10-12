@@ -2,7 +2,9 @@
 \alias{DomainExtent.default}
 \alias{DomainExtent.geofield}
 \title{Finding the (Lat-Lon) extent of a domain.}
-\description{}
+\description{
+A function that returns the basic dimensions of a domain.
+}
 \usage{
 DomainExtent(domain)
 }
@@ -19,10 +21,6 @@ DomainExtent(domain)
       co-ordinates.}
     \item{dx,dy}{The interval between grid points in meters.}
     \item{nx,ny}{The number of points in X and Y direction.}
-}
-\details{
-}
-\examples{
 }
 \seealso{\code{DomainPoints}
 }

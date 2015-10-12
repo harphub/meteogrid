@@ -274,44 +274,6 @@ iview <- function(x,nlevels=15,color.palette=irainbow,
       smooth=FALSE,legend=legend,nlevels=nlevels,...)
 }
 
-### a new version using Lattice (experimental)
-iview2 <- function(x,nlevels=15,color.palette=irainbow,
-          title=paste(attr(x,"info")$name,"\n",attr(x,"time")),
-          legend=list(space="right",width=1,labels=list(cex=0.8)),
-          breaks=seq(min(x,na.rm=TRUE),max(x,na.rm=TRUE),length=nlevels),
-          asp=1,mask=NULL,
-          drawmap=TRUE,maplwd=.5,mapcol='black',
-          map.database="world", ...){
-  require(lattice)
-  if(!is.null(mask)){
-    if(is.character(mask)) mask <- eval(parse(text=mask))
-    else if (is.expression(mask)) mask <- eval(mask)
-    x[eval(expression(mask))] <- NA
-  }
-  gdomain <- attributes(x)$domain
-  glimits <- DomainExtent(gdomain)
-  xc <- seq(glimits$x0,glimits$x1,length=glimits$nx)
-  yc <- seq(glimits$y0,glimits$y1,length=glimits$ny)
-  grid <- expand.grid(x=xc,y=yc)
-  grid$z <- as.vector(x[1:gdomain$nx,1:gdomain$ny])
-
-  if(is.null(breaks)) breaks=pretty(grid$z,nlevels)
-  .Last.domain(gdomain)
-
-
-  ppp <- levelplot(z~x*y,data=grid,col.regions=color.palette(2*nlevels),
-         main=list(label=title),
-         colorkey=legend,cuts=nlevels,
-         scales=list(draw=FALSE),xlab="",ylab="",at=breaks,asp=asp,,...)
-### problem: the levelplot is only "printed" if it is the last statement of the function...
-### and now we should add the map...
-  print(ppp)
-    if(drawmap) plot(gdomain,add=TRUE,drawmap=TRUE,
-         add.dx=TRUE,box=TRUE,maplwd=maplwd,mapcol=mapcol,
-         map.database=map.database)
-
-}
-
 fcview <- function(x,nlevels=15,color.palette=irainbow,
            title=paste(attr(x,"info")$name,"\n",attr(x,"time")),
            legend=TRUE,breaks=seq(min(x,na.rm=TRUE),
@@ -466,7 +428,7 @@ obsplot <- function(x,y,z,breaks=5,pretty=TRUE,legend.pos=NULL,add=TRUE,domain=.
 ### Add latitude/longitude grid to a map ###
 ############################################
 
-DrawLatLon <- function(nx=9, ny=9, labels=TRUE, cex=1, col="grey",
+DrawLatLon <- function(nx=9, ny=9, lines=TRUE, labels=TRUE, cex=1, col="grey",
                        lty=2, font=2, lab.x=2, lab.y=2, ...) {
   if (is.null(.Last.domain())) stop("Sorry, no projection has been defined.")
   glimits <- DomainExtent(.Last.domain())
@@ -475,19 +437,20 @@ DrawLatLon <- function(nx=9, ny=9, labels=TRUE, cex=1, col="grey",
 
   x <- pretty(xlim, nx)
   lonlist <- x[which(x >= xlim[1] & x <= xlim[2])]
-  lonlines <- expand.grid(y=c(seq(ylim[1],ylim[2],len=100),NA),x=lonlist)
 
   y <- pretty(ylim, ny)
   latlist <- y[which(y >= ylim[1] & y <= ylim[2])]
-  latlines <- expand.grid(x=c(seq(xlim[1],xlim[2],len=100),NA),y=latlist)
 
-  lalolines <- rbind(latlines,lonlines)
-  plines <- project(lalolines,proj=.Last.domain()$projection)
-  plines <- map.restrict(plines, c(glimits$x0,glimits$x1),
-                                 c(glimits$y0,glimits$y1),
-                                 xperiod=periodicity(.Last.domain())$xper)
-  lines(plines, col=col, lty=lty)
-
+  if (lines) {
+    lonlines <- expand.grid(y=c(seq(ylim[1],ylim[2],len=100),NA),x=lonlist)
+    latlines <- expand.grid(x=c(seq(xlim[1],xlim[2],len=100),NA),y=latlist)
+    lalolines <- rbind(latlines,lonlines)
+    plines <- project(lalolines,proj=.Last.domain()$projection)
+    plines <- map.restrict(plines, c(glimits$x0,glimits$x1),
+                                   c(glimits$y0,glimits$y1),
+                                   xperiod=periodicity(.Last.domain())$xper)
+    lines(plines, col=col, lty=lty)
+  }
   if (labels) {
 # labels on axis
     NN <- 100
@@ -504,8 +467,8 @@ DrawLatLon <- function(nx=9, ny=9, labels=TRUE, cex=1, col="grey",
     zy <- vapply(latlist,function(ll) which.min(abs(pty$y-ll)),1)
     at.y <- ifelse(abs(pty$y[zy]-latlist) < DY, ty$y[zy], NA)
 
-    axis(1,at=at.x, labels=format(lonlist), tick=FALSE, line=-0.5, col.axis=col)
-    axis(2,at=at.y, labels=format(latlist), tick=FALSE, line=-0.5, col.axis=col)
+    axis(1,at=at.x, labels=format(lonlist), tick=!lines, line=-0.5, col.axis=col)
+    axis(2,at=at.y, labels=format(latlist), tick=!lines, line=-0.5, col.axis=col)
 
   }
-} 
+}

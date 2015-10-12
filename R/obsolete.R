@@ -6,9 +6,9 @@ lalopoint <- function(data,lon,lat,minimise='proj',mask=NULL){
   if (minimise!='proj') return(lalopoint0(data,lon,lat,minimise,mask))
   ldata <- inherits(data,"geofield")
 
-  if (ldata | inherits(data,"FAfile")) domain <- attr(data, "domain")
-  else if (inherits(data,"FAframe")) domain <- FAdomain(data)
+  if (ldata ) domain <- attr(data, "domain")
   else if (inherits(data,"geodomain")) domain <- data
+  else if ("domain" %in% names(attributes(data))) domain <- attr(data,"domain")
   else stop("data is not a geographical object. Can not interprete.")
 
   lalodomain <- DomainPoints(domain,"lalo")

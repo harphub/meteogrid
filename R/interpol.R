@@ -108,17 +108,17 @@ point.index <- function(lon,lat,domain=.Last.domain(),clip=TRUE){
 }
 
 
-point.interp <- function(lon,lat,method="bilin",...){
-  if(substring(method,1,3)=="bil") point.bilin(lon,lat,...)
-  else if (substring(method,1,3)=="bic") point.bicubic(lon,lat,...)
-  else if (is.element(substring(method,1,1),c("n","c"))) point.closest(lon,lat,...)
+point.interp <- function(lon,lat,method="bilin",infield,mask=NULL,weights=NULL){
+  if(substring(method,1,3)=="bil") point.bilin(lon,lat,infield=infield,mask=mask,weights=weights)
+  else if (substring(method,1,3)=="bic") point.bicubic(lon,lat,infield=infield,mask=mask,weights=weights)
+  else if (is.element(substring(method,1,1),c("n","c"))) point.closest(lon,lat,infield=infield,mask=mask,weights=weights)
   else stop(paste("Unknown interpolation method",method))
 }
 
-point.interp.init <- function(lon,lat,method="bilin",...){
-  if(substring(method,1,3)=="bil") point.bilin.init(lon,lat,...)
-  else if (substring(method,1,3)=="bic") point.bicubic.init(lon,lat,...)
-  else if (is.element(substring(method,1,1),c("n","c"))) point.closest.init(lon,lat,...)
+point.interp.init <- function(lon,lat,method="bilin",domain=.Last.domain(),mask=NULL){
+  if(substring(method,1,3)=="bil") point.bilin.init(lon,lat,domain=domain,mask=mask)
+  else if (substring(method,1,3)=="bic") point.bicubic.init(lon,lat,domain=domain,mask=mask)
+  else if (is.element(substring(method,1,1),c("n","c"))) point.closest.init(lon,lat,domain=domain,mask=mask)
   else stop(paste("Unknown interpolation method",method))
 }
 
@@ -305,6 +305,7 @@ point.bicubic.init <- function(lon,lat,domain=.Last.domain(),mask=NULL){
 
 point.bicubic <- function(lon,lat,infield,weights=NULL,mask=NULL){
   if(is.null(weights)) weights <- point.bicubic.init(lon,lat,infield,mask)
+## BUG: di, dj also part of weights
 
   FFi <-  dj*(-dj^2/2+dj-1/2)*infield[cbind(weights$ffi,weights$ffj)] +
           dj^2*(dj-1)/2*infield[cbind(weights$ffi,weights$ccj)] +

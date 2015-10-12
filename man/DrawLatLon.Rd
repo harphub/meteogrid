@@ -1,7 +1,8 @@
 \name{DrawLatLon}
 \alias{DrawLatLon}
 \title{Add a grid of meridians and latitude lines.}
-\description{}
+\description{This function adds a grid of lat/lon lines to an existing plot.
+}
 \usage{
 DrawLatLon(nx=9, ny=9, labels = TRUE, pretty = TRUE, cex = 1, 
             col = "blue", lty = 2, font = 2, ...)

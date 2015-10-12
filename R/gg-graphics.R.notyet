@@ -1,0 +1,45 @@
+#--------------------------------------#
+# Part of R-package geogrid            #
+# Copyright Alex Deckmyn               #
+# Released under GPL-3 license         #
+#--------------------------------------#
+
+
+### a new version using Lattice (experimental)
+iview2 <- function(x,nlevels=15,color.palette=irainbow,
+          title=paste(attr(x,"info")$name,"\n",attr(x,"time")),
+          legend=list(space="right",width=1,labels=list(cex=0.8)),
+          breaks=seq(min(x,na.rm=TRUE),max(x,na.rm=TRUE),length=nlevels),
+          asp=1,mask=NULL,
+          drawmap=TRUE,maplwd=.5,mapcol='black',
+          map.database="world", ...){
+  require(lattice)
+  if(!is.null(mask)){
+    if(is.character(mask)) mask <- eval(parse(text=mask))
+    else if (is.expression(mask)) mask <- eval(mask)
+    x[eval(expression(mask))] <- NA
+  }
+  gdomain <- attributes(x)$domain
+  glimits <- DomainExtent(gdomain)
+  xc <- seq(glimits$x0,glimits$x1,length=glimits$nx)
+  yc <- seq(glimits$y0,glimits$y1,length=glimits$ny)
+  grid <- expand.grid(x=xc,y=yc)
+  grid$z <- as.vector(x[1:gdomain$nx,1:gdomain$ny])
+
+  if(is.null(breaks)) breaks=pretty(grid$z,nlevels)
+  .Last.domain(gdomain)
+
+
+  ppp <- levelplot(z~x*y,data=grid,col.regions=color.palette(2*nlevels),
+         main=list(label=title),
+         colorkey=legend,cuts=nlevels,
+         scales=list(draw=FALSE),xlab="",ylab="",at=breaks,asp=asp,,...)
+### problem: the levelplot is only "printed" if it is the last statement of the function...
+### and now we should add the map...
+  print(ppp)
+    if(drawmap) plot(gdomain,add=TRUE,drawmap=TRUE,
+         add.dx=TRUE,box=TRUE,maplwd=maplwd,mapcol=mapcol,
+         map.database=map.database)
+
+}
+
