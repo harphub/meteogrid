@@ -5,17 +5,18 @@
 \title{Geofield data format}
 \description{The main object class for gridded data. Consists of a matrix with a number of attributes.}
 \usage{
-as.geofield(x, grid, time = "", info = "", domain) 
+as.geofield(x=NA, domain, time = "", info = list()) 
 }
 \arguments{
-  \item{x}{a data matrix}
+  \item{x}{a data matrix. If a vecor (or single value), this is cast to a matrix with dimensions required by the domain.}
+  \item{domain}{A geodomain that should describe a domain with exactly the dimensions of x.}
+  \item{time, info}{Time and a list of information that are added as attributes to the resulting geofield object.}
 }
 \value{
 \item{is.geofield}{returns TRUE if x is a geofield object.}    
-\item{as.geofield}{returns a geofield object. If x is a matrix and a domain is specified, this is added as an attribute. If no domain is specified, the function makes an educated guess (e.g. a 300x300 matrix defaults to the Aladin-France domain). This function can be edited for local applications.
+\item{as.geofield}{returns a geofield object. If x is a matrix and a domain is specified, this is added as an attribute.}
 }
-}
-\details{The geofield format consists a data matrix and some attributes that describe the domain and the field value. An object is a data matrix with the
+\details{The geofield class consists a data matrix and some attributes that describe the domain and the field value. An object is a data matrix with the
   following attributes:
   \itemize{
   \item{domain}{The domain description. This is itself a list with elements:

@@ -3,7 +3,7 @@
 \title{Find Lat-Lon (or X-Y) coordinates of all grid points.}
 \description{This function returns the co-ordinates of all the grid
   points of a given \code{geofield} domain.}
-\usage{DomainPoints(x,type='lalo')}
+\usage{DomainPoints(geo,type='lalo')}
 \arguments{
   \item{geo}{May be either a geofield object or only its domain
     descrtiption (\code{attributes(x,"domain")}.}
