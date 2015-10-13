@@ -4,7 +4,7 @@
 \title{Plotting a map for a given domain.}
 \description{This function plots country borders for a given domain.  }
 \usage{
-\method{plot}{geodomain}=function(x=.Last.domain,add=T,
+\method{plot}{geodomain}(x=.Last.domain,add=T,
              maplwd=1,mapcol='light grey',
              add.dx=T,drawmap=!add, box=drawmap,
              map.database='worldmap',...)

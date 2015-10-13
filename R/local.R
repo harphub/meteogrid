@@ -4,16 +4,6 @@
 # Released under GPL-3 license         #
 #--------------------------------------#
 
-as.geofield <- function (x=NA, domain, time = "", info = list()) {
-  if (is.geofield(x)) return(x)
-  if (is.vector(x)) x <- array(x,dim=c(domain$nx,domain$ny))
-  attr(x,"domain") <- domain
-  attr(x,"time") <- time
-  attr(x,"info") <- info
-  class(x) <- c("geofield",class(x))
-  return(x)
-}
-
 ### some useful projections for us Belgians (official Lambert projections):
 lambel2008 <- list(proj="lcc",ellps="GRS80",
                    lat_1=49.83333333333333,lat_2=51.166666666666667,

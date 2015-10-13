@@ -120,11 +120,11 @@ limage.geofield <- function(x,smooth=FALSE,drawmap=TRUE,
                    map.database="world",...){
   gdomain <- attr(x,"domain")
   glimits <- DomainExtent(gdomain)
-  x <- seq(glimits$x0,glimits$x1,length=glimits$nx)
-  y <- seq(glimits$y0,glimits$y1,length=glimits$ny)
-  z <- field[1:gdomain$nx,1:gdomain$ny]
 
-  limage.default(x=x,y=y,z=z,smooth=smooth,...)
+  limage.default(x=seq(glimits$x0,glimits$x1,length=glimits$nx),
+                 y=seq(glimits$y0,glimits$y1,length=glimits$ny),
+                 z=x[1:gdomain$nx,1:gdomain$ny],
+                 smooth=smooth,...)
 
 ### Iw we add dx/2 at the borders, ini a LatLon this means we shift the meridian?
 ### in fact not!
@@ -295,7 +295,7 @@ vview <- function(U,V,...){
 ###############################
 
 plot.geodomain <- function(x=.Last.domain(),
-             add=!is.null(.last.domain()),
+             add=!is.null(.Last.domain()),
              maplwd=1,mapcol='black',
              add.dx=TRUE,drawmap=!add, box=drawmap,
              map.database="world",...){

@@ -35,6 +35,16 @@ print.geodomain = function(x,...){
 #  print.noquote(domain$projection)
 }
 
+as.geofield <- function (x=NA, domain, time = "", info = list()) {
+  if (is.geofield(x)) return(x)
+  if (is.vector(x)) x <- array(x,dim=c(domain$nx,domain$ny))
+  attr(x,"domain") <- domain
+  attr(x,"time") <- time
+  attr(x,"info") <- info
+  class(x) <- c("geofield",class(x))
+  return(x)
+}
+
 compare.geodomain <- function(domain1,domain2,eps=1e-10){
 ### TRUE if they are equal, FALSE if they are not
 ### this is not exhaustive, but I am in a hurry!
