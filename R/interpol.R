@@ -299,14 +299,15 @@ point.bicubic.init <- function(lon,lat,domain=.Last.domain(),mask=NULL){
   ffj[ffj<1] <- 1
   ccj[ccj>ny] <- ny
   ffj[ffj>ny] <- ny
-  return(list(ffi=ffi,fi=fi,ci=ci,cci=cci,ffj=ffj,fj=fj,cj=cj,ccj=ccj))
+  return(list(di=di,ffi=ffi,fi=fi,ci=ci,cci=cci,
+              dj=dj,ffj=ffj,fj=fj,cj=cj,ccj=ccj))
 }
 
 
 point.bicubic <- function(lon,lat,infield,weights=NULL,mask=NULL){
   if(is.null(weights)) weights <- point.bicubic.init(lon,lat,infield,mask)
-## BUG: di, dj also part of weights
-
+  di <- weights$di
+  dj <- weights$dj
   FFi <-  dj*(-dj^2/2+dj-1/2)*infield[cbind(weights$ffi,weights$ffj)] +
           dj^2*(dj-1)/2*infield[cbind(weights$ffi,weights$ccj)] +
           (1+3/2*dj^3 -5/2*dj^2) * infield[cbind(weights$ffi,weights$fj)] +

@@ -47,22 +47,16 @@ compare.geodomain <- function(domain1,domain2,eps=1e-10){
 
 #####################################
 
-DomainExtent <- function(geo,...){
-  UseMethod("DomainExtent")
-}
-
-DomainExtent.geofield <- function(geo,...){
-  DomainExtent(attr(geo,"domain"))
-}
-
-DomainExtent.geodomain <- function(geo,...){
+DomainExtent <- function(geo){
 ### We look for the extreme LatLon values of a domain domain
 ### these are useful to select the right part from the world map
 ### first find the SW and NE point, then draw a rectangular box
 ### and project it back to LatLon
 ### You could use DomainPoints in stead, but then you'd be projecting
 ### all domain points, which is a bit of an overkill...
-###  if(is.geofield(domain)) domain <- attr(domain,"domain")
+
+  if (inherits(geo,"geofield")) geo <- attr(geo,"domain")
+
   xy <- project(list(x=c(geo$SW[1], geo$NE[1]),y=c(geo$SW[2], geo$NE[2])),
                 proj=geo$projection)
   x0 <- xy$x[1]
@@ -93,16 +87,10 @@ DomainExtent.geodomain <- function(geo,...){
 }
 
 ##########################################################
-DomainPoints <- function(geo,...){
-  UseMethod("DomainPoints")
-}
-
-DomainPoints.geofield <- function(geo,...){
-  DomainPoints(attr(geo,"domain"),...)
-}
-
-DomainPoints.geodomain <- function (geo,type="lalo",...){
+DomainPoints <- function (geo,type="lalo"){
 ### return lat's and lon's of all domain points (or leave in projection if type = "xy")
+  
+  if (inherits(geo,"geofield")) geo <- attr(geo,"domain")
 
   lalo <- list(x=c(geo$SW[1],geo$NE[1]),y=c(geo$SW[2],geo$NE[2]))
   xy <- project(lalo, proj = geo$projection)

@@ -1,15 +1,14 @@
 \name{DomainExtent}
-\alias{DomainExtent.default}
-\alias{DomainExtent.geofield}
+\alias{DomainExtent}
 \title{Finding the (Lat-Lon) extent of a domain.}
 \description{
 A function that returns the basic dimensions of a domain.
 }
 \usage{
-DomainExtent(domain)
+DomainExtent(geo)
 }
 \arguments{
-  \item{domain}{May be either a geofield object or only its domain
+  \item{geo}{May be either a geofield object or only its domain
     descrtiption (\code{attributes(x,"domain")}.}
   }
   \value{

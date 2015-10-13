@@ -17,7 +17,6 @@
   \item{reflon}{The reference longitude of the projection.}
 }
 \value{A \code{geodomain} domain.}
-\seealso{}
 \examples{
 ## Not run:
 \dontrun{

@@ -27,8 +27,4 @@ as.geofield(x, grid, time = "", info = "", domain)
   \item{info}{Other information.}
   }
 }
-\examples{
-}
-\seealso{
-}
 \keyword{file}

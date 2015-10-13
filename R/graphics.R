@@ -115,10 +115,10 @@ function(U,V,x=1:dim(U)[1],y=1:dim(U)[2],thinx=10,thiny=thinx,aspect=1,
 
 limage  <- function(x,...) UseMethod("limage")
 
-limage.geofield <- function(field,smooth=FALSE,drawmap=TRUE,
+limage.geofield <- function(x,smooth=FALSE,drawmap=TRUE,
                    maplwd=.5,mapcol='black',
                    map.database="world",...){
-  gdomain <- attr(field,"domain")
+  gdomain <- attr(x,"domain")
   glimits <- DomainExtent(gdomain)
   x <- seq(glimits$x0,glimits$x1,length=glimits$nx)
   y <- seq(glimits$y0,glimits$y1,length=glimits$ny)
@@ -234,7 +234,6 @@ cview <- function(field,nlevels=15,
            title=paste(attr(x,"info")$name,"\n",attr(x,"time")),
            mask=NULL,mapcol="black",add=FALSE,drawmap=!add,maplwd=.5,
            map.database="world",...){
-  if(!inherits(field,"geofield")) field <- as.geofield(geofield)
   if(!is.null(mask)){
     if(is.character(mask)) mask <- eval(parse(text=mask))
     else if (is.expression(mask)) mask <- eval(mask)
@@ -296,7 +295,7 @@ vview <- function(U,V,...){
 ###############################
 
 plot.geodomain <- function(x=.Last.domain(),
-             add=!is.null(.last.domain),
+             add=!is.null(.last.domain()),
              maplwd=1,mapcol='black',
              add.dx=TRUE,drawmap=!add, box=drawmap,
              map.database="world",...){
@@ -427,9 +426,9 @@ obsplot <- function(x,y,z,breaks=5,pretty=TRUE,legend.pos=NULL,
   nlev <- length(levels(bins))
   cols <- col(nlev)
   xyp <- project(x,y)
-  if(!add) plot.domain(domain,add=FALSE)
+  if (!add) plot.geodomain(domain,add=FALSE)
   points(xyp,col=cols[as.integer(bins)],pch=19)
-  if(!is.null(legend.pos)) legend(x=legend.pos,legend=rev(levels(bins)),fill=rev(cols))
+  if (!is.null(legend.pos)) legend(x=legend.pos,legend=rev(levels(bins)),fill=rev(cols))
   return(invisible(list(xyp=xyp,z=z,levels=levels(bins),cols=cols)))
 
 }

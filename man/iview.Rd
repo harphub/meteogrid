@@ -33,6 +33,4 @@ vview(U,V,,...)
 }
 \seealso{\code{\link[geogrid]{limage}},\code{\link[geogrid]{limage.geofield}},\code{\link[geogrid]{vecplot}}
 }
-\examples{
-}
 \keyword{file}

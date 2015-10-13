@@ -37,7 +37,8 @@ limage.default(x=1:dim(z)[1],y=1:dim(z)[2],z,smooth=F,
 \examples{
 }
 \seealso{
-  \code{\link[base]{image}},\code{\link[base]{contour}},\code{\link[base]{filled.contour}},\code{\link{vecplot}}
+  \code{\link[graphics]{image}},\code{\link[graphics]{contour}},
+  \code{\link[graphics]{filled.contour}},\code{\link{vecplot}}
   \code{\link{geofield}}
 }
 \keyword{file}
