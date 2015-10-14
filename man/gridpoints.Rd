@@ -7,7 +7,7 @@
   stead of geographical co-ordinates.
 }
 \usage{
-gridpoints(x,y=NULL,plot=TRUE,...)
+gridpoints(x, y=NULL, ...)
 }
 \arguments{
   \item{x,y}{Grid indices (column and row) of the points to plot. Either

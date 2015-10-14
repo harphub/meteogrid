@@ -12,8 +12,8 @@ i2a <- function(x,n=ceiling(log(x)/log(10)) )
 matsum <- function(x,...) summary(as.vector(x), ...)
 
 ### click on the map and get the Lat-Lon coordinates
-laloclick <- function(n=1,type='n',...){
-  xy <- locator(n,type=type,...)
+laloclick <- function(n=1, ...){
+  xy <- locator(n, ...)
   project(xy,proj=.Last.domain()$projection,inv=TRUE)
 }
 

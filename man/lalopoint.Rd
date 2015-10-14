@@ -6,10 +6,10 @@
   found. OBSOLETE! Use \code{point.interp}.
 }
 \usage{
-lalopoint(geofield,lon,lat,minimise='lalo')
+lalopoint(geo, lon, lat, minimise='proj', mask=NULL)
 }
 \arguments{
-  \item{geofield}{A \code{geofield, FAfile, geodomain, FAframe} object.}
+  \item{geo}{A \code{geofield, FAfile, geodomain, FAframe} object.}
   \item{lon,lat}{longitude and latitude.}
   \item{minimise}{Which "distance" to minimise: can be 'lalo' (minimise lat-lon) or 'proj' (minimise geographical distance in the projection).  }
 }

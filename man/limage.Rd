@@ -1,19 +1,18 @@
 \name{limage}
 \alias{limage}
-\alias{limage.default}
 \title{Visualisation of gridded data.}
 \description{This function merges the possibilities of image and filled.contour, and adds a flexible legend. }
 \usage{
-limage.default(x=1:dim(z)[1],y=1:dim(z)[2],z,smooth=F,
+limage(x=1:dim(z)[1],y=1:dim(z)[2],z,smooth=FALSE,
            nlevels=15,levels=pretty(zlim,nlevels),
            color.palette=colorRampPalette(c("blue","white","red")),
            col=color.palette(length(levels)-1),
            legend=FALSE,legend.cex=.7,
-           legend.width=1/9,legend.sep=c(1/4,1/2),
+           legend.width=1/12,legend.sep=c(1/4,1/2),
            legend.skip=1,legend.digits=5,
            plot.title,title.adjust=TRUE,
            legend.title,
-           asp=1, ...) 
+           asp=1, useRaster=TRUE, ...) 
 }
 \arguments{
 \item{x,y}{Vectors with regularly spaced co-ordinates.}
@@ -28,11 +27,12 @@ limage.default(x=1:dim(z)[1],y=1:dim(z)[2],z,smooth=F,
 \item{legend.cex}{The scaling of the legend. Default is 0.6 .}
 \item{legend.skip}{An integer >=1. In the legend, numerical values are given explicitely only with interval legend.skip. If there are many levels, you may want to set it to a larger value.}
 \item{legend.title, plot.title}{These options define the main title and an optional title for the legend. They are not given simply as a character string, but in the form of a title command, e.g. \code{legend.title=title(main="legend")}. In this way, you can also have a subtitle etc. and chooose where to write the legend title.}
+\item{useRaster}{A very good option for 'image'. The postscript output is much better. But it may be a problem with other graphical drivers.}
 \item{...}{Other graphical parameters for e.g. image, ... }
 }
 \value{
 }
-\details{There are also shortcuts \code{iview, cview, fcview, vview} that go a little further by interpreting any matrix as a geofield (using the \code{as.geofield} function) and have different colour defaults.
+\details{There are also shortcuts \code{iview, fcview} that go a little further by adding geographical aspects like map boundaries and have different colour defaults.
 }
 \examples{
 }

@@ -119,7 +119,7 @@ DomainPoints <- function (geo,type="lalo"){
   }
 }
 
-gridpoints <- function(x,y=NULL,...){
+gridpoints <- function(x ,y=NULL, ...){
 ### indicate particular grid points on a map (like points, but with grid indices)
   AllCoords <- DomainPoints(.Last.domain(),type="xy")
   xy <- xy.coords(x,y)
@@ -146,12 +146,11 @@ domain2lalo <- function(infield){
 ### SUBGRID           ###
 #########################
 
-subgrid <- function(geo,...){
-  UseMethod("subgrid")
-}
+subgrid <- function(geo, x1, x2, y1, y2, reso=1, ...) {
+  if (inherits(geo,"geofield")) gdomain <- attr(geo,"domain")
+  else if(inherits(geo,"geodomain")) gdomain <- geo
+  else stop("subgrid requires a geofield or geodomain as input.")
 
-subgrid.geodomain <- function(geo,x1=1,x2=geo$nx,
-                             y1=1,y2=geo$ny,reso=1,...) {
   xsub <- seq(x1,x2,by=reso)
   ysub <- seq(y1,y2,by=reso)
   subnx <- length(xsub)
@@ -160,41 +159,36 @@ subgrid.geodomain <- function(geo,x1=1,x2=geo$nx,
   newlalo <- DomainPoints(geo,"lalo")
   newlalo$lon <- newlalo$lon[xsub,ysub]
   newlalo$lat <- newlalo$lat[xsub,ysub]
-  geo$SW <- c(newlalo$lon[1,1],newlalo$lat[1,1])
-  geo$NE <- c(newlalo$lon[subnx,subny],newlalo$lat[subnx,subny])
+  gdomain$SW <- c(newlalo$lon[1,1],newlalo$lat[1,1])
+  gdomain$NE <- c(newlalo$lon[subnx,subny],newlalo$lat[subnx,subny])
 
-  geo$nx <- length(xsub)
-  geo$ny <- length(ysub)
-  geo
-}
+  gdomain$nx <- length(xsub)
+  gdomain$ny <- length(ysub)
 
-subgrid.geofield <- function(geo,x1=1,x2=attr(geo,"domain")$nx,
-                             y1=1,y2=attr(geo,"domain")$ny,reso=1,...){
-  xsub <- seq(x1,x2,by=reso)
-  ysub <- seq(y1,y2,by=reso)
-
-  subfield  <- geo[xsub,ysub]
-  subdomain <- subgrid(attr(geo,"domain"),x1=x1,x2=x2,y1=y1,y2=y2,reso=reso)
-
-  as.geofield(subfield,domain=subdomain,time=attr(geo,"time"),
+  if (inherits(geo,"geofield")) {
+    as.geofield(geo[xsub,ysub], domain=gdomain,time=attr(geo,"time"),
              info=c(attr(geo,"info"),extra="SUBFIELD"))
+  } else gdomain
 }
 
 ################
 
-zoomgrid <- function(infield,x,y,zoom=50){
-  infield <- as.geofield(infield)
+zoomgrid <- function(geo, x, y, zoom=50){
+  if (inherits(geo,"geofield")) gdomain <- attr(geo,"domain")
+  else if (inherits(geo,"geodomain")) gdomain <- geo
+  else stop("subgrid requires a geofield or geodomain as input.")
+
   if (x-zoom < 1) xmin <- 1
-  else if (x+zoom > attr(infield,"domain")$nx) xmin <- attr(infield,"domain")$nx-2*zoom
+  else if (x+zoom > gdomain$nx) xmin <- gdomain$nx-2*zoom
   else xmin <- x-zoom
 
   if (y-zoom < 1) ymin <- 1
-  else if (y+zoom > attr(infield,"domain")$ny) ymin <- attr(infield,"domain")$ny-2*zoom
+  else if (y+zoom > gdomain$ny) ymin <- gdomain$ny-2*zoom
   else ymin <- y-zoom
   xmax <- xmin+2*zoom
   ymax <- ymin+2*zoom
 
-  subgrid(infield,xmin,xmax,ymin,ymax,reso=1)
+  subgrid(geo,xmin,xmax,ymin,ymax,reso=1)
 }
 
 

@@ -16,47 +16,9 @@
 
 ### plotting a (U,V) vectorfield on a domain !
 ### don't expect too much...
-"vecplot"  <- function(U,...) UseMethod("vecplot")
 
-vecplot.geofield <- function(U,V,add=FALSE,aspcorrect=TRUE,
-                     drawmap=TRUE,mapcol="black",maplwd=.5,...){
 
-  gdomain <- attr(U,"domain")
-  glimits <- DomainExtent(gdomain)
-  x <- seq(glimits$x0,glimits$x1,length=gdomain$nx)
-  y <- seq(glimits$y0,glimits$y1,length=gdomain$ny)
-
-### asp=1 assumes the co-ordinates of the map are proportional to those of the vector field
-### this is WRONG in lat-lon maps! Actually you should rescale by cos(lat)!
-
-#    if ( attr(U,"domain")$projection[1]=="proj=lalo" & (aspcorrect) ){
-
-  ppp <- gdomain$projection
-  if(is.list(ppp)) proj <- ppp$proj
-  else proj <- substr(ppp[1],5,nchar(ppp[1]))
-  if ( aspcorrect & (proj=="lalo" | proj=="rotlalo") ){
-    print("LatLon domain: rescaling U components to correct for local aspect ratio U -> U / cos(lat).")
-#      aspect=cos(glimits$clonlat[2])
-#      print(paste("Using aspect ratio at domain center:",aspect))
-    localaspect <- cos(DomainPoints(U,type="lalo")$lat * pi/180)
-### get the speed correct!
-    vecnorm <- sqrt(U^2 + V^2)
-    U <- U / localaspect
-### Correct the norm for the map factor:
-    newnorm <- sqrt(U^2 + V^2)
-    U <- U*vecnorm/newnorm
-    V <- V*vecnorm/newnorm
-  }
-
-  if (drawmap)
-    plot(gdomain,maplwd=maplwd,mapcol=mapcol,add=add,box=!add,add.dx=TRUE)
-
-  vecplot(U=U[1:gdomain$nx,1:gdomain$ny],
-          V=V[1:gdomain$nx,1:gdomain$ny],x=x,y=y,add=TRUE,...)
-
-}
-
-"vecplot.default" <-
+vecplot <-
 function(U,V,x=1:dim(U)[1],y=1:dim(U)[2],thinx=10,thiny=thinx,aspect=1,
          add=FALSE,arrowcolor=1,arrowsize=.03,maxscale=.9,lwd=.5,rescale,xlab="",ylab="",...)
 {
@@ -108,36 +70,13 @@ function(U,V,x=1:dim(U)[1],y=1:dim(U)[2],thinx=10,thiny=thinx,aspect=1,
   suppressWarnings(arrows(x,y,u,v,length=arrowsize,col=arrowcolor,lwd=lwd))
   if(!add) box()
 }
+
 ###################################
 ### IMAGE and FILLED.CONTOUR merged
-### with legend added
+### with flexible legend added
 ####################################
 
-limage  <- function(x,...) UseMethod("limage")
-
-limage.geofield <- function(x,smooth=FALSE,drawmap=TRUE,
-                   maplwd=.5,mapcol='black',
-                   map.database="world",...){
-  gdomain <- attr(x,"domain")
-  glimits <- DomainExtent(gdomain)
-
-  limage.default(x=seq(glimits$x0,glimits$x1,length=glimits$nx),
-                 y=seq(glimits$y0,glimits$y1,length=glimits$ny),
-                 z=x[1:gdomain$nx,1:gdomain$ny],
-                 smooth=smooth,...)
-
-### If we add dx/2 at the borders, in a LatLon this means we shift the meridian?
-### in fact not!
-### BUT: for a global, VERTEX CENTERED grid, we should add the last
-
-  .Last.domain(gdomain)
-  if(drawmap)
-    plot(gdomain,add=TRUE,drawmap=TRUE,
-         add.dx=!smooth,box=TRUE,maplwd=maplwd,mapcol=mapcol,
-         map.database=map.database)
-}
-
-limage.default <-
+limage <-
   function(x=1:dim(z)[1],y=1:dim(z)[2],z,smooth=FALSE,
            nlevels=15,levels=pretty(zlim,nlevels),
            color.palette=colorRampPalette(c("blue","white","red")),
@@ -224,17 +163,69 @@ limage.default <-
       plot.title
       if (legend & title.adjust) par(adj = oadj)
     }
+}
+
+############################
+### SHORTCUTS            ###
+############################
+
+iview <- function(x,nlevels=15,color.palette=irainbow,
+            title=paste(attr(x,"info")$name,"\n",attr(x,"time")),
+            legend=FALSE,mask=NULL,
+            drawmap=TRUE, maplwd=.5, mapcol='black', map.database='world', ...){
+  if(!inherits(x,"geofield")) stop("iview requires a geofield as input.")
+  if(!is.null(mask)){
+    if(is.character(mask)) mask <- eval(parse(text=mask))
+    else if (is.expression(mask)) mask <- eval(mask)
+    x[eval(expression(mask))] <- NA
   }
 
+  gdomain <- attr(x,"domain")
+  glimits <- DomainExtent(gdomain)
 
-########################
-### CONTOUR          ###
-########################
+  limage(x=seq(glimits$x0,glimits$x1,length=glimits$nx),
+         y=seq(glimits$y0,glimits$y1,length=glimits$ny),
+         z=x[1:gdomain$nx,1:gdomain$ny],
+         smooth=FALSE,
+         plot.title=title(main=title),
+         color.palette=color.palette, legend=legend, nlevels=nlevels, ...)
+  .Last.domain(gdomain)
+
+  if (drawmap)
+    plot(gdomain, add=TRUE, drawmap=TRUE,
+         add.dx=TRUE, box=TRUE, maplwd=maplwd, mapcol=mapcol,
+         map.database=map.database)
+}
+
+fcview <- function(x,nlevels=15,color.palette=irainbow,
+            title=paste(attr(x,"info")$name,"\n",attr(x,"time")),
+            legend=TRUE,mask=NULL,
+            drawmap=TRUE, maplwd=.5, mapcol='black', map.database='world', ...){
+  if(!inherits(x,"geofield")) stop("fcview requires a geofield as input.")
+  if(!is.null(mask)){
+    if(is.character(mask)) mask <- eval(parse(text=mask))
+    else if (is.expression(mask)) mask <- eval(mask)
+    x[eval(expression(mask))] <- NA
+  }
+  limage(x=seq(glimits$x0,glimits$x1,length=glimits$nx),
+         y=seq(glimits$y0,glimits$y1,length=glimits$ny),
+         z=x[1:gdomain$nx,1:gdomain$ny],
+         smooth=TRUE,
+         plot.title=title(main=title),
+         color.palette=color.palette, legend=legend, nlevels=nlevels, ...)
+  .Last.domain(gdomain)
+
+  if (drawmap)
+    plot(gdomain, add=TRUE, drawmap=TRUE,
+         add.dx=TRUE, box=TRUE, maplwd=maplwd, mapcol=mapcol,
+         map.database=map.database)
+}
 
 cview <- function(x,nlevels=15,
            title=paste(attr(x,"info")$name,"\n",attr(x,"time")),
-           mask=NULL,mapcol="black",add=FALSE,drawmap=!add,maplwd=.5,
-           map.database="world",...){
+           mask=NULL, add=FALSE,
+           drawmap=!add, maplwd=.5, mapcol="black", map.database="world", ...){
+  if(!inherits(x,"geofield")) stop("cview requires a geofield as input.")
   if(!is.null(mask)){
     if(is.character(mask)) mask <- eval(parse(text=mask))
     else if (is.expression(mask)) mask <- eval(mask)
@@ -251,39 +242,49 @@ cview <- function(x,nlevels=15,
           y=seq(glimits$y0,glimits$y1,length=gdomain$ny),
           z=x[1:gdomain$nx, 1:gdomain$ny],
           xlab = "", ylab = "", axes = FALSE, add = ifelse(drawmap,TRUE,add), ...)
+
+  if (!add) .Last.domain(gdomain)
 }
 
-############################
-### SHORTCUTS            ###
-############################
+vview <- function(U,V,add=FALSE,aspcorrect=TRUE,
+                  drawmap=TRUE, maplwd=.5, mapcol="black", map.database='world', ...){
+  if(!inherits(U,"geofield") | !inherits(V,"geofield")) stop("vview requires 2 geofields as input.")
+  gdomain <- attr(U,"domain")
+  glimits <- DomainExtent(gdomain)
+  x <- seq(glimits$x0,glimits$x1,length=gdomain$nx)
+  y <- seq(glimits$y0,glimits$y1,length=gdomain$ny)
 
-iview <- function(x,nlevels=15,color.palette=irainbow,
-          title=paste(attr(x,"info")$name,"\n",attr(x,"time")),
-          legend=FALSE,mask=NULL,...){
-  if(!is.null(mask)){
-    if(is.character(mask)) mask <- eval(parse(text=mask))
-    else if (is.expression(mask)) mask <- eval(mask)
-    x[eval(expression(mask))] <- NA
+### asp=1 assumes the co-ordinates of the map are proportional to those of the vector field
+### this is WRONG in lat-lon maps! Actually you should rescale by cos(lat)!
+
+#    if ( attr(U,"domain")$projection[1]=="proj=lalo" & (aspcorrect) ){
+
+  ppp <- gdomain$projection
+  if(is.list(ppp)) proj <- ppp$proj
+  else proj <- substr(ppp[1],5,nchar(ppp[1]))
+  if ( aspcorrect & (proj=="lalo" | proj=="rotlalo") ){
+    print("LatLon domain: rescaling U components to correct for local aspect ratio U -> U / cos(lat).")
+#      aspect=cos(glimits$clonlat[2])
+#      print(paste("Using aspect ratio at domain center:",aspect))
+    localaspect <- cos(DomainPoints(U,type="lalo")$lat * pi/180)
+### get the speed correct!
+    vecnorm <- sqrt(U^2 + V^2)
+    U <- U / localaspect
+### Correct the norm for the map factor:
+    newnorm <- sqrt(U^2 + V^2)
+    U <- U*vecnorm/newnorm
+    V <- V*vecnorm/newnorm
   }
-  limage(as.geofield(x),color.palette=color.palette,
-      plot.title=title(main=title),
-      smooth=FALSE,legend=legend,nlevels=nlevels,...)
-}
 
-fcview <- function(x,nlevels=15,color.palette=irainbow,
-           title=paste(attr(x,"info")$name,"\n",attr(x,"time")),
-           legend=TRUE,mask=NULL,...){
-  if(!is.null(mask)){
-    if(is.character(mask)) mask <- eval(parse(text=mask))
-    else if (is.expression(mask)) mask <- eval(mask)
-    x[eval(expression(mask))] <- NA
-  }
-  limage(as.geofield(x),color.palette=color.palette,plot.title=title(main=title),
-          smooth=TRUE,legend=legend,nlevels=nlevels,...)
-}
+  if (drawmap)
+    plot(gdomain, add=add, drawmap=TRUE,
+         add.dx=TRUE, box=TRUE, maplwd=maplwd, mapcol=mapcol,
+         map.database=map.database)
 
-vview <- function(U,V,...){
-  vecplot(as.geofield(U),as.geofield(V),...)
+  vecplot(U=U[1:gdomain$nx,1:gdomain$ny],
+          V=V[1:gdomain$nx,1:gdomain$ny],
+          x=x, y=y, add=add|drawmap, ...)
+
 }
 
 ###############################

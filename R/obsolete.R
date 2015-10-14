@@ -1,21 +1,21 @@
 # Some obsolete functions I would rather eliminate
 # but which are requested by people too lazy to update their code
 
-lalopoint <- function(data,lon,lat,minimise='proj',mask=NULL){
+lalopoint <- function(geo,lon,lat,minimise='proj',mask=NULL){
 ### find the closest domain point to the given co-ordinates
-  if (minimise!='proj') return(lalopoint0(data,lon,lat,minimise,mask))
-  ldata <- inherits(data,"geofield")
+  if (minimise!='proj') return(lalopoint0(geo,lon,lat,minimise,mask))
+  ldata <- inherits(geo,"geofield")
 
-  if (ldata ) domain <- attr(data, "domain")
-  else if (inherits(data,"geodomain")) domain <- data
-  else if ("domain" %in% names(attributes(data))) domain <- attr(data,"domain")
-  else stop("data is not a geographical object. Can not interprete.")
+  if (ldata ) domain <- attr(geo, "domain")
+  else if (inherits(data,"geodomain")) domain <- geo
+  else if ("domain" %in% names(attributes(geo))) domain <- attr(geo,"domain")
+  else stop("geo is not a geographical object. Can not interprete.")
 
   lalodomain <- DomainPoints(domain,"lalo")
 
   index <- point.closest.init(lon=lon,lat=lat,domain=domain,mask=mask)$index
 
-  if (ldata) dd <- data[index] else dd <- NA
+  if (ldata) dd <- geo[index] else dd <- NA
   ij <- index
   ll <- cbind(lalodomain$lon[index],lalodomain$lat[index])
 

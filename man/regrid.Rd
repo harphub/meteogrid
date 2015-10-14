@@ -5,11 +5,12 @@
 \description{Using spatial interpolation this
   function transforms a geofield to another geometry. }
 \usage{
-regrid(infield, newdomain=.Last.domain,method="bilin",mask=NULL,weights=NULL)
-regrid.init(infield, newdomain=.Last.domain,mask=NULL)
+regrid(infield, newdomain=.Last.domain(),method="bilin",mask=NULL,weights=NULL)
+regrid.init(olddomain, newdomain=.Last.domain(),method="bilin", mask=NULL)
 }
 \arguments{
   \item{infield}{A \code{geofield} object.}
+  \item{olddomain}{A \code{geodomain} object. It may aso be a \code{geofield}, but only the domain attribute is used for initialising the interpolation.}
   \item{newdomain}{A \code{geodomain} or a \code{geofield}. In the second case, the new domain attribute is taken from this second field. The default value is the \code{.Last.domain}, the last domain that has been plotted. }
 #  \item{...}{Options for \code{interp}.}
   \item{method}{The interpolation method can be bilinear ("bilin"), bicubic ("bicub") or nearest neighbour ("n" or "c").}

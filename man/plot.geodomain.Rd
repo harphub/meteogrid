@@ -4,15 +4,15 @@
 \title{Plotting a map for a given domain.}
 \description{This function plots country borders for a given domain.  }
 \usage{
-\method{plot}{geodomain}(x=.Last.domain,add=T,
-             maplwd=1,mapcol='light grey',
-             add.dx=T,drawmap=!add, box=drawmap,
-             map.database='worldmap',...)
+\method{plot}{geodomain}(x=.Last.domain(), add=!is.null(.Last.domain()),
+             maplwd=1, mapcol='black',
+             add.dx=TRUE, drawmap=!add, box=drawmap,
+             map.database='world',...)
 }
 \arguments{
 \item{domain}{A \code{geodomain} format. Default is the last domain plotted.}
 \item{mapcol}{Colour of the map contours. }
-\item{map.database}{A character string for the map database. "worldmap" and "worldcoast" are included.}
+\item{map.database}{A character string for the map database. Default is 'world' from the \code{maps} package.}
 \item{drawmap}{If TRUE, the map contours are superposed on the data plot.}
 \item{maplwd}{Line width of the map.}
 \item{add.dx}{If TRUE, the domain size is extended by half a grid interval in all directions, i.e. the co-ordinates are treated as the centers of grid boxes.}
