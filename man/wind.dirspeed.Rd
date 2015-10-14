@@ -7,8 +7,8 @@
 }
 
 \usage{
-wind.dirspeed(u, v,fieldname=c("Wind direction","Wind speed"),rad=TRUE)
-wind.uv(wspeed,wdir,fieldname=c("U","V"),rad=TRUE)
+wind.dirspeed(u, v,fieldname=c("Wind direction","Wind speed"),rad=FALSE)
+wind.uv(wspeed,wdir,fieldname=c("U","V"),rad=FALSE)
 }
 
 \arguments{
@@ -16,12 +16,12 @@ wind.uv(wspeed,wdir,fieldname=c("U","V"),rad=TRUE)
    }
 \item{wspeed,wdir}{Wind speed and direction direction (radians or degrees).}
 \item{fieldname}{A character string giving the names for the result. Only necessary if u and v are \code{geofield} objects.}
-\item{rad}{If TRUE (default), the wind direction is in radians. If FALSE, it is in (decimal) degrees.}
+\item{rad}{If TRUE, the wind direction is in radians. If FALSE, it is in (decimal) degrees.}
 }
 \value{
 A list with elements \code{wdir} and \code{wspeed}.}
 \details{
-Wind direction is given in degrees. If the wind speed is lower than 10E-6, the result is set to NA.
+Wind direction is given in degrees by default. If the wind speed is lower than 10E-6, the result is set to NA.
 }
 \seealso{
 \code{\link{geowind}}

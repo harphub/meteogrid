@@ -3,7 +3,7 @@
 \title{Projections}
 \description{A wrapper for calling proj4 code for standard projections.}
 \usage{
-project(x, y, proj=.Last.Domain()$projection, inv=FALSE)
+project(x, y, proj=.Last.domain()$projection, inv=FALSE)
 }
 \arguments{
   \item{x,y}{Longitude and latitude values (inv=FALSE) or projected values (inv=TRUE). The two vectors must have equal length. NA's are allowed. If y is missing, x is expected to be a vector of length 2 or to have two columns.}

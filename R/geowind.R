@@ -202,10 +202,10 @@ geowind.RM <- function(domain){
   rad <- pi/180.
   lalo <- DomainPoints(domain,"lalo")
 # TO DO
-  cosA[which(cosA > 1)] <- 1
-  cosA[which(cosA < -1)] <- -1
-  angle <- acos(cosA) * (2*(sinA>=0)-1)
-  list(angle=angle,mapfactor=1)
+#  cosA[which(cosA > 1)] <- 1
+#  cosA[which(cosA < -1)] <- -1
+#  angle <- acos(cosA) * (2*(sinA>=0)-1)
+#  list(angle=angle,mapfactor=1)
 }
 
 

@@ -1,9 +1,13 @@
 \name{Make.domain}
 \alias{Make.domain}
+\alias{Make.domain.RLL}
 \title{Create a geographic grid.}
-\description{This function returns a \code{geofield} domain with the
+\description{This function returns a \code{geodomain} with the
   given parameters.}
-\usage{Make.domain(projtype="lambert",clonlat,nxny,dxdy,reflat,reflon,tilt)}
+\usage{
+Make.domain(projtype="lambert",clonlat,nxny,dxdy,reflat=clonlat[2],reflon=clonlat[1],tilt)
+Make.domain.RLL(Lon1, Lat1, SPlon, SPlat, SPangle=0, nxny, dxdy)
+}
 \arguments{
   \item{projtype}{The projection type. Possible values are
     \code{"lambert"},\code{"mercator"}, \code{"omerc"} (oblique
@@ -15,8 +19,9 @@
     is (decimal) degrees.}
   \item{reflat}{The reference latitude of the projection.}
   \item{reflon}{The reference longitude of the projection.}
+  \item{tilt}{Only for rotated mercator.}
 }
-\value{A \code{geodomain} domain.}
+\value{A \code{geodomain} domain. \code{Make.RLL} is a special function for Rotated LatLon using the HIRLAM conventions, which require location of the rotated South Pole.}
 \examples{
 ## Not run:
 \dontrun{

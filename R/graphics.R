@@ -126,7 +126,7 @@ limage.geofield <- function(x,smooth=FALSE,drawmap=TRUE,
                  z=x[1:gdomain$nx,1:gdomain$ny],
                  smooth=smooth,...)
 
-### Iw we add dx/2 at the borders, ini a LatLon this means we shift the meridian?
+### If we add dx/2 at the borders, in a LatLon this means we shift the meridian?
 ### in fact not!
 ### BUT: for a global, VERTEX CENTERED grid, we should add the last
 
@@ -174,10 +174,11 @@ limage.default <-
     else {
 ### useRaster is available from v 2.13.0 on. It improves the quality enormously.
 ### but you may not want to use it if you are exporting to some other output device...
-      image(x,y,z,xlab="",ylab="",axes=FALSE,xlim=xlim,col=col,
-            breaks=levels,asp=asp,useRaster=useRaster,...)
+      image(x, y, z, xlab="", ylab="", axes=FALSE, xlim=xlim, col=col,
+            breaks=levels, asp=asp, useRaster=useRaster, ...)
     }
-
+### The legend is drawn inside the same plot area, so using the same co-ordinate space as the map.
+### That may seem weird, but it is quite effective, fast and easy to combine several plots.
     if(legend){
       legendlevels <- levels
 #      if(legendlevels[1]<min(z,na.rm=TRUE))legendlevels[1]=min(z,na.rm=TRUE)
@@ -230,28 +231,25 @@ limage.default <-
 ### CONTOUR          ###
 ########################
 
-cview <- function(field,nlevels=15,
+cview <- function(x,nlevels=15,
            title=paste(attr(x,"info")$name,"\n",attr(x,"time")),
            mask=NULL,mapcol="black",add=FALSE,drawmap=!add,maplwd=.5,
            map.database="world",...){
   if(!is.null(mask)){
     if(is.character(mask)) mask <- eval(parse(text=mask))
     else if (is.expression(mask)) mask <- eval(mask)
-    field[eval(expression(mask))] <- NA
+    x[eval(expression(mask))] <- NA
   }
 
-  gdomain <- attr(field,"domain")
+  gdomain <- attr(x,"domain")
   glimits <- DomainExtent(gdomain)
-  x <- seq(glimits$x0,glimits$x1,length=gdomain$nx)
-  y <- seq(glimits$y0,glimits$y1,length=gdomain$ny)
 
-  if(drawmap) plot(gdomain,maplwd=maplwd,mapcol=mapcol,add=add,
-                   drawmap=drawmap,map.database=map.database)
-### a future using lattice:
-#  contourplot(x, y, field[1:gdomain$nx, 1:gdomain$ny],
-#          xlab = "", ylab = "", axes = FALSE, add = ifelse(drawmap,TRUE,add), ...)
+  if (drawmap) plot(gdomain,maplwd=maplwd,mapcol=mapcol,add=add,
+                    drawmap=drawmap,map.database=map.database)
 
-  contour(x, y, field[1:gdomain$nx, 1:gdomain$ny],
+  contour(x=seq(glimits$x0,glimits$x1,length=gdomain$nx),
+          y=seq(glimits$y0,glimits$y1,length=gdomain$ny),
+          z=x[1:gdomain$nx, 1:gdomain$ny],
           xlab = "", ylab = "", axes = FALSE, add = ifelse(drawmap,TRUE,add), ...)
 }
 
@@ -261,8 +259,7 @@ cview <- function(field,nlevels=15,
 
 iview <- function(x,nlevels=15,color.palette=irainbow,
           title=paste(attr(x,"info")$name,"\n",attr(x,"time")),
-          legend=FALSE,breaks=seq(min(x,na.rm=TRUE),max(x,na.rm=TRUE),
-          length=nlevels),mask=NULL,...){
+          legend=FALSE,mask=NULL,...){
   if(!is.null(mask)){
     if(is.character(mask)) mask <- eval(parse(text=mask))
     else if (is.expression(mask)) mask <- eval(mask)
@@ -275,12 +272,11 @@ iview <- function(x,nlevels=15,color.palette=irainbow,
 
 fcview <- function(x,nlevels=15,color.palette=irainbow,
            title=paste(attr(x,"info")$name,"\n",attr(x,"time")),
-           legend=TRUE,breaks=seq(min(x,na.rm=TRUE),
-           max(x,na.rm=TRUE),length=nlevels),mask=NULL,...){
+           legend=TRUE,mask=NULL,...){
   if(!is.null(mask)){
-    if(is.character(mask)) mask=eval(parse(text=mask))
-    else if (is.expression(mask)) mask=eval(mask)
-    x[eval(expression(mask))]=NA
+    if(is.character(mask)) mask <- eval(parse(text=mask))
+    else if (is.expression(mask)) mask <- eval(mask)
+    x[eval(expression(mask))] <- NA
   }
   limage(as.geofield(x),color.palette=color.palette,plot.title=title(main=title),
           smooth=TRUE,legend=legend,nlevels=nlevels,...)
@@ -315,8 +311,9 @@ plot.geodomain <- function(x=.Last.domain(),
     ylim <- c(glimits$y0,glimits$y1)
   }
   else {
-    xlim <- c(glimits$x0-glimits$dx/2,glimits$x1+glimits$dx/2)
-    ylim <- c(glimits$y0-glimits$dy/2,glimits$y1+glimits$dy/2)
+    xlim <- c(glimits$x0,glimits$x1) + glimits$dx*c(-1,1)/2
+    ylim <- c(glimits$y0,glimits$y1) + glimits$dy*c(-1,1)/2
+
   }
 
   if(!add){
@@ -332,9 +329,6 @@ plot.geodomain <- function(x=.Last.domain(),
     xyper <- periodicity(domain)
 ### make sure that no points fall outside the map domain.
     geo <- map.restrict(geo,xlim=xlim,ylim=ylim,xperiod=xyper$xper,yperiod=xyper$yper)
-#    trellis.focus("panel",1,1)
-#    panel.lines(geo, col = mapcol, lwd = maplwd,...)
-### or use panel.lines ?
     lines(geo, col = mapcol, lwd = maplwd,...)
   }
 
@@ -344,7 +338,6 @@ plot.geodomain <- function(x=.Last.domain(),
     lines(c(xlim[1],xlim[1],xlim[2],xlim[2],xlim[1]),
           c(ylim[1],ylim[2],ylim[2],ylim[1],ylim[1]),...)
   }
-#  trellis.unfocus()
 }
 
 plot.geofield <- function(x,...){
@@ -388,8 +381,9 @@ domainbox <-
     ylim <- c(glimits$y0, glimits$y1)
   }
   else {
-    xlim <- c(glimits$x0 - glimits$dx/2, glimits$x1 + glimits$dx/2)
-    ylim <- c(glimits$y0 - glimits$dy/2, glimits$y1 + glimits$dy/2)
+    xlim <- c(glimits$x0, glimits$x1) + glimits$dx*c(-1,1)/2
+    ylim <- c(glimits$y0, glimits$y1) + glimits$dy*c(-1,1)/2
+
   }
 
 

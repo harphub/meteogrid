@@ -9,7 +9,7 @@ i2a <- function(x,n=ceiling(log(x)/log(10)) )
              formatC(x,width=n,flag=0,format="d")
 
 ### To have the summary of a matrix or array
-matsum <- function(x,...) summary(as.vector(x))
+matsum <- function(x,...) summary(as.vector(x), ...)
 
 ### click on the map and get the Lat-Lon coordinates
 laloclick <- function(n=1,type='n',...){

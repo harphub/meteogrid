@@ -253,7 +253,7 @@ Make.domain <- function(projtype="lambert",clonlat,nxny,dxdy,reflat=clonlat[2],r
   result
 }
 
-MakeRLL <- function(Lon1,Lat1,SPlon,SPlat,SPangle=0,nxny,dxdy){
+Make.domain.RLL <- function(Lon1,Lat1,SPlon,SPlat,SPangle=0,nxny,dxdy){
 ### This is for Rotated LatLon as used by Hirlam: central meridian is vertical.
 ### In the future, this should be merged with Make.domain
 ### but that is not trivial: here, the center point is of no real consequence
