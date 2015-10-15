@@ -20,6 +20,7 @@ Make.domain.RLL(Lon1, Lat1, SPlon, SPlat, SPangle=0, nxny, dxdy)
   \item{reflat}{The reference latitude of the projection.}
   \item{reflon}{The reference longitude of the projection.}
   \item{tilt}{Only for rotated mercator.}
+  \item{Lon1,Lat1,SPlon,SPlat,SPangle}{HIRLAM-style rotated LatLon grid: rotation of South Pole.}
 }
 \value{A \code{geodomain} domain. \code{Make.RLL} is a special function for Rotated LatLon using the HIRLAM conventions, which require location of the rotated South Pole.}
 \examples{

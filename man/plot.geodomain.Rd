@@ -8,29 +8,29 @@
              maplwd=1, mapcol='black',
              add.dx=TRUE, drawmap=!add, box=drawmap,
              map.database='world',...)
+\method{plot}{geofield}(x, ...)
 }
 \arguments{
-\item{domain}{A \code{geodomain} format. Default is the last domain plotted.}
+\item{x}{A an object of \code{geofield} or \code{geodomain} class. Default is the last domain plotted.}
 \item{mapcol}{Colour of the map contours. }
 \item{map.database}{A character string for the map database. Default is 'world' from the \code{maps} package.}
 \item{drawmap}{If TRUE, the map contours are superposed on the data plot.}
 \item{maplwd}{Line width of the map.}
 \item{add.dx}{If TRUE, the domain size is extended by half a grid interval in all directions, i.e. the co-ordinates are treated as the centers of grid boxes.}
 \item{box}{If TRUE, a rectangular box is drawn around the domain.}
+\item{add}{If TRUE, the plot is superposed on the current plot.}
 \item{...}{Other standard graphical parameters.}
 }
-\value{
-}
-\details{There are also shortcuts \code{iview, cview, fcview, vview} that go a little further by interpreting any matrix as a geofield (using the \code{as.geofield} function) and have different colour defaults. 
+\details{These plot methods only plot a map. For \code{geofield} objects there are various other functions that plot the actual data.
 }
 \examples{
 \dontrun{
 ttt <- FAdec(...)
 ### to plot the domain of ttt (not the data itself):
-plot(ttt,mapreso=.01)
+plot(ttt, mapreso=.01, add=FALSE)
 }
 }
 \seealso{
-  \code{\link{geofield}},\code{\link{plot}}
+  \code{\link{geofield}},\code{\link{geodomain}}, \code{\link{plot}}, \code{\link{iview}}, \code{\link{domainbox}}
 }
 \keyword{file}

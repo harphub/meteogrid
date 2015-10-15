@@ -16,7 +16,7 @@ is.geodomain <- function(x){
   inherits(x,"geodomain")
 }
 
-print.geofield <- function(x,...){
+print.geofield <- function(x, ...){
   cat(paste(attr(x,"info")$origin,":",attr(x,"info")$name),"\n")
   cat("Time:\n")
   cat(attr(x,"time"),"\n")
@@ -26,7 +26,7 @@ print.geofield <- function(x,...){
   cat(summary(as.vector(x)),"\n")
 }
 
-print.geodomain = function(x,...){
+print.geodomain = function(x, ...){
   cat(x$nx,"x",x$ny,"domain\n")
   cat("Projection summary:\n")
   cat("proj=",x$projection$proj,"\n")
@@ -45,14 +45,23 @@ as.geofield <- function (x=NA, domain, time = "", info = list()) {
   return(x)
 }
 
-compare.geodomain <- function(domain1,domain2,eps=1e-10){
+compare.geodomain <- function(x, y ,eps=1e-10){
 ### TRUE if they are equal, FALSE if they are not
 ### this is not exhaustive, but I am in a hurry!
-  (domain1$nx == domain2$nx) &
-  (domain1$ny == domain2$ny) &
-  (domain1$projection$proj == domain2$projection$proj) &
-  (max(abs(domain1$NE-domain2$NE)) < eps) &
-  (max(abs(domain1$SW-domain2$SW)) < eps)
+  OK <- (x$nx == y$nx) &  (x$ny == y$ny) &
+  (max(abs(x$NE-y$NE)) < eps) & (max(abs(x$SW-y$SW)) < eps)
+  if (!OK) return(FALSE)
+### compare the projection: may have a different order!
+  n1 <- names(x$projection)
+  n2 <- names(y$projection)
+  ndif <- setdiff(n1,n2)
+  if (length(ndif) > 0) return(FALSE)
+  for(nn in n1){
+    if (is.character(x[[nn]])) OK <- (x[[nn]]==y[[nn]])
+    else OK <- (abs(x[[nn]]-y[[nn]])<eps)
+    if (!OK) return (FALSE)
+  }
+  return(TRUE)
 }
 
 #####################################
@@ -146,7 +155,7 @@ domain2lalo <- function(infield){
 ### SUBGRID           ###
 #########################
 
-subgrid <- function(geo, x1, x2, y1, y2, reso=1, ...) {
+subgrid <- function(geo, x1, x2, y1, y2, reso=1) {
   if (inherits(geo,"geofield")) gdomain <- attr(geo,"domain")
   else if(inherits(geo,"geodomain")) gdomain <- geo
   else stop("subgrid requires a geofield or geodomain as input.")
@@ -265,90 +274,5 @@ Make.domain.RLL <- function(Lon1,Lat1,SPlon,SPlat,SPangle=0,nxny,dxdy){
   result <- list(projection=projection,nx=nxny[1],ny=nxny[2],SW=SW,NE=NE)
   class(result) <- "geodomain"
   result
-}
-
-##################################
-### Interface to PROJ4 library ###
-##################################
-
-project <- function(x,y,proj=.Last.domain()$projection,inv=FALSE) {
-
-  if (missing(y)) {
-# apparantly, is.list gives TRUE for data.frames, but lets be careful:
-    if(is.list(x) | is.data.frame(x)) {y <- x$y;x <- x$x}
-    else if(is.vector(x)) {
-      y <- x[2]
-      x <- x[1]
-    } else {
-      y <- x[,2]
-      x <- x[,1]
-    }
-  }
-
-  if (missing(proj)) {
-    if(!is.null(.Last.domain())) proj <- .Last.domain()$projection
-    else return("No projection.")
-  }
-
-  if (proj$proj == "latlong") {
-### longitude should be in the interval [-180,180[
-### unless e.g. if my global data is on a globe [0,360[
-### we assume that the meridian = MinLon + 180
-### so meridian-180 must not be transported.
-    meridian <- if(is.null(proj$lon0)) 0 else proj$lon0
-#    x <- ifelse(x < meridian-180,x+360,x)
-#    x <- ifelse(x >= meridian+180,x-360,x)
-## much faster (!):
-    x[which(x <  (meridian-180))] <- x[which(x <  (meridian-180))] + 360
-    x[which(x >= (meridian+180))] <- x[which(x >= (meridian+180))] - 360
-    
-    data.frame(x=x,y=y)
-  } else  {
-    npoints <- as.integer(length(x))
-    npar <- as.integer(length(proj))
-    par <- paste(names(proj),lapply(proj,function(x) if(is.na(x)) "" else paste("=",x,sep="")),sep="")
-### SIMPLER: par=paste(names(proj),'=',proj,sep='')
-### but this doesn't allow options without =x value
-
-    if (!inv) {
-      x <- x/180*pi
-      y <- y/180*pi
-    }
-### to fix what *I think* is a bug in PROJ4 (never had a reply)
-### If they ever solve this bug, I'll have to change this!
-    if (proj$proj=='omerc' & inv ){
-      if (proj$alpha<0 ) x <- -x
-      else y <- -y
-    }
-    result <- .C("Rproj4",x=x,y=y,npoints=npoints,par=par,
-                 npar=npar,inv=as.integer(inv),NAOK=TRUE,PACKAGE="geogrid")
-### again the same proj.4 bug:
-    if (proj$proj=='omerc' & !inv) {
-      if (proj$alpha<0 ) result$x <- -result$x
-      else result$y <- -result$y
-    }
-    if (!inv) data.frame(x=result$x,y=result$y)
-    else data.frame(x=result$x*180/pi,y=result$y*180/pi)
-  }
-
-}
-
-periodicity <- function(domain=.Last.domain()){
-### function that decides whether a domain/projection is periodic.
-### Note that e.g. in any LatLon domain, the X co-ordinate is periodic
-### even if the domain does cover the globe.
-### Only cylindrical projections are periodic, I suppose.
-### TO DO: there are more, but I am not interested in them.
-### even
-  xper <- switch(domain$projection$proj,
-            "latlong"   = 360,
-            "ob_tran"   = 2*pi, ### BUG: this could be any oblique projection
-            "merc"     = 2 * pi * domain$projection$a,
-            "omerc"    = 2 * pi * domain$projection$a,
-            "tmerc"    = 2 * pi * domain$projection$a,
-            "somerc"   = 2 * pi * domain$projection$a,
-            NA_real_)
-  yper <- NA_real_
-  list(xper=xper,yper=yper)
 }
 

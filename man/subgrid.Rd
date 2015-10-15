@@ -24,8 +24,6 @@ zoomgrid(geo, x, y, zoom = 50)
 }
 \details{\code{zoomgrid} is in fact just a wrapper for a particular type of call to \code{subgrid}, which is a bit more general. Note that there is no interpolation of any kind involved in these routines. It is simply a subselection of grid boxes. This could also be interpreted as a version of \code{regrid(...,method="closest")}.
 }
-\examples{
-}
 \seealso{\code{\link{regrid}}
 }
 \keyword{file}

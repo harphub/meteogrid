@@ -21,8 +21,7 @@ fcview(x,nlevels=15,color.palette=irainbow,
        title=paste(attr(x,"info")$name,"\n",attr(x,"time")),
        legend=TRUE,mask=NULL,
        drawmap=TRUE, maplwd=.5, mapcol='black', map.database='world', ...)
-vview(U, V, add=FALSE, aspcorrect=TRUE,:w
-
+vview(U, V, add=FALSE, aspcorrect=TRUE,
       drawmap=TRUE, maplwd=.5, mapcol="black", map.database='world', ...)
 }
 \arguments{
@@ -31,7 +30,8 @@ vview(U, V, add=FALSE, aspcorrect=TRUE,:w
 \item{nlevels}{Number of (colour) levels. You may also give the levels explicitely.}
 \item{color.palette}{Colours for the levels.}
 \item{title}{Title for the plot.}
-\item{mask}{A masking function, may be an expression or a string that will be parsed.}
+\item{add}{If TRUE, the plot is superposed on the current image,}
+\item{mask}{Defines a mask such that all grid points with mask==FALSE are set to NA. The mask may be a matrix with the same dimension as x, an expression involving x, or even a string that is parsed and which uses 'x' to represent the data.}
 \item{legend}{If TRUE, a color legend is drawn at the right of the image.}
 \item{drawmap}{If TRUE, a world map is superposed on the image.}
 \item{maplwd, mapcol}{Line width and colour for the world map.}

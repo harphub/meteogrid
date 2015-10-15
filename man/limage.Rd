@@ -21,6 +21,8 @@ limage(x=1:dim(z)[1],y=1:dim(z)[2],z,smooth=FALSE,
 \item{asp}{Aspect ratio of the axes. Default is 1. In the case of a
   Lat-Lon map, a warning is issued, because Lat and Lon degrees are not
   proportional in general.}
+\item{nlevels, levels}{Number of levels (assumed to be evenly distributed) or explicit break points.}
+\item{color.palette}{A color palette to use for the plot.}
 \item{legend}{If TRUE, a legend is added to the right of the image. Note that in this case the title of the image will be off-centre if \code{title.adjust}=FALSE.} 
 \item{legend.width}{The fraction of the plot region occupied by the xlegend. Must be smaller than 1.}
 \item{legend.sep}{A vector with 2 elements that describes which fraction of the legend width is occupied by the color strip itself. Default is c(1/4,2/4).}
@@ -28,13 +30,10 @@ limage(x=1:dim(z)[1],y=1:dim(z)[2],z,smooth=FALSE,
 \item{legend.skip}{An integer >=1. In the legend, numerical values are given explicitely only with interval legend.skip. If there are many levels, you may want to set it to a larger value.}
 \item{legend.title, plot.title}{These options define the main title and an optional title for the legend. They are not given simply as a character string, but in the form of a title command, e.g. \code{legend.title=title(main="legend")}. In this way, you can also have a subtitle etc. and chooose where to write the legend title.}
 \item{useRaster}{A very good option for 'image'. The postscript output is much better. But it may be a problem with other graphical drivers.}
+\item{col, legend.digits, title.adjust}{fine-tuning the plot.}
 \item{...}{Other graphical parameters for e.g. image, ... }
 }
-\value{
-}
 \details{There are also shortcuts \code{iview, fcview} that go a little further by adding geographical aspects like map boundaries and have different colour defaults.
-}
-\examples{
 }
 \seealso{
   \code{\link[graphics]{image}},\code{\link[graphics]{contour}},

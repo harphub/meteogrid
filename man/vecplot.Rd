@@ -2,7 +2,7 @@
 \alias{vecplot}
 \title{Plotting vector fields}
 \description{A simple and primitive function for plotting vector
-  fields. Use it for }
+  fields.}
 \usage{
 vecplot(U,V,x=1:dim(U)[1],y=1:dim(U)[2],thinx=10,thiny=thinx,
                 aspect, add=FALSE, arrowcolor=1, arrowsize=.03,
@@ -19,8 +19,10 @@ vecplot(U,V,x=1:dim(U)[1],y=1:dim(U)[2],thinx=10,thiny=thinx,
   \item{arrowsize}{Size of the actual "arrow" part of the vector.}
   \item{maxscale}{Scaling of vector lengths vs grid interval.}
   \item{add}{If TRUE, the vectors are added to an existing plot. }
+  \item{lwd}{line width}
   \item{rescale}{Another way to rescale the vector lengths. }
-  \item{lwd}{linewidth}
+  \item{xlab,ylab}{Labels for the X and Y axes. Default is to leave them clear.}
+  \item{...}{Options for 'arrows'.}
  }
  \value{ A vector field plot.
 }
@@ -30,9 +32,5 @@ vecplot(U,V,x=1:dim(U)[1],y=1:dim(U)[2],thinx=10,thiny=thinx,
    co-ordinate system of the underlying plot. In other words: the X and
    Y axis should have the same units. If this is not the case, the
    aspect ratio (asp) should be adapted manually.
-}
-\examples{
-}
-\seealso{
 }
 \keyword{file}

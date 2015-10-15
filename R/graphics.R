@@ -177,9 +177,8 @@ iview <- function(x,nlevels=15,color.palette=irainbow,
   if(!is.null(mask)){
     if(is.character(mask)) mask <- eval(parse(text=mask))
     else if (is.expression(mask)) mask <- eval(mask)
-    x[eval(expression(mask))] <- NA
+    x[!eval(expression(mask))] <- NA
   }
-
   gdomain <- attr(x,"domain")
   glimits <- DomainExtent(gdomain)
 
@@ -205,8 +204,11 @@ fcview <- function(x,nlevels=15,color.palette=irainbow,
   if(!is.null(mask)){
     if(is.character(mask)) mask <- eval(parse(text=mask))
     else if (is.expression(mask)) mask <- eval(mask)
-    x[eval(expression(mask))] <- NA
+    x[!eval(expression(mask))] <- NA
   }
+  gdomain <- attr(x,"domain")
+  glimits <- DomainExtent(gdomain)
+
   limage(x=seq(glimits$x0,glimits$x1,length=glimits$nx),
          y=seq(glimits$y0,glimits$y1,length=glimits$ny),
          z=x[1:gdomain$nx,1:gdomain$ny],
@@ -229,7 +231,7 @@ cview <- function(x,nlevels=15,
   if(!is.null(mask)){
     if(is.character(mask)) mask <- eval(parse(text=mask))
     else if (is.expression(mask)) mask <- eval(mask)
-    x[eval(expression(mask))] <- NA
+    x[!eval(expression(mask))] <- NA
   }
 
   gdomain <- attr(x,"domain")
@@ -344,37 +346,17 @@ plot.geodomain <- function(x=.Last.domain(),
 plot.geofield <- function(x,...){
   plot(attr(x,"domain"),...)
 }
-######################
-### periodicity depends on the projection
-### may be 360, 2*pi or ~40.000 in Mercator !
-### a non-periodic LatLon domain still has a "period" of 360 !
-
-map.restrict1 <- function(bx,by,xlim,xperiod=NA_real_,xfrac=0.5){
-  lx <- length(bx)
-
-  result <- .C("maprestrict1",bx=as.double(bx),by=as.double(by),lx=as.integer(lx),
-            x0=as.double(xlim[1]),x1=as.double(xlim[2]),
-            nx=double(2*lx),ny=double(2*lx),
-            newlen=integer(1),xperiod=as.numeric(xperiod),
-            xfrac=as.numeric(xfrac),NAOK=TRUE)
-  data.frame(x=result$nx[2:result$newlen],y=result$ny[2:result$newlen])
-}
-
-map.restrict <- function(bxy,xlim,ylim,xperiod=NA_real_,xfrac=0.5,yperiod=NA_real_,yfrac=NA_real_){
-  bxy <- map.restrict1(bxy$x,bxy$y,xlim,xperiod,xfrac)
-  byx <- map.restrict1(bxy$y, bxy$x, ylim, yperiod, yfrac)
-  list(x = byx$y, y = byx$x)
-}
 
 #####################################################
 ### plotting the frame of a domain on another map ###
 #####################################################
 
 domainbox <-
-  function (domain , add.dx = TRUE, ...)
+  function (geo , add.dx = TRUE, ...)
 {
   if (is.null(.Last.domain())) stop("There is no image yet to add the domainbox to.")
-  if (is.geofield(domain)) domain <- attributes(domain)$domain
+  if (is.geofield(geo)) domain <- attributes(geo)$domain
+  else domain <- geo
 
   glimits <- DomainExtent(domain)
   if (!add.dx) {
@@ -422,7 +404,7 @@ obsplot <- function(x,y,z,breaks=5,pretty=TRUE,legend.pos=NULL,
   cols <- col(nlev)
   xyp <- project(x,y)
   if (!add) plot.geodomain(domain,add=FALSE)
-  points(xyp,col=cols[as.integer(bins)],pch=19)
+  points(xyp,col=cols[as.integer(bins)],pch=19,...)
   if (!is.null(legend.pos)) legend(x=legend.pos,legend=rev(levels(bins)),fill=rev(cols))
   return(invisible(list(xyp=xyp,z=z,levels=levels(bins),cols=cols)))
 

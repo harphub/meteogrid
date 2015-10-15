@@ -5,8 +5,8 @@
 #--------------------------------------#
 
 ### format an integer as a string (simplified)
-i2a <- function(x,n=ceiling(log(x)/log(10)) )
-             formatC(x,width=n,flag=0,format="d")
+i2a <- function(i,n=ceiling(log(i)/log(10)) )
+             formatC(i,width=n,flag=0,format="d")
 
 ### To have the summary of a matrix or array
 matsum <- function(x,...) summary(as.vector(x), ...)

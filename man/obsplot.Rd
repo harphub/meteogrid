@@ -17,6 +17,7 @@ obsplot(x,y,z,breaks=5,pretty=TRUE,legend.pos=NULL,
   \item{add}{If TRUE, add to current plot. Otherwise, start a new plot with dmain.}
   \item{domain}{By default, the last plotted domain.}
   \item{col}{Colour scheme.}
+  \item{...}{Options for 'points'.}
 }
 \value{
   A set of points is plotted at the x,y points, with colour taken from the chosen colour scheme. The return value (hidden) is a list wit hthe projected x,y points, the data values, levels and colours.

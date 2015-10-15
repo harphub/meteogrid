@@ -5,11 +5,12 @@
 Function for adding the outline of a geographical domain to the current plot.
 }
 \usage{
-domainbox(domain, add.dx=TRUE, ...)
+domainbox(geo, add.dx=TRUE, ...)
 }
 \arguments{
-\item{domain}{A \code{geodomain} object. Or any object (like \code{geofield}) thta has a domain attribute.}
+\item{geo}{A \code{geodomain} object. Or any object (like \code{geofield}) thta has a domain attribute.}
 \item{add.dx}{Usually, the co-ordinates are the centers of the grid boxes, not the corners. So we add dx/2 to get the full plot window. Set to FALSE in other cases.}
+\item{...}{Graphical parameters.}
 }
 \value{
 The outline of the domain is added to a pre-existing plot. If the projection is the same, this may be a square, but otherwise it is re-projected.

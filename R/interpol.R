@@ -169,8 +169,6 @@ point.bilin.init <- function(lon,lat,domain=.Last.domain(),mask=NULL){
 
 point.bilin <- function(lon,lat,infield,mask=NULL,weights=NULL)
 {
-### How to introduce a L/S mask? Must adapt weights.
-### That would be slow in R.
   if(is.null(weights)){
 ## for gaussian grid: call different init function!
     if(inherits(infield,"gaussian")) weights <- point.bilin.gaussian.init(lon,lat,infield)
@@ -243,7 +241,7 @@ point.closest <- function(lon,lat,infield,mask=NULL,weights=NULL){
 ### bicubic spline interpolation
 
 ### 1D routine (for testing purposes)
-interp.cubic.1D <- function(i,data){
+.interp.cubic.1D <- function(i,data){
   nx <- length(data)
   fi <- floor(i)
   di <- i - fi
