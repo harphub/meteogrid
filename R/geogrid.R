@@ -74,7 +74,7 @@ DomainExtent <- function(geo){
 ### You could use DomainPoints in stead, but then you'd be projecting
 ### all domain points, which is a bit of an overkill...
 
-  if (inherits(geo,"geofield")) geo <- attr(geo,"domain")
+  if (!inherits(geo,"geodomain")) geo <- attr(geo,"domain")
 
   xy <- project(list(x=c(geo$SW[1], geo$NE[1]),y=c(geo$SW[2], geo$NE[2])),
                 proj=geo$projection)
@@ -109,7 +109,7 @@ DomainExtent <- function(geo){
 DomainPoints <- function (geo,type="lalo"){
 ### return lat's and lon's of all domain points (or leave in projection if type = "xy")
   
-  if (inherits(geo,"geofield")) geo <- attr(geo,"domain")
+  if (!inherits(geo,"geodomain")) geo <- attr(geo,"domain")
 
   lalo <- list(x=c(geo$SW[1],geo$NE[1]),y=c(geo$SW[2],geo$NE[2]))
   xy <- project(lalo, proj = geo$projection)
@@ -141,14 +141,6 @@ gridpoints <- function(x ,y=NULL, ...){
 
 ###########################################################
 
-domain2lalo <- function(infield){
-### return the LatLon co-ordinates of all grid points (X,Y), and the field values as Z
-### all in 1 data frame (I think that's better than a list)
-### You could use this for spatial interpolations...
-  lalodomain <- DomainPoints(infield,"lalo")
-  data.frame(x=as.vector(lalodomain$lon),y=as.vector(lalodomain$lat),
-             z = as.vector(infield[1:attr(infield,'domain')$nx, 1:attr(infield,'domain')$ny]))
-}
 
 
 #########################

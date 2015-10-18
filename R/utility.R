@@ -8,6 +8,10 @@
 i2a <- function(i,n=ceiling(log(i)/log(10)) )
              formatC(i,width=n,flag=0,format="d")
 
+### trim whitespace from character strings
+trim <- function(x) sub(pattern=" +$",replacement="",
+                        x=sub(pattern="| +",replacement="",x))
+
 ### To have the summary of a matrix or array
 matsum <- function(x,...) summary(as.vector(x), ...)
 
@@ -20,7 +24,7 @@ laloclick <- function(n=1, ...){
 ### For fun: plot an orthographic projection of the world.
 orthoglobe <- function(reflon=0,reflat=90,map.database="world",...){
   projection <- list(proj="ortho",lon_0=reflon,lat_0=reflat,a=6371229.0,es=0.0)
-  boundaries <- map(database=map.database)
+  boundaries <- map(database=map.database, plot=FALSE)
   geo <- project(boundaries, proj =projection,inv = FALSE)
 
   plot(geo,type="l",xlab="",ylab="",axes=FALSE,...)
@@ -52,7 +56,8 @@ as.ocean <- function(data, XYLIM=par('usr')){
   data.frame(x=c(bx,px),y=c(by,py))
 }
 
-box.resize <- function(glim){
+### I can't even remember what this function is meant to do...
+.box.resize <- function(glim){
   usr <- par('usr')
   plt <- par('plt')
 #  fin=par('fin')
@@ -84,7 +89,7 @@ seamask <- function(col='white',add.dx=TRUE,
   boundaries <- map(database=map.database,xlim=glimits$lonlim,ylim=glimits$latlim,plot=FALSE,interior=FALSE,fill=TRUE)
   borders <- map.restrict(project(boundaries,proj=domain$projection),xlim=glimits$lonlim,ylim=glimits$latlim)
 ##  antipolygon(borders)
-  box.resize(LXY)
+  .box.resize(LXY)
   invborders <- as.ocean(borders)
   polygon(invborders,col=col,border=FALSE)
   par(opar)

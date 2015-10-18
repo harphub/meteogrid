@@ -1,8 +1,7 @@
 \name{seamask}
 \alias{seamask}
 \alias{as.ocean}
-\alias{antipolygon}
-\title{Mask out the ocean etc.}
+\title{Mask out the ocean}
 \description{
 These routines allow you to plot the ocean as a polygon (in stead of the land surface), which may be useful for some graphs. This routine is rather experimental and will not work under many circumstances! }
 
@@ -15,7 +14,7 @@ as.ocean(data,XYLIM=par('usr'))
 \item{add.dx}{Does the existing figure have 'dx' added? True for 'iview', FALSE for fcview.}
 \item{data}{as.ocean expects a list or data frame with components 'x' and 'y'. These must consist of closed polygons, separated by NA.}
 \item{XYLIM}{The limits opf the 'ocean'. This may usually be set to the size of the current plot region (even if the map polygons go beyond).}
-\item{drawmap,map.databse}{Decide whetehr a map is drawn explicitely and which map data base is used.}
+\item{drawmap, map.database}{Decide whetehr a map is drawn explicitely and which map data base is used.}
 }
 \value{
   An image (\code{iview}), contour (\code{cview}) or filled contour

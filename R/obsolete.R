@@ -3,7 +3,7 @@
 
 lalopoint <- function(geo,lon,lat,minimise='proj',mask=NULL){
 ### find the closest domain point to the given co-ordinates
-  if (minimise!='proj') return(lalopoint0(geo,lon,lat,minimise,mask))
+  if (minimise!='proj') return(.lalopoint0(geo,lon,lat,minimise,mask))
   ldata <- inherits(geo,"geofield")
 
   if (ldata ) domain <- attr(geo, "domain")
@@ -24,7 +24,7 @@ lalopoint <- function(geo,lon,lat,minimise='proj',mask=NULL){
 
 ### The old legacy code for LatLon minimisation
 ### Only on life support because colleagues yell at me.
-lalopoint0 <- function(data,lon,lat,minimise='lalo',mask=NULL){
+.lalopoint0 <- function(data,lon,lat,minimise='lalo',mask=NULL){
 ### find the closest domain point to the given co-ordinates
 ### by minimising distance in either LonLat or projected co-ordinates
 ### This is in fact not exactly the same as minimising geographical distance!
@@ -75,3 +75,16 @@ lalopoint0 <- function(data,lon,lat,minimise='lalo',mask=NULL){
   else
     list(data = NA, lonlat = c(il, jl), index = c(i,j) )
 }
+
+
+##########################
+
+.domain2lalo <- function(infield){
+### return the LatLon co-ordinates of all grid points (X,Y), and the field values as Z
+### all in 1 data frame (I think that's better than a list)
+### You could use this for spatial interpolations...
+  lalodomain <- DomainPoints(infield,"lalo")
+  data.frame(x=as.vector(lalodomain$lon),y=as.vector(lalodomain$lat),
+             z = as.vector(infield[1:attr(infield,'domain')$nx, 1:attr(infield,'domain')$ny]))
+}
+

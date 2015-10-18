@@ -171,8 +171,9 @@ point.bilin <- function(lon,lat,infield,mask=NULL,weights=NULL)
 {
   if(is.null(weights)){
 ## for gaussian grid: call different init function!
-    if(inherits(infield,"gaussian")) weights <- point.bilin.gaussian.init(lon,lat,infield)
-    else weights <- point.bilin.init(lon,lat,infield,mask=mask)
+#    if(inherits(infield,"gaussian")) weights <- point.bilin.gaussian.init(lon,lat,infield)
+#    else
+    weights <- point.bilin.init(lon,lat,infield,mask=mask)
   }
 
   return(weights$w00*infield[weights$F00] + weights$w01*infield[weights$F01] +
