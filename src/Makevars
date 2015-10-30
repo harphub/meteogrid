@@ -1,9 +1,2 @@
-#ifeq ($(PROJDIR),)
-#  PKG_LIBS = -lproj
-#else
-#  PKG_CPPFLAGS = -I$(PROJDIR)/include
-#  PKG_LIBS = -L$(PROJDIR)/lib -lproj
-#endif
-
 PKG_CFLAGS = `pkg-config --silence-errors --cflags proj`
 PKG_LIBS =$(PKG_CFLAGS) -lproj

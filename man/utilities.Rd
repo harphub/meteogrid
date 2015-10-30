@@ -1,5 +1,6 @@
 \name{utilities}
 \alias{i2a}
+\alias{trim}
 \alias{trimk}
 \alias{matsum}
 \title{Simple utilities}
@@ -14,7 +15,7 @@ matsum(x, ...)
   \item{x}{A matrix or array (matsum), a character string(trim)}
   \item{...}{More arguments to \code{summary}}.
 }
-\value{\summarize{
+\value{\itemize{
 \item{\code{i2a} formats i as an integer of the required length with zero padding.}
 \item{\code{matsum} is simply the summary of all the matrix columns at once, i.e. x treated as a vector.}
 \item{\code{trim} strip sleading and trailing blanks from a string.}
