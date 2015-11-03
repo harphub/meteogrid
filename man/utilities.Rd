@@ -1,5 +1,6 @@
 \name{utilities}
 \alias{i2a}
+\alias{trim}
 \alias{trimk}
 \alias{matsum}
 \title{Simple utilities}
