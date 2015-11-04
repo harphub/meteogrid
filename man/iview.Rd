@@ -51,9 +51,9 @@ vview(U, V, add=FALSE, aspcorrect=TRUE,
 \examples{
 \dontrun{
 # mask as a string that is evaluated literally (x is the input data)
-iview(x=field,mask="x>0") # all positive values are left blank
+iview(x=field,mask="x>0") # all negative values are left blank
 # mask as an expression, assuming lsm is a known geofield
-iview(x=field,mask= !lsm) # all points where lsm=FALSE are left blank
+iview(x=field,mask=lsm) # all points where lsm=FALSE are left blank
 }}
 \seealso{\code{\link{limage}},\code{\link{vecplot}},\code{\link[graphics]{contour}}
 }
