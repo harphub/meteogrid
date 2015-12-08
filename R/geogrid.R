@@ -254,8 +254,8 @@ Make.domain.RLL <- function(Lon1,Lat1,SPlon,SPlat,SPangle=0,nxny,dxdy){
 ### but that is not trivial: here, the center point is of no real consequence
 ### and you have to define the rotated South Pole
   if(length(dxdy)==1) dxdy <- rep(dxdy,2)
-  Lon2 <- Lon1+nxny[1]*dxdy[1]
-  Lat2 <- Lat1+nxny[2]*dxdy[2]
+  Lon2 <- Lon1+(nxny[1]-1)*dxdy[1]
+  Lat2 <- Lat1+(nxny[2]-1)*dxdy[2]
   projection <- list(proj="ob_tran","o_proj"="latlong",
                        "o_lat_p"=-SPlat,"o_lon_p"=0,"lon_0"=SPlon)
 
