@@ -7,7 +7,7 @@ lalopoint <- function(geo,lon,lat,minimise='proj',mask=NULL){
   ldata <- inherits(geo,"geofield")
 
   if (ldata ) domain <- attr(geo, "domain")
-  else if (inherits(data,"geodomain")) domain <- geo
+  else if (inherits(geo,"geodomain")) domain <- geo
   else if ("domain" %in% names(attributes(geo))) domain <- attr(geo,"domain")
   else stop("geo is not a geographical object. Can not interprete.")
 
