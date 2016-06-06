@@ -8,12 +8,16 @@
 ### Interface to PROJ4 library ###
 ##################################
 
-project <- function(x,y,proj=.Last.domain()$projection,inv=FALSE)
+project <- function(x, y, proj=.Last.domain()$projection, inv=FALSE)
 {
   if (missing(y)) {
-# apparantly, is.list gives TRUE for data.frames, but lets be careful:
-    if(is.list(x) | is.data.frame(x)) {y <- x$y;x <- x$x}
-    else if(is.vector(x)) {
+# apparantly, is.list gives TRUE for data.frames, but let's be careful:
+    if (is.list(x) | is.data.frame(x)) {
+      y <- x$y
+      x <- x$x
+      if (is.null(x) | is.null(y)) stop("No valid x and y co-ordinates found.")
+    }
+    else if (is.vector(x)) {
       y <- x[2]
       x <- x[1]
     } else {
@@ -21,7 +25,8 @@ project <- function(x,y,proj=.Last.domain()$projection,inv=FALSE)
       x <- x[,1]
     }
   }
-
+  if (length(x) != length(y)) stop("x and y don't have the same length.")
+  if (!is.numeric(x) | !is.numeric(y)) stop("Co-ordinates must be numeric values.")
   if (missing(proj)) {
     if(!is.null(.Last.domain())) proj <- .Last.domain()$projection
     else return("No projection.")
