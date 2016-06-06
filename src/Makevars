@@ -1,2 +1,0 @@
-PKG_CFLAGS = `pkg-config --silence-errors --cflags proj`
-PKG_LIBS =$(PKG_CFLAGS) -lproj
