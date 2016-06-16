@@ -13,8 +13,12 @@ project <- function(x, y, proj=.Last.domain()$projection, inv=FALSE)
   if (missing(y)) {
 # apparantly, is.list gives TRUE for data.frames, but let's be careful:
     if (is.list(x) | is.data.frame(x)) {
-      y <- x$y
-      x <- x$x
+#      y <- x$y
+#      x <- x$x
+### we assume the first two list elements are longitude & latitude
+### whatever the actual names (could be x/y, lon/lat, Lon/Lat...)
+      y <- as.numeric(x[[2]])
+      x <- as.numeric(x[[1]])
       if (is.null(x) | is.null(y)) stop("No valid x and y co-ordinates found.")
     }
     else if (is.vector(x)) {
@@ -48,7 +52,7 @@ project <- function(x, y, proj=.Last.domain()$projection, inv=FALSE)
   } else  {
     npoints <- as.integer(length(x))
     npar <- as.integer(length(proj))
-    par <- paste(names(proj),lapply(proj,function(x) if(is.na(x)) "" else paste("=",x,sep="")),sep="")
+    par <- proj4.list2str(proj)
 ### SIMPLER: par=paste(names(proj),'=',proj,sep='')
 ### but this doesn't allow options without =x value
 
@@ -120,7 +124,20 @@ periodicity <- function(domain=.Last.domain()){
   list(xper=xper,yper=yper)
 }
 
+### turn a proj4 string into a list
+proj4.str2list <- function(pp){
+  tryNum <- function(x) if ( !is.na(suppressWarnings(as.numeric(x))) ) as.numeric(x) else x
+  p1 <- strsplit(pp,"+",fixed=TRUE)[[1]][-1]  # vector of "x=n" strings
+        p2 <- gsub(' ','',p1) # remove all blanks
+  p3 <- strsplit(p2,"=")
+        parNam <- vapply(p3, function(x) x[1], FUN.VALUE="a")
+        prj <- lapply(p3, function(x) if (length(x)==1) NA else tryNum(x[2]))
+        names(prj) <- parNam
+  prj
+}
 
-
+proj4.list2str <- function(pp){
+  paste(names(pp), lapply(pp, function(x) if (is.na(x)) "" else paste("=",x,sep="")),sep="")
+}
 
 
