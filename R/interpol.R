@@ -39,6 +39,21 @@ regrid <- function (infield, newdomain=.Last.domain(),method="bilin",
                              as.vector(newpoints$lat),
                              infield,weights=weights)
   }
+### Mean of all cells
+### take the mean of the values of all grid points that fall in the new grid boxes
+  else if (method=="mean") {
+    result <- upscale.regrid.mean(as.vector(newpoints$lon),
+                             as.vector(newpoints$lat),
+                             infield)
+  }
+### Mean of all cells
+  else if (method=="median") {
+    result <- upscale.regrid.median(as.vector(newpoints$lon),
+                             as.vector(newpoints$lat),
+                             infield)
+  }
+
+
   else stop(paste("Unknown interpolation method",method))
 
   return(
