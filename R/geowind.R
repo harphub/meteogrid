@@ -76,20 +76,25 @@ geowind <- function(u,v,inv=FALSE,init=NULL){
   }
   U <- ( cos(ww$angle) * u + sin(ww$angle) * v) * ww$mapfactor
   V <- (-sin(ww$angle) * u + cos(ww$angle) * v) * ww$mapfactor
-  if(!inv){
-    attributes(U)$info$name <- paste(attributes(u)$info$name,
-            "Rotated to N/E axes.")
-    attributes(V)$info$name <- paste(attributes(v)$info$name,
-            "Rotated to N/E axes.")
+  if (inherits(u, "geofield")) {
+    attributes(U) <- attributes(u)
+    attributes(V) <- attributes(v)
+    if (!inv){
+      attributes(U)$info$name <- paste(attributes(u)$info$name,
+              "Rotated to N/E axes.")
+      attributes(V)$info$name <- paste(attributes(v)$info$name,
+              "Rotated to N/E axes.")
+    }
+    else {
+      attributes(U)$info$name <- paste(attributes(u)$info$name,
+              "grid axes.")
+      attributes(V)$info$name <- paste(attributes(v)$info$name,
+              "grid axes.")
+    }
+    list(U=U,V=V)
+  } else {
+   if (is.vector(u)) data.frame(U=U,V=V)
   }
-  else {
-    attributes(U)$info$name <- paste(attributes(u)$info$name,
-            "grid axes.")
-    attributes(V)$info$name <- paste(attributes(v)$info$name,
-            "grid axes.")
-  }
-  if(is.vector(u)) data.frame(U=U,V=V)
-  else list(U=U,V=V)
 }
 
 geowind.init <- function(domain){
@@ -139,7 +144,9 @@ geowind.init <- function(domain){
   angle <- acos(cosA) * (2*(sinA>=0)-1)
 # the result has domain ]-PI,+PI[
 ## ATTENTION: angle calculated here is for the wind origin
-  list(angle = angle,mapfactor = 1)
+  mapfactor <- 1
+  list(angle = as.geofield(angle,domain=domain,info=list(name="Model wind angle correction")),
+       mapfactor = as.geofield(mapfactor,domain=domain,info=list(name="Model wind mapfactor")))
 }
 
 ## Lambert conformal conical
@@ -157,7 +164,8 @@ geowind.init <- function(domain){
 
   mapfactor <- (refcos/cos(lalo$lat * rad))^(1 - refcos) * ((1 + refsin)/(1 + sin(lalo$lat * rad)))^refsin
   angle <- refsin * (lalo$lon - reflon) * rad
-  list(angle=angle,mapfactor=mapfactor)
+  list(angle = as.geofield(angle,domain=domain,info=list(name="Model wind angle correction")),
+       mapfactor = as.geofield(mapfactor,domain=domain,info=list(name="Model wind mapfactor")))
 }
 
 .geowind.LCC2 <- function(domain){
@@ -177,7 +185,10 @@ geowind.init <- function(domain){
   diff[diff < -180] <- diff[diff < -180]+360
   diff[diff >  180] <- diff[diff >  180]-360
   alpha <- diff * n * rad * sign(lat1)
-  list(angle= -alpha,mapfactor=1)
+  angle <- -alpha
+  mapfactor <- 1
+  list(angle = as.geofield(angle,domain=domain,info=list(name="Model wind angle correction")),
+       mapfactor = as.geofield(mapfactor,domain=domain,info=list(name="Model wind mapfactor")))
 }
 
 ## Polar Stereographic
@@ -193,7 +204,9 @@ geowind.init <- function(domain){
   diff[diff > 180] <- diff[diff > 180]-360
 
   angle <- diff * rad * (2*(reflat>=0)-1)
-  list(angle=angle,mapfactor=1)
+  mapfactor <- 1
+  list(angle = as.geofield(angle,domain=domain,info=list(name="Model wind angle correction")),
+       mapfactor = as.geofield(mapfactor,domain=domain,info=list(name="Model wind mapfactor")))
 }
 
 ## Rotated Mercator
@@ -207,5 +220,6 @@ geowind.init <- function(domain){
 #  angle <- acos(cosA) * (2*(sinA>=0)-1)
 #  list(angle=angle,mapfactor=1)
 }
+
 
 
