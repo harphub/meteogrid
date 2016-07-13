@@ -63,14 +63,14 @@ wind.uv <- function(wspeed,wdir,fieldname=c("U","V"),rad=FALSE){
 ### 2. main routine for rotation grid axes <-> N/E axes ###
 ###########################################################
 
-geowind <- function(u,v,inv=FALSE,init=NULL){
-  if( is.null(init) ){
+geowind <- function(u, v, inv=FALSE, init=NULL){
+  if (is.null(init)) {
     domain <- attributes(u)$domain
     ww <- geowind.init(domain)
   }
   else ww <- init
 
-  if(inv) {
+  if (inv) {
     ww$angle <- -ww$angle
     ww$mapfactor <- 1/ww$mapfactor
   }
@@ -91,9 +91,10 @@ geowind <- function(u,v,inv=FALSE,init=NULL){
       attributes(V)$info$name <- paste(attributes(v)$info$name,
               "grid axes.")
     }
-    list(U=U,V=V)
+    list(U=U, V=V)
   } else {
-   if (is.vector(u)) data.frame(U=U,V=V)
+   if (is.vector(u)) data.frame(U=U, V=V)
+   else list(U=U, V=V)
   }
 }
 
