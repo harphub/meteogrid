@@ -80,7 +80,7 @@ limage <-
   function(x=1:dim(z)[1],y=1:dim(z)[2],z,smooth=FALSE,
            nlevels=15,levels=pretty(zlim,nlevels),
            color.palette=colorRampPalette(c("blue","white","red")),
-           col=color.palette(length(levels)-1),
+           col=color.palette(length(levels)-1), na.col=par("bg"),
            legend=FALSE,legend.cex=.7,
            legend.width=1/12,legend.sep=c(1/4,1/2),
            legend.skip=1,legend.digits=5,
@@ -113,8 +113,15 @@ limage <-
     else {
 ### useRaster is available from v 2.13.0 on. It improves the quality enormously.
 ### but you may not want to use it if you are exporting to some other output device...
-      image(x, y, z, xlab="", ylab="", axes=FALSE, xlim=xlim, col=col,
-            breaks=levels, asp=asp, useRaster=useRaster, ...)
+      if (na.col != par("bg") && any(is.na(z)) ) {
+        image(x, y, is.na(z), xlab="", ylab="", axes=FALSE, xlim=xlim, col=c(par("bg"),na.col),
+              asp=asp, useRaster=useRaster, ...)
+        image(x, y, z, xlab="", ylab="", axes=FALSE, xlim=xlim, col=col,
+              breaks=levels, asp=asp, useRaster=useRaster, add=TRUE, ...)
+      } else {
+        image(x, y, z, xlab="", ylab="", axes=FALSE, xlim=xlim, col=col,
+              breaks=levels, asp=asp, useRaster=useRaster, ...)
+      }
     }
 ### The legend is drawn inside the same plot area, so using the same co-ordinate space as the map.
 ### That may seem weird, but it is quite effective, fast and easy to combine several plots.
@@ -171,7 +178,7 @@ limage <-
 
 iview <- function(x,nlevels=15,color.palette=irainbow,
             title=paste(attr(x,"info")$name,"\n",attr(x,"time")),
-            legend=FALSE,mask=NULL,
+            legend=FALSE,mask=NULL,na.col=par("bg"),
             drawmap=TRUE, maplwd=.5, mapcol='black', map.database='world', ...){
   if(!inherits(x,"geofield")) stop("iview requires a geofield as input.")
   if(!is.null(mask)){
@@ -187,7 +194,7 @@ iview <- function(x,nlevels=15,color.palette=irainbow,
          z=x[1:gdomain$nx,1:gdomain$ny],
          smooth=FALSE,
          plot.title=title(main=title),
-         color.palette=color.palette, legend=legend, nlevels=nlevels, ...)
+         color.palette=color.palette, legend=legend, nlevels=nlevels, na.col=na.col, ...)
   .Last.domain(gdomain)
 
   if (drawmap)

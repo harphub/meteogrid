@@ -6,7 +6,7 @@
 limage(x=1:dim(z)[1],y=1:dim(z)[2],z,smooth=FALSE,
            nlevels=15,levels=pretty(zlim,nlevels),
            color.palette=colorRampPalette(c("blue","white","red")),
-           col=color.palette(length(levels)-1),
+           col=color.palette(length(levels)-1), na.col=par("bg"),
            legend=FALSE,legend.cex=.7,
            legend.width=1/12,legend.sep=c(1/4,1/2),
            legend.skip=1,legend.digits=5,
@@ -23,6 +23,7 @@ limage(x=1:dim(z)[1],y=1:dim(z)[2],z,smooth=FALSE,
   proportional in general.}
 \item{nlevels, levels}{Number of levels (assumed to be evenly distributed) or explicit break points.}
 \item{color.palette}{A color palette to use for the plot.}
+\item{na.col}{Only used if \code{smooth=FALSE}. Sets an alternative colour for all NA values.}
 \item{legend}{If TRUE, a legend is added to the right of the image. Note that in this case the title of the image will be off-centre if \code{title.adjust}=FALSE.} 
 \item{legend.width}{The fraction of the plot region occupied by the xlegend. Must be smaller than 1.}
 \item{legend.sep}{A vector with 2 elements that describes which fraction of the legend width is occupied by the color strip itself. Default is c(1/4,2/4).}
