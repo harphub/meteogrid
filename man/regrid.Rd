@@ -13,7 +13,7 @@ regrid.init(olddomain, newdomain=.Last.domain(),method="bilin", mask=NULL)
   \item{olddomain}{A \code{geodomain} object. It may aso be a \code{geofield}, but only the domain attribute is used for initialising the interpolation.}
   \item{newdomain}{A \code{geodomain} or a \code{geofield}. In the second case, the new domain attribute is taken from this second field. The default value is the \code{.Last.domain}, the last domain that has been plotted. }
 #  \item{...}{Options for \code{interp}.}
-  \item{method}{The interpolation method can be bilinear ("bilin"), bicubic ("bicub") or nearest neighbour ("n" or "c").}
+  \item{method}{The interpolation method can be bilinear ("bilin"), bicubic ("bicub") or nearest neighbour ("n" or "c"). Additionally, there are two methods for upscaling: "mean" and "median"}
   \item{mask}{A mask (grid of same dimension as infield), points with value 0 (or FALSE) are not used for interpolation.}
   \item{weights}{Output from \code{regrid.init}. By providing such weights, you can save a lot of time if many fields need interpolation.}
  }

@@ -58,7 +58,13 @@ upscale_factor <- function(infield, factor=c(2,2), method="mean", ... ){
 
 ### take the mean value of all cells whose center falls in the new grid cell
 upscale_regrid <- function(infield, newdomain, method="mean", ... ) {
-  if (is.geofield(newdomain)) newdomain <- attributes(newdomain)$domain
+  if (!is.geodomain(newdomain)) {
+    if (inherits(newdomain, "geofield") || inherits(newdomain, "FAfile")) newdomain <- attributes(newdomain)$domain
+    else if (inherits(newdomain, "FAframe")) newdomain <- FAdomain(newdomain)
+    else stop("new domain not well defined!")
+  }
+
+
   gnx <- newdomain$nx
   gny <- newdomain$ny
   if (method != "mean") stop("Only mean is available for upscale regridding.") 

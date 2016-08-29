@@ -11,84 +11,46 @@
 ### regrid is a function for interpolating data from one grid to another
 ### It simply considers the new grid as a set of lat/lon points for interpolation.
 ### "init" allows you to return the indices and weights for the interpolation
-### "weights" : if this is profided, they are not re-calculated.
+### "weights" : if this is provided, they are not re-calculated.
 ### "mask" lets you define a land/sea mask. only points where mask==TRUE are used.
 ###             (FIX ME: not implemented for bicubic)
-regrid <- function (infield, newdomain=.Last.domain(),method="bilin",
-                    mask=NULL,weights=NULL)
+regrid <- function (infield, newdomain=.Last.domain(), method="bilin",
+                    mask=NULL, weights=NULL)
 {
-### regridding: bilinear, bi-cubic or nearest neighbour
-  if(is.geofield(newdomain)) newdomain <- attr(newdomain,"domain") # not strictly necessary...
-  newpoints <- DomainPoints(newdomain)
-
-### Bilinear interpolation
-  if(substring(method,1,3)=="bil"){
-    result <- point.bilin(as.vector(newpoints$lon),
-                             as.vector(newpoints$lat),
-                             infield,mask=mask,weights=weights)
-  }
-### Nearest neighbour interpolation
-  else if (is.element(substring(method,1,1),c("n","c"))){
-    result <- point.closest(as.vector(newpoints$lon),
-                             as.vector(newpoints$lat),
-                             infield,mask=mask,weights=weights)
-  }
-### Bicubic spline
-  else if (substring(method,1,3)=="bic"){
-    result <- point.bicubic(as.vector(newpoints$lon),
-                             as.vector(newpoints$lat),
-                             infield,weights=weights)
-  }
-### Mean of all cells
-### take the mean of the values of all grid points that fall in the new grid boxes
-  else if (method=="mean") {
-    result <- upscale.regrid.mean(as.vector(newpoints$lon),
-                             as.vector(newpoints$lat),
-                             infield)
-  }
-### Mean of all cells
-  else if (method=="median") {
-    result <- upscale.regrid.median(as.vector(newpoints$lon),
-                             as.vector(newpoints$lat),
-                             infield)
+### regridding: bilinear, bi-cubic or nearest neighbour, and now also upscaling by mean
+  if (!is.geodomain(newdomain)) {
+    if (inherits(newdomain, "geofield") || inherits(newdomain, "FAfile")) newdomain <- attributes(newdomain)$domain
+    else if (inherits(newdomain, "FAframe")) newdomain <- FAdomain(newdomain)
+    else stop("new domain not well defined!")
   }
 
+  if (method %in% c("mean", "median")) {
+    return(upscale_regrid(infield, newdomain, method))
+  } else {
+# speed-up: if you already have the weights, no need to calculate lon/lat of the new domain!
+    if (is.null(weights)) weights <- regrid.init(olddomain=infield, newdomain=newdomain, method=method, mask=mask)
 
-  else stop(paste("Unknown interpolation method",method))
+    result <- point.interp(lon=NULL, lat=NULL, infield, mask=mask, weights=weights)
 
-  return(
-    as.geofield(matrix(result, ncol = newdomain$ny, nrow = newdomain$nx),
+    return(as.geofield(matrix(result, ncol = newdomain$ny, nrow = newdomain$nx),
                 domain = newdomain,time=attr(infield,"time"),
                 info=attr(infield,"info")))
+  }
 }
 
-regrid.init <- function (olddomain, newdomain=.Last.domain(),method="bilin",mask=NULL)
+regrid.init <- function (olddomain, newdomain=.Last.domain(), method="bilin", mask=NULL)
 {
 ### regridding: either bilinear of nearest neighbour
 ### olddomain and newdomain may be geofields 
+  if (!is.geodomain(newdomain)) {
+    if (inherits(newdomain, "geofield") || inherits(newdomain, "FAfile")) newdomain <- attributes(newdomain)$domain
+    else if (inherits(newdomain, "FAframe")) newdomain <- FAdomain(newdomain)
+    else stop("new domain not well defined!")
+  }
   newpoints <- DomainPoints(newdomain)
-
-### Bilinear interpolation
-  if(substring(method,1,3)=="bil"){
-    result <- point.bilin.init(as.vector(newpoints$lon),
-                               as.vector(newpoints$lat),
-                               olddomain,mask=mask)
-  }
-### Nearest neighbour interpolation (accept "n" for nearest or "c" for closest)
-  else if (is.element(substring(method,1,1),c("n","c"))){
-    result <- point.closest.init(as.vector(newpoints$lon),
-                                 as.vector(newpoints$lat),
-                                 olddomain,mask=mask)
-  }
-### Bicubic spline
-  else if (substring(method,1,3)=="bic"){
-    result <- point.bicubic.init(as.vector(newpoints$lon),
-                                 as.vector(newpoints$lat),
-                                 olddomain)
-  }
-  else stop(paste("Unknown interpolation method",method))
-
-  return(result)
+  
+  point.interp.init(lon=as.vector(newpoints$lon), as.vector(newpoints$lat),
+                    method=method, domain=olddomain, mask=mask)
 }
 
 
@@ -140,7 +102,7 @@ point.interp.init <- function(lon,lat,method="bilin",domain=.Last.domain(),mask=
 
 ### bilinear interpolation
 point.bilin.init <- function(lon,lat,domain=.Last.domain(),mask=NULL){
-  if(is.geofield(domain)) domain <- attributes(domain)$domain
+  if (is.geofield(domain)) domain <- attributes(domain)$domain
   nx <- domain$nx
   ny <- domain$ny
   index <- point.index(lon,lat,domain)
@@ -161,7 +123,7 @@ point.bilin.init <- function(lon,lat,domain=.Last.domain(),mask=NULL){
   w10 <- di*(1-dj)
   w11 <- di*dj
 
-  if(!is.null(mask)){
+  if (!is.null(mask)) {
 # if some of the 4 points are masked: set weight to zero, and renormalise the remaining weights to sum=1
     w00[!mask[cbind(fi,fj)]] <- 0
     w01[!mask[cbind(fi,cj)]] <- 0
