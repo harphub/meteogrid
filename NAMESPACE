@@ -1,4 +1,11 @@
 importFrom("maps","map")
+importFrom("grDevices", "colorRampPalette", "colors", "grey", "rgb",
+           "xy.coords")
+importFrom("graphics", ".filled.contour", "arrows", "axis", "box",
+           "contour", "image", "legend", "lines", "locator", "par",
+           "plot", "plot.new", "plot.window", "points", "polygon",
+           "rect", "text")
+
 # Export all names
 exportPattern(".")
 # exportPattern("^Domain")

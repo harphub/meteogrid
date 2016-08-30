@@ -24,7 +24,7 @@ upscale <- function(infield, factor=NULL, newdomain=NULL, method="mean", ... ) {
   result
 }
 
-upscale_factor <- function(infield, factor=c(2,2), method="mean", ... ){
+upscale_factor <- function(infield, factor, method="mean", ... ){
   if (length(factor)==1) factor <- c(factor, factor)
   ### define the upscaled domain 
   olddomain <- attr(infield, "domain")
@@ -60,7 +60,7 @@ upscale_factor <- function(infield, factor=c(2,2), method="mean", ... ){
 upscale_regrid <- function(infield, newdomain, method="mean", ... ) {
   if (!is.geodomain(newdomain)) {
     if (inherits(newdomain, "geofield") || inherits(newdomain, "FAfile")) newdomain <- attributes(newdomain)$domain
-    else if (inherits(newdomain, "FAframe")) newdomain <- FAdomain(newdomain)
+    else if (inherits(newdomain, "FAframe") && requireNamespace("Rfa")) newdomain <- Rfa::FAdomain(newdomain)
     else stop("new domain not well defined!")
   }
 

@@ -6,12 +6,12 @@
 \description{Change resolution/geometry of a geofield by averaging. }
 \usage{
 upscale(infield, factor=NULL, newdomain=NULL, method="mean", ...)
-upscale_factor(infield, factor=NULL, method="mean", ...)
-upscale_regrid(infield, newdomain=NULL, method="mean", ...)
+upscale_factor(infield, factor, method="mean", ...)
+upscale_regrid(infield, newdomain, method="mean", ...)
 }
 \arguments{
   \item{infield}{A \code{geofield} object.}
-  \item{factor}{If given, the new grid is simply a coarser version of the original. \code{factor} should be a vector of 2 integers (if it is scalar, the value is repeated). It edscribes how many gridd cells in the X and Y direction are aggregated to one new grid box.}
+  \item{factor}{If given, the new grid is simply a coarser version of the original. \code{factor} should be a vector of 2 integers (if it is scalar, the value is repeated). It dscribes how many gridd cells in the X and Y direction are aggregated to one new grid box.}
   \item{newdomain}{A \code{geodomain} or a \code{geofield}. In the second case, the new domain attribute is taken from this second field.}
   \item{method}{The aggregation method. When aggregating by a given factor, this could be a function like \code{mean}, \code{median}, \code{max}...}
   \item{...}{Options for the method (e.g. \code{na.rm=TRUE}).}

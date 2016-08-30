@@ -20,7 +20,7 @@ regrid <- function (infield, newdomain=.Last.domain(), method="bilin",
 ### regridding: bilinear, bi-cubic or nearest neighbour, and now also upscaling by mean
   if (!is.geodomain(newdomain)) {
     if (inherits(newdomain, "geofield") || inherits(newdomain, "FAfile")) newdomain <- attributes(newdomain)$domain
-    else if (inherits(newdomain, "FAframe")) newdomain <- FAdomain(newdomain)
+    else if (inherits(newdomain, "FAframe") && requireNamespace("Rfa")) newdomain <- Rfa::FAdomain(newdomain)
     else stop("new domain not well defined!")
   }
 
@@ -30,7 +30,7 @@ regrid <- function (infield, newdomain=.Last.domain(), method="bilin",
 # speed-up: if you already have the weights, no need to calculate lon/lat of the new domain!
     if (is.null(weights)) weights <- regrid.init(olddomain=infield, newdomain=newdomain, method=method, mask=mask)
 
-    result <- point.interp(lon=NULL, lat=NULL, infield, mask=mask, weights=weights)
+    result <- point.interp(lon=NULL, lat=NULL, infield=infield, method=method, mask=mask, weights=weights)
 
     return(as.geofield(matrix(result, ncol = newdomain$ny, nrow = newdomain$nx),
                 domain = newdomain,time=attr(infield,"time"),
@@ -44,7 +44,7 @@ regrid.init <- function (olddomain, newdomain=.Last.domain(), method="bilin", ma
 ### olddomain and newdomain may be geofields 
   if (!is.geodomain(newdomain)) {
     if (inherits(newdomain, "geofield") || inherits(newdomain, "FAfile")) newdomain <- attributes(newdomain)$domain
-    else if (inherits(newdomain, "FAframe")) newdomain <- FAdomain(newdomain)
+    else if (inherits(newdomain, "FAframe") && requireNamespace("Rfa")) newdomain <- Rfa::FAdomain(newdomain)
     else stop("new domain not well defined!")
   }
   newpoints <- DomainPoints(newdomain)
@@ -85,23 +85,27 @@ point.index <- function(lon,lat,domain=.Last.domain(),clip=TRUE){
 }
 
 
-point.interp <- function(lon,lat,method="bilin",infield,mask=NULL,weights=NULL){
-  if(substring(method,1,3)=="bil") point.bilin(lon,lat,infield=infield,mask=mask,weights=weights)
-  else if (substring(method,1,3)=="bic") point.bicubic(lon,lat,infield=infield,mask=mask,weights=weights)
-  else if (is.element(substring(method,1,1),c("n","c"))) point.closest(lon,lat,infield=infield,mask=mask,weights=weights)
+point.interp <- function(lon, lat, infield, method="bilin", mask=NULL, weights=NULL){
+  if(substring(method,1,3)=="bil") point.bilin(lon, lat,
+                                               infield=infield, mask=mask, weights=weights)
+  else if (substring(method,1,3)=="bic") point.bicubic(lon, lat, 
+                                                       infield=infield, mask=mask, weights=weights)
+  else if (is.element(substring(method,1,1),c("n","c"))) point.closest(lon, lat, 
+                                                       infield=infield, mask=mask, weights=weights)
   else stop(paste("Unknown interpolation method",method))
 }
 
-point.interp.init <- function(lon,lat,method="bilin",domain=.Last.domain(),mask=NULL){
-  if(substring(method,1,3)=="bil") point.bilin.init(lon,lat,domain=domain,mask=mask)
-  else if (substring(method,1,3)=="bic") point.bicubic.init(lon,lat,domain=domain,mask=mask)
-  else if (is.element(substring(method,1,1),c("n","c"))) point.closest.init(lon,lat,domain=domain,mask=mask)
+point.interp.init <- function(lon, lat, domain=.Last.domain(), method="bilin", mask=NULL){
+  if(substring(method,1,3)=="bil") point.bilin.init(lon, lat, domain=domain, mask=mask)
+  else if (substring(method,1,3)=="bic") point.bicubic.init(lon, lat, domain=domain, mask=mask)
+  else if (is.element(substring(method,1,1),c("n","c"))) point.closest.init(
+                                                               lon, lat, domain=domain, mask=mask)
   else stop(paste("Unknown interpolation method",method))
 }
 
 
 ### bilinear interpolation
-point.bilin.init <- function(lon,lat,domain=.Last.domain(),mask=NULL){
+point.bilin.init <- function(lon, lat, domain=.Last.domain(), mask=NULL){
   if (is.geofield(domain)) domain <- attributes(domain)$domain
   nx <- domain$nx
   ny <- domain$ny
@@ -144,7 +148,7 @@ point.bilin.init <- function(lon,lat,domain=.Last.domain(),mask=NULL){
 }
 
 
-point.bilin <- function(lon,lat,infield,mask=NULL,weights=NULL)
+point.bilin <- function(lon, lat, infield, mask=NULL, weights=NULL)
 {
   if(is.null(weights)){
 ## for gaussian grid: call different init function!
@@ -158,7 +162,7 @@ point.bilin <- function(lon,lat,infield,mask=NULL,weights=NULL)
 }
 
 ### nearest neighbour (closest point)
-point.closest.init <- function(lon,lat,domain=.Last.domain(),mask=NULL) {
+point.closest.init <- function(lon, lat, domain=.Last.domain(), mask=NULL) {
   if(is.geofield(domain)) domain <- attributes(domain)$domain
   nx <- domain$nx
   ny <- domain$ny
