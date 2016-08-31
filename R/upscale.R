@@ -14,12 +14,12 @@
 
 ### upscaling can be either by a factor (e.g. by two grid cells)
 ### or to a new grid
-upscale <- function(infield, factor=NULL, newdomain=NULL, method="mean", ... ) {
+upscale <- function(infield, factor=NULL, newdomain=NULL, method="mean", weights=0, ... ) {
   if (!is.null(factor)) {
     result <- upscale_factor(infield, factor=factor, method=method, ... )
   }
   else {
-    result <- upscale_regrid(infield, newdomain=newdomain, method=method, ... )
+    result <- upscale_regrid(infield, newdomain=newdomain, method=method, weights=weights, ... )
   }
   result
 }
@@ -57,31 +57,63 @@ upscale_factor <- function(infield, factor, method="mean", ... ){
 }
 
 ### take the mean value of all cells whose center falls in the new grid cell
-upscale_regrid <- function(infield, newdomain, method="mean", ... ) {
+upscale_regrid <- function(infield, newdomain, method="mean", weights=NULL, ... ) {
   if (!is.geodomain(newdomain)) {
     if (inherits(newdomain, "geofield") || inherits(newdomain, "FAfile")) newdomain <- attributes(newdomain)$domain
     else if (inherits(newdomain, "FAframe") && requireNamespace("Rfa")) newdomain <- Rfa::FAdomain(newdomain)
     else stop("new domain not well defined!")
   }
-
-
   gnx <- newdomain$nx
   gny <- newdomain$ny
-  if (method != "mean") stop("Only mean is available for upscale regridding.") 
-  opoints <- DomainPoints(infield)
+  if (is.null(weights)) {
+    if (method != "mean") stop("Only mean is available for upscale regridding.") 
+    opoints <- DomainPoints(infield)
 #  opoints$value <- as.vector(infield)
-  pind <- point.index(as.vector(opoints$lon), as.vector(opoints$lat), domain=newdomain, clip=FALSE)
+    pind <- point.index(as.vector(opoints$lon), as.vector(opoints$lat), domain=newdomain, clip=FALSE)
 
-  result <- .C("upscale_by_mean", npoints=as.integer(prod(dim(infield))),
-                                  px=as.integer(round(pind$i)), py=as.integer(round(pind$j)), 
-                                  pval=as.numeric(infield),
-                                  gnx=as.integer(gnx), gny=as.integer(gny),
-                                  gcount=integer(gnx * gny),
-                                  gval=numeric(gnx * gny),
-                                  NAOK=TRUE, PACKAGE="geogrid")
+    result <- .C("upscale_by_mean", npoints=as.integer(prod(dim(infield))),
+                                    px=as.integer(round(pind$i)), py=as.integer(round(pind$j)), 
+                                    pval=as.numeric(infield),
+                                    gnx=as.integer(gnx), gny=as.integer(gny),
+                                    gcount=integer(gnx * gny),
+                                    gval=numeric(gnx * gny),
+                                    NAOK=TRUE, PACKAGE="geogrid")
 # we don't really use gcount, but it is available if necessary...
-  as.geofield(matrix(result$gval, nrow=gnx), domain=newdomain)
+  } else {
+  result <- .C("upscale_by_mean_from_init", npoints=as.integer(weights$npoints),
+                                    pval=as.numeric(infield),
+                                    gnx=as.integer(weights$gnx), gny=as.integer(weights$gny),
+                                    gcount=as.integer(weights$gcount),
+                                    gcell=as.integer(weights$gcell),
+                                    gval=numeric(gnx * gny),
+                                    NAOK=TRUE, PACKAGE="geogrid")
+  }
+  as.geofield(result$gval, domain=newdomain)
 }
 
+upscale_regrid_init <- function(olddomain, newdomain) {
+    if (!is.geodomain(olddomain)) {
+    if (inherits(olddomain, "geofield") || inherits(olddomain, "FAfile")) olddomain <- attributes(olddomain)$domain
+    else if (inherits(olddomain, "FAframe") && requireNamespace("Rfa")) olddomain <- Rfa::FAdomain(olddomain)
+    else stop("old domain not well defined!")
+  }
+  if (!is.geodomain(newdomain)) {
+    if (inherits(newdomain, "geofield") || inherits(newdomain, "FAfile")) newdomain <- attributes(newdomain)$domain
+    else if (inherits(newdomain, "FAframe") && requireNamespace("Rfa")) newdomain <- Rfa::FAdomain(newdomain)
+    else stop("new domain not well defined!")
+  }
+  gnx <- newdomain$nx
+  gny <- newdomain$ny
+  opoints <- DomainPoints(olddomain)
+  npoints <- olddomain$nx * olddomain$ny
+  pind <- point.index(as.vector(opoints$lon), as.vector(opoints$lat), domain=newdomain, clip=FALSE)
 
+  result <- .C("upscale_by_mean_init", npoints=as.integer(npoints),
+                                    px=as.integer(round(pind$i)), py=as.integer(round(pind$j)), 
+                                    gnx=as.integer(gnx), gny=as.integer(gny),
+                                    gcount=integer(gnx * gny),
+                                    gcell=integer(npoints),
+                                    NAOK=TRUE, PACKAGE="geogrid")
+  result[c("npoints","gnx","gny","gcount","gcell")]
+}
 
