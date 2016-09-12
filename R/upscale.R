@@ -80,7 +80,7 @@ upscale_regrid <- function(infield, newdomain, method="mean", weights=NULL, ... 
                                     NAOK=TRUE, PACKAGE="geogrid")
 # we don't really use gcount, but it is available if necessary...
   } else {
-  result <- .C("upscale_by_mean_from_init", npoints=as.integer(weights$npoints),
+    result <- .C("upscale_by_mean_from_init", npoints=as.integer(weights$npoints),
                                     pval=as.numeric(infield),
                                     gnx=as.integer(weights$gnx), gny=as.integer(weights$gny),
                                     gcount=as.integer(weights$gcount),

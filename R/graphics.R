@@ -421,12 +421,18 @@ obsplot <- function(x,y,z,breaks=5,pretty=TRUE,legend.pos=NULL,
 ### Add latitude/longitude grid to a map ###
 ############################################
 
-DrawLatLon <- function(nx=9, ny=9, lines=TRUE, labels=TRUE, cex=1, col="grey",
+### MANY ISSUES
+### TO DO:
+### font, lab.x, lab.y not used
+### the labels are not ideally placed... fixed with e.g. mgp[3]=.5
+### fcview: dx/2 difference in limits
+DrawLatLon <- function(nx=9, ny=9, lines=TRUE, labels=TRUE, lab.size=1, col="grey",
                        lty=2, font=2, lab.x=2, lab.y=2, ...) {
   if (is.null(.Last.domain())) stop("Sorry, no projection has been defined.")
   glimits <- DomainExtent(.Last.domain())
   xlim <- glimits$lonlim
   ylim <- glimits$latlim
+
 
   x <- pretty(xlim, nx)
   lonlist <- x[which(x >= xlim[1] & x <= xlim[2])]
@@ -446,7 +452,7 @@ DrawLatLon <- function(nx=9, ny=9, lines=TRUE, labels=TRUE, cex=1, col="grey",
   }
   if (labels) {
 # labels on axis
-    NN <- 100
+    NN <- 1000
     DX <- diff(glimits$lonlim)/(NN-1) # not a good criterion...
     DY <- diff(glimits$latlim)/(NN-1)
 
@@ -460,8 +466,10 @@ DrawLatLon <- function(nx=9, ny=9, lines=TRUE, labels=TRUE, cex=1, col="grey",
     zy <- vapply(latlist,function(ll) which.min(abs(pty$y-ll)),1)
     at.y <- ifelse(abs(pty$y[zy]-latlist) < DY, ty$y[zy], NA)
 
-    axis(1,at=at.x, labels=format(lonlist), tick=!lines, line=-0.5, col.axis=col)
-    axis(2,at=at.y, labels=format(latlist), tick=!lines, line=-0.5, col.axis=col)
+#BUG: for fcview, don't subtract glimits$dx/2
+
+    axis(1,at=at.x, labels=format(lonlist), tick=!lines, col.axis=col, cex.axis=lab.size, pos=glimits$y0-glimits$dy/2, ...)
+    axis(2,at=at.y, labels=format(latlist), tick=!lines, col.axis=col, cex.axis=lab.size, pos=glimits$x0-glimits$dx/2, ...)
 
   }
 }
