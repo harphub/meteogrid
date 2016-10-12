@@ -19,8 +19,7 @@ regrid <- function (infield, newdomain=.Last.domain(), method="bilin",
 {
 ### regridding: bilinear, bi-cubic or nearest neighbour, and now also upscaling by mean
   if (!is.geodomain(newdomain)) {
-    if (inherits(newdomain, "geofield") || inherits(newdomain, "FAfile")) newdomain <- attributes(newdomain)$domain
-    else if (inherits(newdomain, "FAframe") && requireNamespace("Rfa")) newdomain <- Rfa::FAdomain(newdomain)
+    if ("domain" %in% names(attributes(newdomain))) newdomain <- attributes(newdomain)$domain
     else stop("new domain not well defined!")
   }
 
@@ -43,8 +42,7 @@ regrid.init <- function (olddomain, newdomain=.Last.domain(), method="bilin", ma
 ### regridding: either bilinear of nearest neighbour
 ### olddomain and newdomain may be geofields 
   if (!is.geodomain(newdomain)) {
-    if (inherits(newdomain, "geofield") || inherits(newdomain, "FAfile")) newdomain <- attributes(newdomain)$domain
-    else if (inherits(newdomain, "FAframe") && requireNamespace("Rfa")) newdomain <- Rfa::FAdomain(newdomain)
+    if ("domain" %in% names(attributes(newdomain))) newdomain <- attributes(newdomain)$domain
     else stop("new domain not well defined!")
   }
   newpoints <- DomainPoints(newdomain)

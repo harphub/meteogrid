@@ -30,9 +30,6 @@ lalopoint <- function(geo,lon,lat,minimise='proj',mask=NULL){
 ### This is in fact not exactly the same as minimising geographical distance!
   ldata <- inherits(data,"geofield")
   if (ldata) domain <- attr(data, "domain")
-## remove Rfa dependency...
-#  else if (inherits(data,"FAfile")) domain <- attr(data, "domain")
-#  else if (inherits(data,"FAframe")) domain <- FAdomain(data)
   else if (inherits(data,"geodomain")) domain <- data
   else stop("data is not a geographical object. Can not interprete.")
   if(length(lon)!=1) stop("lalopoint0 only accepts a single point.")

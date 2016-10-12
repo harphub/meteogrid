@@ -41,7 +41,7 @@ project <- function(x, y, proj=.Last.domain()$projection, inv=FALSE)
 ### unless e.g. if my global data is on a globe [0,360[
 ### we assume that the meridian = MinLon + 180
 ### so meridian-180 must not be transported.
-    meridian <- if(is.null(proj$lon0)) 0 else proj$lon0
+    meridian <- if (is.null(proj$lon0)) 0 else proj$lon0
 #    x <- ifelse(x < meridian-180,x+360,x)
 #    x <- ifelse(x >= meridian+180,x-360,x)
 ## much faster (!):
@@ -128,11 +128,11 @@ periodicity <- function(domain=.Last.domain()){
 proj4.str2list <- function(pp){
   tryNum <- function(x) if ( !is.na(suppressWarnings(as.numeric(x))) ) as.numeric(x) else x
   p1 <- strsplit(pp,"+",fixed=TRUE)[[1]][-1]  # vector of "x=n" strings
-        p2 <- gsub(' ','',p1) # remove all blanks
+  p2 <- gsub(' ','',p1) # remove all blanks
   p3 <- strsplit(p2,"=")
-        parNam <- vapply(p3, function(x) x[1], FUN.VALUE="a")
-        prj <- lapply(p3, function(x) if (length(x)==1) NA else tryNum(x[2]))
-        names(prj) <- parNam
+  parNam <- vapply(p3, function(x) x[1], FUN.VALUE="a")
+  prj <- lapply(p3, function(x) if (length(x)==1) NA else tryNum(x[2]))
+  names(prj) <- parNam
   prj
 }
 

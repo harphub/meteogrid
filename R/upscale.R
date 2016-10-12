@@ -59,8 +59,7 @@ upscale_factor <- function(infield, factor, method="mean", ... ){
 ### take the mean value of all cells whose center falls in the new grid cell
 upscale_regrid <- function(infield, newdomain, method="mean", weights=NULL, ... ) {
   if (!is.geodomain(newdomain)) {
-    if (inherits(newdomain, "geofield") || inherits(newdomain, "FAfile")) newdomain <- attributes(newdomain)$domain
-    else if (inherits(newdomain, "FAframe") && requireNamespace("Rfa")) newdomain <- Rfa::FAdomain(newdomain)
+    if ("domain" %in% names(attributes(newdomain))) newdomain <- attributes(newdomain)$domain
     else stop("new domain not well defined!")
   }
   gnx <- newdomain$nx
@@ -93,13 +92,11 @@ upscale_regrid <- function(infield, newdomain, method="mean", weights=NULL, ... 
 
 upscale_regrid_init <- function(olddomain, newdomain) {
     if (!is.geodomain(olddomain)) {
-    if (inherits(olddomain, "geofield") || inherits(olddomain, "FAfile")) olddomain <- attributes(olddomain)$domain
-    else if (inherits(olddomain, "FAframe") && requireNamespace("Rfa")) olddomain <- Rfa::FAdomain(olddomain)
+    if ("domain" %in% names(attributes(olddomain))) olddomain <- attributes(olddomain)$domain
     else stop("old domain not well defined!")
   }
   if (!is.geodomain(newdomain)) {
-    if (inherits(newdomain, "geofield") || inherits(newdomain, "FAfile")) newdomain <- attributes(newdomain)$domain
-    else if (inherits(newdomain, "FAframe") && requireNamespace("Rfa")) newdomain <- Rfa::FAdomain(newdomain)
+    if ("domain" %in% names(attributes(newdomain))) newdomain <- attributes(newdomain)$domain
     else stop("new domain not well defined!")
   }
   gnx <- newdomain$nx

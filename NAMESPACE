@@ -1,4 +1,4 @@
-importFrom("maps","map")
+#importFrom("maps","map")
 importFrom("grDevices", "colorRampPalette", "colors", "grey", "rgb",
            "xy.coords")
 importFrom("graphics", ".filled.contour", "arrows", "axis", "box",
@@ -8,13 +8,9 @@ importFrom("graphics", ".filled.contour", "arrows", "axis", "box",
 
 # Export all names
 exportPattern(".")
-# exportPattern("^Domain")
-#S3method(as,geofield)
 S3method(plot,geodomain)
 S3method(plot,geofield)
 S3method(print,geofield)
 S3method(print,geodomain)
-# export(i2a,matsum,laloclick,orthoglobe,as.ocean,box.resize,seamask,irainbow,grainbow)
-# exportPattern("^col")
 useDynLib("geogrid")
 

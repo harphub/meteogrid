@@ -1,10 +1,11 @@
 /*
-#--------------------------------------#
-# Part of R-package geogrid            #
-# © Alex Deckmyn                       #
-# RMI Belgium, alex.deckmyn@meteo.be   #
-# Released under GPL-3 license         #
-#--------------------------------------#
+#-------------------------------------------#
+# Part of R-package geogrid                 #
+# © Alex Deckmyn                            #
+# Royal Meteorological Institute of Belgium #
+# alex.deckmyn@meteo.be                     #
+# Released under GPL-3 license              #
+#-------------------------------------------#
 */
 
 #include<stdio.h>
@@ -16,16 +17,13 @@ void maprestrict1(double* bx,double* by,int* lx,
                double* nx,double* ny,int* newlength,
                double* xperiod, double* xfrac);
 
-/* A routine to make sure that a given map does not extend beyond the borders of the domain in the x direction */
-/* because when drawing the lines, you may go outside the domain. */
+// A routine to make sure that a given map does not extend beyond the borders of the domain in the x direction
+// because when drawing the lines, you may go outside the domain.
 /*
     INPUT:   bx,by,lx=length
              x0,x1 : boundaries
     OUTPUT : nx,ny,newlength
              The length of the date may change! nx and ny must be long enough to accomodate this.
-
-AUTHOR: Alex Deckmyn
-
 */
 
 void maprestrict1(double *bx,double *by,int* lx,
@@ -74,11 +72,11 @@ void maprestrict1(double *bx,double *by,int* lx,
       npos++;
       if(npos>=NPOSMAX) Rf_error("overflow\n");
     }
-/* the following should also be done if the point is outside the domain */
+// the following should also be done if the point is outside the domain
     else if(  !ISNA(nx[npos-1]) && !ISNA(*xperiod) &&
               abs(bx[i]-nx[npos-1])>= *xperiod * *xfrac) {
-      /* HERE WE SUPPOSE THE POINT SKIPPED OVER A PERIODIC DOMAIN */
-      /* So we have to split the line ! */
+      // HERE WE SUPPOSE THE POINT SKIPPED OVER A PERIODIC DOMAIN
+      // So we have to split the line !
 #ifdef DEBUG
       Rprintf("Splitting at %d %lf %lf -> %lf %lf \n",npos,nx[npos-1],ny[npos-1],bx[i],by[i]);
 #endif

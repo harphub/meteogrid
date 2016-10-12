@@ -21,7 +21,7 @@
 ###########################################################
 
 wind.dirspeed <- function(u,v,fieldname=c("Wind direction","Wind speed"),rad=FALSE){
-  if(missing(v) & is.list(u)) {
+  if (missing(v) & is.list(u)) {
     v <- u[[2]]
     u <- u[[1]]
   }
@@ -31,30 +31,30 @@ wind.dirspeed <- function(u,v,fieldname=c("Wind direction","Wind speed"),rad=FAL
   wdir <- ifelse(abs(u)>MINSPEED,
                       ( -180 - atan(v/u) * 180/pi + sign(u)*90 ) %% 360,
                       ifelse(abs(v)<MINSPEED,NA, ifelse(v>0,180,0) ) )
-  if(rad) wdir <- wdir*pi/180.
-  if(is.geofield(u)) {
+  if (rad) wdir <- wdir*pi/180.
+  if (is.geofield(u)) {
     attributes(wdir) <- attributes(u)
     attributes(wdir)$info$name <- fieldname[1]
     attributes(wspeed) <- attributes(u)
     attributes(wspeed)$info$name <- fieldname[2]
   }
-  if(is.vector(u)) return(data.frame(wdir=wdir,wspeed=wspeed))
+  if (is.vector(u)) return(data.frame(wdir=wdir,wspeed=wspeed))
   else return(list(wdir=wdir,wspeed=wspeed))
 }
 
 wind.uv <- function(wspeed,wdir,fieldname=c("U","V"),rad=FALSE){
-  if(missing(wdir) & is.list(wspeed)){
+  if (missing(wdir) & is.list(wspeed)){
     wdir <- wspeed$wdir
     wspeed <- wspeed$wspeed
   }
-  if(!rad) wdir <- wdir*pi/180.
+  if (!rad) wdir <- wdir*pi/180.
   u <- wspeed*cos(wdir)
   v <- wspeed*sin(wdir)
-  if(is.geofield(wdir)) {
+  if (is.geofield(wdir)) {
     attributes(u)$info$name <- fieldname[1]
     attributes(v)$info$name <- fieldname[2]
   }
-  if(is.vector(wspeed)) return(data.frame(U=u,V=v))
+  if (is.vector(wspeed)) return(data.frame(U=u,V=v))
   else return(list(U=u,V=v))
 }
 
@@ -152,7 +152,6 @@ geowind.init <- function(domain){
 
 ## Lambert conformal conical
 .geowind.LCC <- function(domain){
-### version in Rfa (based on Luc Gerard?)
 ### 12/2014: change sign of angle for consistency
   rad <- pi/180.
 
@@ -221,6 +220,5 @@ geowind.init <- function(domain){
 #  angle <- acos(cosA) * (2*(sinA>=0)-1)
 #  list(angle=angle,mapfactor=1)
 }
-
 
 
