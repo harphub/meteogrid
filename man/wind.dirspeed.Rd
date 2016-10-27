@@ -26,12 +26,4 @@ Wind direction is given in degrees by default. If the wind speed is lower than 1
 \seealso{
 \code{\link{geowind}}
 }
-\examples{
-\dontrun{
-  u <- FAdec('ICMSHABOF+0001',"S020WIND.U")
-  v <- FAdec('ICMSHABOF+0001',"S020WIND.V")
-  UV <- geowind(u,v)
-  DS <- wind.dirspeed(UV$U,UV$V) ### a list containg 2 geofield objects
-}
-}
 \keyword{file}

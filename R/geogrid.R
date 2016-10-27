@@ -1,8 +1,10 @@
-#--------------------------------------#
-# Part of R-package geogrid            #
-# Copyright Alex Deckmyn               #
-# Released under GPL-3 license         #
-#--------------------------------------#
+#-------------------------------------------#
+# Part of R-package geogrid                 #
+# Copyright (c) 2003-2016 Alex Deckmyn      #
+#   Royal Meteorological Institute, Belgium #
+# alex.deckmyn@meteo.be                     #
+# Released under GPL-3 license              #
+#-------------------------------------------#
 
 ######################
 ### geogrid
@@ -149,7 +151,7 @@ gridpoints <- function(x ,y=NULL, ...){
 
 subgrid <- function(geo, x1, x2, y1, y2, reso=1) {
   if (inherits(geo,"geofield")) gdomain <- attr(geo,"domain")
-  else if(inherits(geo,"geodomain")) gdomain <- geo
+  else if (inherits(geo,"geodomain")) gdomain <- geo
   else stop("subgrid requires a geofield or geodomain as input.")
 
   xsub <- seq(x1,x2,by=reso)
@@ -199,23 +201,23 @@ zoomgrid <- function(geo, x, y, zoom=50){
 
 Make.domain <- function(projtype="lambert",clonlat,nxny,dxdy,reflat=clonlat[2],reflon=clonlat[1],tilt){
 ### Lambert (as used in ALADIN: only 1 reference latitude)
-  if(length(dxdy)==1) dxdy <- rep(dxdy,2)
-  if(projtype=="lambert")
+  if (length(dxdy)==1) dxdy <- rep(dxdy,2)
+  if (projtype=="lambert")
     projection <- list(proj="lcc",lon_0=reflon,lat_1=reflat,lat_2=reflat,a=6371229.0,es=0.0)
 
 ### Rotated & tilted Mercator
 ### as used in ALADIN: reflon=clon, reflat=clat !!!
-  else if(projtype=="mercator"){
-    if(reflat!=clonlat[2] | reflon!=clonlat[1]) warning('This domain is not ALADIN-compatible!')
-    if(abs(reflat)<.01)
+  else if (projtype=="mercator"){
+    if (reflat!=clonlat[2] | reflon!=clonlat[1]) warning('This domain is not ALADIN-compatible!')
+    if (abs(reflat)<.01)
       projection <- list(proj="merc",lon_0=reflon,a=6371229.0,es=0.0)
-    else{
-      if(abs(tilt)<1.0E-7) projection <- list(proj = "somerc", lonc = reflon,
+    else {
+      if (abs(tilt)<1.0E-7) projection <- list(proj = "somerc", lonc = reflon,
                             lat_0 = reflat, a = 6371229, es = 0)
       else if (abs(abs(tilt)-90) < 1.0E-7)  projection <- list(proj = "tmerc", lonc = reflon,
                             lat_0 = reflat, a = 6371229, es = 0)
       else {
-        if(tilt>0) projection <- list(proj = "omerc", lonc = reflon,
+        if (tilt>0) projection <- list(proj = "omerc", lonc = reflon,
                             lat_0 = reflat, alpha = -90 + tilt, a = 6371229,
                             es = 0,no_rot=NA)
         else projection <- list(proj = "omerc", lonc = reflon,
@@ -224,9 +226,9 @@ Make.domain <- function(projtype="lambert",clonlat,nxny,dxdy,reflat=clonlat[2],r
       }
     }
   }
-  else if(projtype=="latlong")
+  else if (projtype=="latlong")
     projection=list(proj="latlong")
-  else if(projtype=="RotLatLon"){
+  else if (projtype=="RotLatLon"){
       projection <- list(proj="ob_tran","o_proj"="latlong",
                        "o_lat_p"=-reflat,"o_lon_p"=0,"lon_0"=reflon)
   }
@@ -253,9 +255,9 @@ Make.domain.RLL <- function(Lon1,Lat1,SPlon,SPlat,SPangle=0,nxny,dxdy){
 ### In the future, this should be merged with Make.domain
 ### but that is not trivial: here, the center point is of no real consequence
 ### and you have to define the rotated South Pole
-  if(length(dxdy)==1) dxdy <- rep(dxdy,2)
-  Lon2 <- Lon1+(nxny[1]-1)*dxdy[1]
-  Lat2 <- Lat1+(nxny[2]-1)*dxdy[2]
+  if (length(dxdy)==1) dxdy <- rep(dxdy,2)
+  Lon2 <- Lon1 + (nxny[1]-1)*dxdy[1]
+  Lat2 <- Lat1 + (nxny[2]-1)*dxdy[2]
   projection <- list(proj="ob_tran","o_proj"="latlong",
                        "o_lat_p"=-SPlat,"o_lon_p"=0,"lon_0"=SPlon)
 

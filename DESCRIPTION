@@ -2,11 +2,10 @@ Package: geogrid
 Version: 3.4.0-2
 Date: 2016-10-31
 Title: Geographical Grids - Mainly Meteorological
-Description: Viewing (projected) grid map data. 
-Author: Alex Deckmyn <Alex.Deckmyn@meteo.be>.
+Description: A toolbox for working with and viewing gridded data. 
+Author: Alex Deckmyn (Royal Meteorological Institute of Belgium) <Alex.Deckmyn@meteo.be> 
 Maintainer: Alex Deckmyn <Alex.Deckmyn@meteo.be>
 Depends: R(>= 3.0.0)
 NeedsCompilation: yes
 Suggests: RColorBrewer, Rfa, Rgrib2, maps(>= 3.0.0)
-License: GPL-3
-URL:
+License: GPL (>=3)

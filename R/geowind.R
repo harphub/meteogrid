@@ -1,9 +1,9 @@
-#--------------------------------------#
-# Part of R-package geogrid            #
-# Copyright Alex Deckmyn               #
-# RMI Belgium, alex.deckmyn@meteo.be   #
-# Released under GPL-3 license         #
-#--------------------------------------#
+#-------------------------------------------#
+# Part of R-package geogrid                 #
+# Copyright (c) 2003-2016 Alex Deckmyn      #
+#   Royal Meteorological Institute, Belgium #
+# Released under GPL-3 license              #
+#-------------------------------------------#
 
 # geowind: rotation of wind fields
 # not easy to do in a generic way, so we only implement for a few projections:

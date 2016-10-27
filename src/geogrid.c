@@ -1,9 +1,8 @@
 /*
 #-------------------------------------------#
 # Part of R-package geogrid                 #
-# © Alex Deckmyn                            #
-# Royal Meteorological Institute of Belgium #
-# alex.deckmyn@meteo.be                     #
+# Copyright (c) 2003-2016 Alex Deckmyn      #
+#   Royal Meteorological Institute, Belgium #
 # Released under GPL-3 license              #
 #-------------------------------------------#
 */

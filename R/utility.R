@@ -1,8 +1,9 @@
-#--------------------------------------#
-# Part of R-package geogrid            #
-# Copyright Alex Deckmyn               #
-# Released under GPL-3 license         #
-#--------------------------------------#
+#-------------------------------------------#
+# Part of R-package geogrid                 #
+# Copyright (c) 2003-2016 Alex Deckmyn      #
+#   Royal Meteorological Institute, Belgium #
+# Released under GPL-3 license              #
+#-------------------------------------------#
 
 ### format an integer as a string (simplified)
 i2a <- function(i,n=ceiling(log(i)/log(10)) )
@@ -24,7 +25,7 @@ laloclick <- function(n=1, ...){
 ### For fun: plot an orthographic projection of the world.
 orthoglobe <- function(reflon=0,reflat=90,map.database="world",...){
   projection <- list(proj="ortho",lon_0=reflon,lat_0=reflat,a=6371229.0,es=0.0)
-  boundaries <- map(database=map.database, plot=FALSE)
+  boundaries <- maps::map(database=map.database, plot=FALSE)
   geo <- project(boundaries, proj =projection,inv = FALSE)
 
   plot(geo,type="l",xlab="",ylab="",axes=FALSE,...)
@@ -33,72 +34,8 @@ orthoglobe <- function(reflon=0,reflat=90,map.database="world",...){
   .Last.domain(domain)
 }
 
-as.ocean <- function(data, XYLIM=par('usr')){
-### convert land boundaries into an 'ocean boundary'
-###  data is a data.frame or list of polygons
-###  with coordinates 'x' and 'y'
-###  polygons are seperated by NA
-
-### outer border of the 'ocean':
-  bx <- XYLIM[c(1,2,2,1,1)]
-  by <- XYLIM[c(3,3,4,4,3)]
-
-  ee <- (1:length(data$x))[is.na(data$x)]-1
-  if (!is.na(data$x)[length(data$x)]) ee=c(ee,length(data$x))
-
-  px <- c(data$x[1:ee[1]],XYLIM[1])
-  py <- c(data$y[1:ee[1]],XYLIM[3])
-
-  if( length(ee)>1) for(i in 1:(length(ee)-1)){
-     px <- c(px,data$x[ (ee[i]+2):ee[(i+1)] ],XYLIM[1])
-     py <- c(py,data$y[ (ee[i]+2):ee[(i+1)] ],XYLIM[3])
-  }
-  data.frame(x=c(bx,px),y=c(by,py))
-}
-
-### I can't even remember what this function is meant to do...
-.box.resize <- function(glim){
-  usr <- par('usr')
-  plt <- par('plt')
-#  fin=par('fin')
-#  mai=par('mai')
-
-  f1 <- plt[1]+(glim[1]-usr[1])*(plt[2]-plt[1])/(usr[2]-usr[1])
-  f2 <- plt[2]-(usr[2]-glim[2])*(plt[2]-plt[1])/(usr[2]-usr[1])
-  f3 <- plt[3]+(glim[3]-usr[3])*(plt[4]-plt[3])/(usr[4]-usr[3])
-  f4 <- plt[4]-(usr[4]-glim[4])*(plt[4]-plt[3])/(usr[4]-usr[3])
-#  print(c(f1,f2,f3,f4))
-
-#  pin=c(fin[1]*(f2-f1),fin[2]*(f4-f3))
-  par(plt=c(f1,f2,f3,f4),usr=glim)
-### the following 'box' command is necessary for the par change to take effect
-### I don't really know why
-  box(lty=0)
-}
-
-seamask <- function(col='white',add.dx=TRUE,
-                 drawmap=TRUE,map.database='world'){
-# This doesn't work very well!!!
-# problem is that there may be partial polygons...
-  domain <- .Last.domain()
-  opar <- par('plt','usr')
-  glimits <- DomainExtent(domain)
-  LXY <- c(glimits$x0,glimits$x1,glimits$y0,glimits$y1)
-  if(add.dx) LXY <- LXY+c(-glimits$dx,glimits$dx,-glimits$dy,glimits$dy)/2
-
-  boundaries <- map(database=map.database,xlim=glimits$lonlim,ylim=glimits$latlim,plot=FALSE,interior=FALSE,fill=TRUE)
-  borders <- map.restrict(project(boundaries,proj=domain$projection),xlim=glimits$lonlim,ylim=glimits$latlim)
-##  antipolygon(borders)
-  .box.resize(LXY)
-  invborders <- as.ocean(borders)
-  polygon(invborders,col=col,border=FALSE)
-  par(opar)
-  box(lty=0)
-  plot(domain,box=TRUE,drawmap=drawmap,add.dx=add.dx)
-}
-
-antipolygon <- function(data,col="white",xylim=DomainExtent(.Last.domain())){
-### inspired by the version in GEOmap
+antipolygon <- function(data, xylim=DomainExtent(.Last.domain()), bg="white"){
+### inspired by the version in the R-package GEOmap
 ### this colours everything outside the polygon given by "data"
 ### up to the limits in xylim.
 ### typical usage:
@@ -107,7 +44,7 @@ antipolygon <- function(data,col="white",xylim=DomainExtent(.Last.domain())){
 ### antipolygon(mask,xylim=xylim)
     x <- c(data$x, data$x[1],xylim$x0,xylim$x0,xylim$x1,xylim$x1,xylim$x0)
     y <- c(data$y, data$y[1],xylim$y0,xylim$y1,xylim$y1,xylim$y0,xylim$y0)
-    polygon(x, y, border = col, col = col, xpd = TRUE)
+    polygon(x, y, border = bg, col = bg, xpd = TRUE)
 }
 
 

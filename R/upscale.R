@@ -1,8 +1,9 @@
-#--------------------------------------#
-# Part of R-package geogrid            #
-# Copyright Alex Deckmyn               #
-# Released under GPL-3 license         #
-#--------------------------------------#
+#-------------------------------------------#
+# Part of R-package geogrid                 #
+# Copyright (c) 2003-2016 Alex Deckmyn      #
+#   Royal Meteorological Institute, Belgium #
+# Released under GPL-3 license              #
+#-------------------------------------------#
 
 ###################
 ### UPSCALING   ###
