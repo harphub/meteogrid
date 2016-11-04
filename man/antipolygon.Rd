@@ -14,7 +14,7 @@ antipolygon(data,xylim=DomainExtent(.Last.domain()), bg='white')
 \details{
  antipolygon() works by adding the 4 corner points to the polygon, thus 'inverting' it.
 }
-\example{ \dontrun{
+\examples{ \dontrun{
 mask <- project(map("world","Belgium",fill=0,plot=FALSE))
 xylim <- DomainExtent(datafield)
 antipolygon(mask,xylim=xylim)
