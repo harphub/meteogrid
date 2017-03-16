@@ -1,4 +1,4 @@
-#importFrom("maps","map")
+importFrom("maps","map")
 importFrom("grDevices", "colorRampPalette", "colors", "grey", "rgb",
            "xy.coords")
 importFrom("graphics", ".filled.contour", "arrows", "axis", "box",

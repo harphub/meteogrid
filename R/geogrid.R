@@ -167,6 +167,8 @@ subgrid <- function(geo, x1, x2, y1, y2, reso=1) {
 
   gdomain$nx <- length(xsub)
   gdomain$ny <- length(ysub)
+  gdomain$dx <- gdomain$dx * reso
+  gdomain$dy <- gdomain$dy * reso
 
   if (inherits(geo,"geofield")) {
     as.geofield(geo[xsub,ysub], domain=gdomain,time=attr(geo,"time"),
