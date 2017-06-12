@@ -337,7 +337,8 @@ plot.geodomain <- function(x=.Last.domain(),
 
   if(drawmap){
 ### requireNamespace is not enough: you need to find worldMapEnv too
-    if (!require("maps")) stop("maps package not available.")
+### Fixed in maps 3.2.0
+    if (!requireNamespace("maps")) stop("maps package not available.")
     boundaries <- maps::map(database=map.database,xlim=glimits$lonlim,ylim=glimits$latlim,plot=FALSE)
     geo <- project(boundaries, proj = domain$projection,inv = FALSE)
     xyper <- periodicity(domain)
