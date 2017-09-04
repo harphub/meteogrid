@@ -5,8 +5,9 @@ importFrom("graphics", ".filled.contour", "arrows", "axis", "box",
            "plot", "plot.new", "plot.window", "points", "polygon",
            "rect", "text")
 
-# Export all names
-exportPattern(".")
+# Export all names (but not .xxx):
+exportPattern("^[a-zA-Z]")
+export(".Last.domain")
 S3method(plot,geodomain)
 S3method(plot,geofield)
 S3method(print,geofield)
