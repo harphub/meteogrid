@@ -181,7 +181,8 @@ limage <-
 iview <- function(x,nlevels=15,color.palette=irainbow,
             title=paste(attr(x,"info")$name,"\n",attr(x,"time")),
             legend=FALSE,mask=NULL,na.col=par("bg"),
-            drawmap=TRUE, maplwd=.5, mapcol='black', map.database='world', ...){
+            drawmap=TRUE, maplwd=.5, mapcol='black', map.database='world', 
+            interior=TRUE, fill=FALSE, ...){
   if(!inherits(x,"geofield")) stop("iview requires a geofield as input.")
   if(!is.null(mask)){
     if(is.character(mask)) mask <- eval(parse(text=mask))
@@ -200,15 +201,17 @@ iview <- function(x,nlevels=15,color.palette=irainbow,
   .Last.domain(gdomain)
 
   if (drawmap)
-    plot(gdomain, add=TRUE, drawmap=TRUE,
-         add.dx=TRUE, box=TRUE, maplwd=maplwd, mapcol=mapcol,
+    plot.geodomain(gdomain, add=TRUE,
+         add.dx=TRUE, box=TRUE, lwd=maplwd, col=mapcol,
+         interior=interior, fill=fill,
          map.database=map.database)
 }
 
 fcview <- function(x,nlevels=15,color.palette=irainbow,
             title=paste(attr(x,"info")$name,"\n",attr(x,"time")),
             legend=TRUE,mask=NULL,
-            drawmap=TRUE, maplwd=.5, mapcol='black', map.database='world', ...){
+            drawmap=TRUE, maplwd=.5, mapcol='black', map.database='world',
+            interior=TRUE, fill=FALSE, ...){
   if(!inherits(x,"geofield")) stop("fcview requires a geofield as input.")
   if(!is.null(mask)){
     if(is.character(mask)) mask <- eval(parse(text=mask))
@@ -227,15 +230,17 @@ fcview <- function(x,nlevels=15,color.palette=irainbow,
   .Last.domain(gdomain)
 
   if (drawmap)
-    plot(gdomain, add=TRUE, drawmap=TRUE,
-         add.dx=TRUE, box=TRUE, maplwd=maplwd, mapcol=mapcol,
+    plot.geodomain(gdomain, add=TRUE,
+         add.dx=TRUE, box=TRUE, lwd=maplwd, col=mapcol,
+         interior=interior, fill=fill,
          map.database=map.database)
 }
 
 cview <- function(x,nlevels=15,
            title=paste(attr(x,"info")$name,"\n",attr(x,"time")),
            mask=NULL, add=FALSE,
-           drawmap=!add, maplwd=.5, mapcol="black", map.database="world", ...){
+           drawmap=!add, maplwd=.5, mapcol="black", map.database="world",
+           interior=TRUE, fill=FALSE, ...){
   if(!inherits(x,"geofield")) stop("cview requires a geofield as input.")
   if(!is.null(mask)){
     if(is.character(mask)) mask <- eval(parse(text=mask))
@@ -246,8 +251,9 @@ cview <- function(x,nlevels=15,
   gdomain <- attr(x,"domain")
   glimits <- DomainExtent(gdomain)
 
-  if (drawmap) plot(gdomain,maplwd=maplwd,mapcol=mapcol,add=add,
-                    drawmap=drawmap,map.database=map.database)
+  if (drawmap) plot.geodomain(gdomain, lwd=maplwd, col=mapcol, add=add,
+                              interior=interior, fill=fill,
+                              map.database=map.database)
 
   contour(x=seq(glimits$x0,glimits$x1,length=gdomain$nx),
           y=seq(glimits$y0,glimits$y1,length=gdomain$ny),
@@ -258,7 +264,8 @@ cview <- function(x,nlevels=15,
 }
 
 vview <- function(U,V,add=FALSE,aspcorrect=TRUE,
-                  drawmap=TRUE, maplwd=.5, mapcol="black", map.database='world', ...){
+                  drawmap=TRUE, maplwd=.5, mapcol="black", map.database='world',
+                  interior=TRUE, fill=FALSE, ...){
   if(!inherits(U,"geofield") | !inherits(V,"geofield")) stop("vview requires 2 geofields as input.")
   gdomain <- attr(U,"domain")
   glimits <- DomainExtent(gdomain)
@@ -288,8 +295,9 @@ vview <- function(U,V,add=FALSE,aspcorrect=TRUE,
   }
 
   if (drawmap)
-    plot(gdomain, add=add, drawmap=TRUE,
-         add.dx=TRUE, box=TRUE, maplwd=maplwd, mapcol=mapcol,
+    plot(gdomain, add=add,
+         add.dx=TRUE, box=TRUE, lwd=maplwd, col=mapcol,
+         interior=interior, fill=fill,
          map.database=map.database)
 
   vecplot(U=U[1:gdomain$nx,1:gdomain$ny],
@@ -304,9 +312,10 @@ vview <- function(U,V,add=FALSE,aspcorrect=TRUE,
 
 plot.geodomain <- function(x=.Last.domain(),
              add=!is.null(.Last.domain()),
-             maplwd=1,mapcol='black',
-             add.dx=TRUE,drawmap=!add, box=drawmap,
-             map.database="world",...){
+             col='black', mapfill=c("sandybrown","steelblue"),
+             add.dx=TRUE, box=TRUE,
+             fill=FALSE, interior=TRUE,
+             map.database="world", ...){
 
 ### consistency
   if (add) domain <- .Last.domain()
@@ -318,7 +327,7 @@ plot.geodomain <- function(x=.Last.domain(),
 ### for backward compatibility
   glimits <- DomainExtent(domain)
 
-  if(!add.dx){
+  if (!add.dx){
     xlim <- c(glimits$x0,glimits$x1)
     ylim <- c(glimits$y0,glimits$y1)
   }
@@ -328,35 +337,94 @@ plot.geodomain <- function(x=.Last.domain(),
 
   }
 
-  if(!add){
-     x <- seq(glimits$x0,glimits$x1,length=domain$nx)
-     y <- seq(glimits$y0,glimits$y1,length=domain$ny)
-     image(x,y,array(0,dim=c(domain$nx,domain$ny)),xlab="",ylab="",axes=FALSE,col=0)
+  if (!add){
+     x <- seq(glimits$x0, glimits$x1, length=glimits$nx)
+     y <- seq(glimits$y0, glimits$y1, length=glimits$ny)
+     bg <- if (fill && length(mapfill)>1) mapfill[2] else getOption("bg")
+     image(x, y, array(0,dim=c(glimits$nx, glimits$ny)),
+           xlab="", ylab="", axes=FALSE, col=bg, useRaster=TRUE)
      .Last.domain(domain)
   }
 
-  if(drawmap){
-### requireNamespace is not enough: you need to find worldMapEnv too
-### Fixed in maps 3.2.0
-    if (!requireNamespace("maps")) stop("maps package not available.")
-    boundaries <- maps::map(database=map.database,xlim=glimits$lonlim,ylim=glimits$latlim,plot=FALSE)
-    geo <- project(boundaries, proj = domain$projection,inv = FALSE)
-    xyper <- periodicity(domain)
-### make sure that no points fall outside the map domain.
-    geo <- map.restrict(geo,xlim=xlim,ylim=ylim,xperiod=xyper$xper,yperiod=xyper$yper)
-    lines(geo, col = mapcol, lwd = maplwd,...)
+  if (fill && !interior) {
+    geo1 <- getmap(domain, interior=TRUE, fill=TRUE, map.database=map.database)
+    geo2 <- getmap(domain, interior=FALSE, fill=FALSE, map.database=map.database)
+    polygon(geo1, border=0, col=mapfill[1], ...)
+    lines(geo2, col=col, ...)
+  } else {
+    geo <- getmap(domain, interior=interior, fill=fill, map.database=map.database)
+    if (fill) {
+      polygon(geo, border=col, col=mapfill[1], ...)
+    } else {
+      lines(geo, col = col, ...)
+    }
   }
 
-  if(box){
+  if (box) {
 #    panel.lines(c(xlim[1],xlim[1],xlim[2],xlim[2],xlim[1]),
 #          c(ylim[1],ylim[2],ylim[2],ylim[1],ylim[1]),col="black",...)
-    lines(c(xlim[1],xlim[1],xlim[2],xlim[2],xlim[1]),
-          c(ylim[1],ylim[2],ylim[2],ylim[1],ylim[1]),...)
+    lines(c(xlim[1], xlim[1], xlim[2], xlim[2], xlim[1]),
+          c(ylim[1], ylim[2], ylim[2], ylim[1], ylim[1]), ...)
   }
 }
 
-plot.geofield <- function(x,...){
-  plot(attr(x,"domain"),...)
+getmap <- function(domain=.Last.domain(), interior=TRUE, 
+                   fill=FALSE, map.database="world", ...) {
+  if (fill && !interior) warning("When fill=TRUE, interior=FALSE is ignored.")
+  if (!inherits(domain, "geodomain")) domain <- attributes(domain)$domain
+  glimits <- DomainExtent(domain)
+  xlim <- c(glimits$x0,glimits$x1) + glimits$dx*c(-1,1)/2
+  ylim <- c(glimits$y0,glimits$y1) + glimits$dy*c(-1,1)/2
+  if (!requireNamespace("maps")) stop("maps package not available.")
+  boundaries <- maps::map(database=map.database,
+                     xlim=glimits$lonlim, ylim=glimits$latlim,
+                     fill=fill, interior=interior, plot=FALSE)
+  geo <- as.list(project(boundaries, proj = domain$projection,inv = FALSE))
+  if (fill) {
+    geo$names <- boundaries$names
+    class(geo) <- "map"
+  }
+  if (packageVersion("maps") < "3.2") {
+    if (fill) {
+     cat("maps version older than 3.2.0 does not support polygon clipping setting fill=FALSE.")
+    }
+    xyper <- periodicity(domain)
+    geo <- map.restrict(geo,xlim=xlim,ylim=ylim,xperiod=xyper$xper,yperiod=xyper$yper)
+  } else {
+    geo <- maps::map.clip.poly(as.list(geo), xlim=xlim, ylim=ylim, poly=fill)
+  }
+  invisible(geo)
+}
+
+getbox <- function(domain=.Last.domain()) {
+  if (!inherits(domain, "geodomain")) domain <- attributes(domain)$domain
+  glimits <- DomainExtent(domain)
+  xlim <- c(glimits$x0,glimits$x1) + glimits$dx*c(-1,1)/2
+  ylim <- c(glimits$y0,glimits$y1) + glimits$dy*c(-1,1)/2
+  box <- list(x=xlim[c(1,1,2,2,1)], y=ylim[c(1,2,2,1,1)], names="box")
+  class(box) <- "map"
+  invisible(box)
+}
+
+getmask <- function(domain=.Last.domain(), ...) {
+  if (!inherits(domain, "geodomain")) domain <- attributes(domain)$domain
+
+  mbox <- sf::st_as_sf(getbox(domain, ...))
+  mmap <- sf::st_as_sf(getmap(domain, fill=TRUE, ...))
+  mdif <- sf::st_difference(mbox, st_union(st_combine(mmap)))
+  mdif
+# mdif$geometry[1] is a sfc_MULTIPOLYGON
+# how extract is as a simple "map" list?
+# need sf2map()
+# BUT: polygons with holes, so will never work with simiple "polygon"
+# so simply use the "plot"
+#  plot(mdif, add=TRUE, col="white", border=0)
+}
+
+
+
+plot.geofield <- function(x, ...){
+  plot(attr(x,"domain"), ...)
 }
 
 #####################################################
@@ -364,7 +432,7 @@ plot.geofield <- function(x,...){
 #####################################################
 
 domainbox <-
-  function (geo , add.dx = TRUE, ...)
+  function (geo , add.dx = TRUE, length=200, ...)
 {
   if (is.null(.Last.domain())) stop("There is no image yet to add the domainbox to.")
   if (is.geofield(geo)) domain <- attributes(geo)$domain
@@ -382,13 +450,13 @@ domainbox <-
   }
 
 
-  x <- seq(xlim[1], xlim[2], length = 200)
-  y <- seq(ylim[1], ylim[2], length = 200)
+  x <- seq(xlim[1], xlim[2], length = length)
+  y <- seq(ylim[1], ylim[2], length = length)
 
-  domainframe <- cbind(c(rep(xlim[1],length(y)),x,rep(xlim[2],length(y)),rev(x)),
-                         c(y,rep(ylim[2],length(x)),rev(y),rep(ylim[1],length(x)) ) )
-  domainlalo <- project(domainframe,proj=domain$projection,inv=TRUE)
-  lines(project(domainlalo,proj=.Last.domain()$projection),...)
+  domainframe <- cbind(c(rep(xlim[1],length(y)), x, rep(xlim[2],length(y)),rev(x)),
+                       c(y,rep(ylim[2],length(x)), rev(y), rep(ylim[1],length(x)) ) )
+  domainlalo <- project(domainframe, proj=domain$projection, inv=TRUE)
+  lines(project(domainlalo, proj=.Last.domain()$projection), ...)
 
 }
 
