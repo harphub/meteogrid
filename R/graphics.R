@@ -312,7 +312,7 @@ vview <- function(U,V,add=FALSE,aspcorrect=TRUE,
 
 plot.geodomain <- function(x=.Last.domain(),
              add=!is.null(.Last.domain()),
-             col='black', mapfill=c("sandybrown","steelblue"),
+             col=1, mapfill=c("sandybrown","steelblue"),
              add.dx=TRUE, box=TRUE,
              fill=FALSE, interior=TRUE,
              map.database="world", ...){
@@ -407,11 +407,12 @@ getbox <- function(domain=.Last.domain()) {
 }
 
 getmask <- function(domain=.Last.domain(), ...) {
+  if (!requireNamespace("sf")) stop("sf package not available.")
   if (!inherits(domain, "geodomain")) domain <- attributes(domain)$domain
 
   mbox <- sf::st_as_sf(getbox(domain, ...))
   mmap <- sf::st_as_sf(getmap(domain, fill=TRUE, ...))
-  mdif <- sf::st_difference(mbox, st_union(st_combine(mmap)))
+  mdif <- sf::st_difference(mbox, sf::st_union(sf::st_combine(mmap)))
   mdif
 # mdif$geometry[1] is a sfc_MULTIPOLYGON
 # how extract is as a simple "map" list?
