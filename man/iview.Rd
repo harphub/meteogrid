@@ -12,17 +12,21 @@ methods of image, contour, fcontour and vecplot.
 iview(x,nlevels=15,color.palette=irainbow,
       title=paste(attr(x,"info")$name,"\n",attr(x,"time")),
       legend=FALSE, mask=NULL, na.col=par("bg"),
-      drawmap=TRUE, maplwd=.5, mapcol='black', map.database='world', ...)
+      drawmap=TRUE, maplwd=.5, mapcol='black', map.database='world',
+      interior=TRUE, fill=FALSE, ...)
 cview(x,nlevels=15,
       title=paste(attr(x,"info")$name,"\n",attr(x,"time")),
       mask=NULL, add=FALSE,
-      drawmap=!add, maplwd=.5, mapcol="black", map.database="world", ...)
+      drawmap=!add, maplwd=.5, mapcol="black", map.database="world",
+      interior=TRUE, fill=FALSE, ...)
 fcview(x,nlevels=15,color.palette=irainbow,
        title=paste(attr(x,"info")$name,"\n",attr(x,"time")),
        legend=TRUE,mask=NULL,
-       drawmap=TRUE, maplwd=.5, mapcol='black', map.database='world', ...)
+       drawmap=TRUE, maplwd=.5, mapcol='black', map.database='world',
+      interior=TRUE, fill=FALSE, ...)
 vview(U, V, add=FALSE, aspcorrect=TRUE,
-      drawmap=TRUE, maplwd=.5, mapcol="black", map.database='world', ...)
+      drawmap=TRUE, maplwd=.5, mapcol="black", map.database='world',
+      interior=TRUE, fill=FALSE, ...)
 }
 \arguments{
 \item{x}{A \code{geofield} object.}
@@ -35,6 +39,8 @@ vview(U, V, add=FALSE, aspcorrect=TRUE,
 \item{na.col}{By default, masked grid points (and any other NA values) are transparent. With \code{na.col} you can give them another colour.}
 \item{legend}{If TRUE, a color legend is drawn at the right of the image.}
 \item{drawmap}{If TRUE, a world map is superposed on the image.}
+\item{fill}{If TRUE, the map is drawn as filled polygons, not just lines. This is most interesting for contours and vectors, but may in rare cases be used with images, if the colours are transparent.}
+\item{interior}{If FALSE, the interior political borders are not drawn.}
 \item{maplwd, mapcol}{Line width and colour for the world map.}
 \item{map.database}{Which map data to use. Default is 'world' from the \code{maps} package.}
 \item{aspcorrect}{In Lat/Lon co-ordinates, the aspect ratio is not 1:1. If this argument is TRUE, a correction is attempted. For other projections, this argument is ignored.}

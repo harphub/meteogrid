@@ -11,13 +11,13 @@
 \title{Approximate field values at given Lat-Lon co-ordinates.}
 \description{Approximate field values for given Lat-Lon co-ordinates. Either by interpolation or by taking the closest grid point value. The \code{.init} routines allow to calculate the interpolation weights only once. The routines for different methods don't have to be called explicitely. In principle, you should only call \code{point.interp} and \code{point.interp.init} and specify a method.}
 \usage{
-point.interp(lon, lat, infield, method="bilin", mask=NULL, pointmask=0, force=FALSE, weights=NULL)
-point.interp.init(lon, lat, domain=.Last.domain(), method="bilin", mask=NULL, pointmask=0, force=FALSE)
+point.interp(lon, lat, infield, method="bilin", mask=NULL, pointmask=NULL, force=FALSE, weights=NULL)
+point.interp.init(lon, lat, domain=.Last.domain(), method="bilin", mask=NULL, pointmask=NULL, force=FALSE)
 point.index(lon, lat, domain=.Last.domain(), clip=TRUE)
-point.closest(lon, lat, infield, mask=NULL, pointmask=0, force=FALSE, weights=NULL)
-point.closest.init(lon, lat, domain=.Last.domain(), mask=NULL, pointmask=0, force=FALSE)
-point.bilin(lon, lat, infield, mask=NULL, pointmask=0, force=FALSE, weights=NULL)
-point.bilin.init(lon, lat, domain=.Last.domain(), mask=NULL, pointmask=0, force=FALSE)
+point.closest(lon, lat, infield, mask=NULL, pointmask=NULL, force=FALSE, weights=NULL)
+point.closest.init(lon, lat, domain=.Last.domain(), mask=NULL, pointmask=NULL, force=FALSE)
+point.bilin(lon, lat, infield, mask=NULL, pointmask=NULL, force=FALSE, weights=NULL)
+point.bilin.init(lon, lat, domain=.Last.domain(), mask=NULL, pointmask=NULL, force=FALSE)
 point.bicubic(lon, lat, infield, weights=NULL)
 point.bicubic.init(lon, lat, domain=.Last.domain())
 }

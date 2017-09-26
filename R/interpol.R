@@ -93,7 +93,7 @@ point.interp <- function(lon, lat, infield, method="bilin", mask=NULL, pointmask
   if (substring(method,1,3)=="bil") {
     point.bilin(lon, lat, infield=infield, mask=mask, pointmask=pointmask, force=force, weights=weights)
   } else if (substring(method,1,3)=="bic") {
-    if (!is.null(mask) | !is.null(newmask) | force) warning("Mask is not supported for bicubic interpolation.")
+    if (!is.null(mask) | !is.null(pointmask) | force) warning("Mask is not supported for bicubic interpolation.")
     point.bicubic(lon, lat, infield=infield, weights=weights)
   } else if (is.element(substring(method,1,1),c("n","c"))) {
     point.closest(lon, lat, infield=infield, mask=mask, pointmask=pointmask, force=force, weights=weights)
@@ -104,7 +104,7 @@ point.interp.init <- function(lon, lat, domain=.Last.domain(), method="bilin", m
   if (substring(method,1,3)=="bil") {
     point.bilin.init(lon, lat, domain=domain, mask=mask, pointmask=pointmask, force=force)
   } else if (substring(method,1,3)=="bic") {
-    if (!is.null(mask) | !is.null(newmask) | force) warning("Mask is not supported for bicubic interpolation.")
+    if (!is.null(mask) | !is.null(pointmask) | force) warning("Mask is not supported for bicubic interpolation.")
     point.bicubic.init(lon, lat, domain=domain)
   } else if (is.element(substring(method,1,1),c("n","c"))) {
     point.closest.init(lon, lat, domain=domain, mask=mask, pointmask=pointmask, force=force)

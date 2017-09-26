@@ -201,15 +201,16 @@ zoomgrid <- function(geo, x, y, zoom=50){
 ### CREATE NEW DOMAINS  ###
 ###########################
 
-Make.domain <- function(projtype="lambert",clonlat,nxny,dxdy,reflat=clonlat[2],reflon=clonlat[1],tilt){
+Make.domain <- function(projtype="lambert", clonlat, nxny, dxdy, 
+                        reflat=clonlat[2], reflon=clonlat[1], tilt){
 ### Lambert (as used in ALADIN: only 1 reference latitude)
   if (length(dxdy)==1) dxdy <- rep(dxdy,2)
-  if (projtype=="lambert")
+  if (projtype %in% c("lcc", "lambert"))
     projection <- list(proj="lcc",lon_0=reflon,lat_1=reflat,lat_2=reflat,a=6371229.0,es=0.0)
 
 ### Rotated & tilted Mercator
 ### as used in ALADIN: reflon=clon, reflat=clat !!!
-  else if (projtype=="mercator"){
+  else if (projtype %in% c("merc", "somerc", "omerc", "mercator")){
     if (reflat!=clonlat[2] | reflon!=clonlat[1]) warning('This domain is not ALADIN-compatible!')
     if (abs(reflat)<.01)
       projection <- list(proj="merc",lon_0=reflon,a=6371229.0,es=0.0)
@@ -227,10 +228,9 @@ Make.domain <- function(projtype="lambert",clonlat,nxny,dxdy,reflat=clonlat[2],r
                             es = 0,no_rot=NA)
       }
     }
-  }
-  else if (projtype=="latlong")
+  } else if (projtype %in% c("latlong")) {
     projection=list(proj="latlong")
-  else if (projtype=="RotLatLon"){
+  } else if (projtype %in% c("ob_tran", "RotLatLon")){
       projection <- list(proj="ob_tran","o_proj"="latlong",
                        "o_lat_p"=-reflat,"o_lon_p"=0,"lon_0"=reflon)
   }
@@ -238,16 +238,17 @@ Make.domain <- function(projtype="lambert",clonlat,nxny,dxdy,reflat=clonlat[2],r
 
 ### project the center point
 
-  cxy <- project(list(x=clonlat[1],y=clonlat[2]),proj=projection)
+  cxy <- project(list(x=clonlat[1], y=clonlat[2]), proj=projection)
 
   SW0 <- c(cxy$x,cxy$y) - dxdy*(nxny - 1)/2
   NE0 <- SW0 + dxdy*(nxny - 1)
 
-  lims <- project(list(x=c(SW0[1],NE0[1]),y=c(SW0[2],NE0[2])),proj=projection,inv=TRUE)
+  lims <- project(list(x=c(SW0[1],NE0[1]),y=c(SW0[2],NE0[2])), proj=projection, inv=TRUE)
   SW <- c(lims$x[1],lims$y[1])
   NE <- c(lims$x[2],lims$y[2])
 ### and the output is...
-  result <- list(projection=projection,nx=nxny[1],ny=nxny[2],dx=dxdy[1],dy=dxdy[2],SW=SW,NE=NE,center=clonlat)
+  result <- list(projection=projection, nx=nxny[1], ny=nxny[2], dx=dxdy[1], dy=dxdy[2],
+                 SW=SW, NE=NE, center=clonlat)
   class(result) <- "geodomain"
   result
 }

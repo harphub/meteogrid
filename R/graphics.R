@@ -500,8 +500,10 @@ obsplot <- function(x,y,z,breaks=5,pretty=TRUE,legend.pos=NULL,
 ### font, lab.x, lab.y not used
 ### the labels are not ideally placed... fixed with e.g. mgp[3]=.5
 ### fcview: dx/2 difference in limits
-DrawLatLon <- function(nx=9, ny=9, lines=TRUE, labels=TRUE, lab.size=1, col="grey",
-                       lty=2, font=2, lab.x=2, lab.y=2, ...) {
+DrawLatLon <- function(nx=9, ny=9, lines=TRUE, labels=TRUE, 
+                       lab.size=1, col="grey",
+                       lty=2, font=2, lab.x=2, lab.y=2,
+                       npoints=500, ...) {
   if (is.null(.Last.domain())) stop("Sorry, no projection has been defined.")
   glimits <- DomainExtent(.Last.domain())
   xlim <- glimits$lonlim
@@ -515,8 +517,8 @@ DrawLatLon <- function(nx=9, ny=9, lines=TRUE, labels=TRUE, lab.size=1, col="gre
   latlist <- y[which(y >= ylim[1] & y <= ylim[2])]
 
   if (lines) {
-    lonlines <- expand.grid(y=c(seq(ylim[1],ylim[2],len=100),NA),x=lonlist)
-    latlines <- expand.grid(x=c(seq(xlim[1],xlim[2],len=100),NA),y=latlist)
+    lonlines <- expand.grid(y=c(seq(ylim[1],ylim[2], len=npoints),NA), x=lonlist)
+    latlines <- expand.grid(x=c(seq(xlim[1],xlim[2], len=npoints),NA), y=latlist)
     lalolines <- rbind(latlines,lonlines)
     plines <- project(lalolines,proj=.Last.domain()$projection)
     plines <- map.restrict(plines, c(glimits$x0,glimits$x1),

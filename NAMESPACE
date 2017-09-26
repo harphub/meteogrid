@@ -4,7 +4,7 @@ importFrom("graphics", ".filled.contour", "arrows", "axis", "box",
            "contour", "image", "legend", "lines", "locator", "par",
            "plot", "plot.new", "plot.window", "points", "polygon",
            "rect", "text")
-
+importFrom("utils", "packageVersion")
 # Export all names (but not .xxx):
 exportPattern("^[a-zA-Z]")
 export(".Last.domain")
