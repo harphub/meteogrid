@@ -311,11 +311,11 @@ vview <- function(U,V,add=FALSE,aspcorrect=TRUE,
 ###############################
 
 plot.geodomain <- function(x=.Last.domain(),
-             add=!is.null(.Last.domain()),
+             add=FALSE,
              col=1, mapfill=c("sandybrown","steelblue"),
              add.dx=TRUE, box=TRUE,
              fill=FALSE, interior=TRUE,
-             map.database="world", ...){
+             map.database="world", asp=1, ...){
 
 ### consistency
   if (add) domain <- .Last.domain()
@@ -342,7 +342,7 @@ plot.geodomain <- function(x=.Last.domain(),
      y <- seq(glimits$y0, glimits$y1, length=glimits$ny)
      bg <- if (fill && length(mapfill)>1) mapfill[2] else getOption("bg")
      image(x, y, array(0,dim=c(glimits$nx, glimits$ny)),
-           xlab="", ylab="", axes=FALSE, col=bg, useRaster=TRUE)
+           xlab="", ylab="", axes=FALSE, col=bg, useRaster=TRUE, asp=asp)
      .Last.domain(domain)
   }
 

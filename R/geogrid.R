@@ -202,28 +202,27 @@ zoomgrid <- function(geo, x, y, zoom=50){
 ###########################
 
 Make.domain <- function(projtype="lambert", clonlat, nxny, dxdy, 
-                        reflat=clonlat[2], reflon=clonlat[1], tilt){
-  earth <- c(a=6371229.0, es=0.0)
+                        reflat=clonlat[2], reflon=clonlat[1], tilt,
+                        earth=list(a=6371229.0, es=0.0)){
   if (length(dxdy)==1) dxdy <- rep(dxdy,2)
   if (projtype %in% c("lcc", "lambert")) {
 ### Lambert (as used in ALADIN: only 1 reference latitude)
-    projection <- list(proj="lcc", lon_0=reflon, lat_1=reflat, lat_2=reflat, earth)
+    projection <- list(proj="lcc", lon_0=reflon, lat_1=reflat, lat_2=reflat)
   } else if (projtype %in% c("merc", "somerc", "omerc", "mercator")){
 ### Rotated & tilted Mercator
 ### as used in ALADIN: reflon=clon, reflat=clat !!!
     if (reflat!=clonlat[2] | reflon!=clonlat[1]) warning('This domain is not ALADIN-compatible!')
     if (abs(reflat)<.01)
-      projection <- list(proj="merc",lon_0=reflon,a=6371229.0,es=0.0)
+      projection <- list(proj="merc",lon_0=reflon)
     else {
-      if (abs(tilt)<1.0E-7) projection <- list(proj = "somerc", lonc = reflon,
-                            lat_0 = reflat, a = 6371229, es = 0)
-      else if (abs(abs(tilt)-90) < 1.0E-7)  projection <- list(proj = "tmerc", lonc = reflon,
-                            lat_0 = reflat, earth)
+      if (abs(tilt)<1.0E-7) projection <- list(proj = "somerc", lonc = reflon, lat_0 = reflat)
+      else if (abs(abs(tilt)-90) < 1.0E-7)  projection <- c(proj = "tmerc", lonc = reflon,
+                            lat_0 = reflat)
       else {
         if (tilt>0) projection <- list(proj = "omerc", lonc = reflon,
-                            lat_0 = reflat, alpha = -90 + tilt, earth,no_rot=NA)
+                            lat_0 = reflat, alpha = -90 + tilt, no_rot=NA)
         else projection <- list(proj = "omerc", lonc = reflon,
-                            lat_0 = reflat, alpha = 90 + tilt, earth,no_rot=NA)
+                            lat_0 = reflat, alpha = 90 + tilt, no_rot=NA)
       }
     }
   } else if (projtype %in% c("latlong")) {
@@ -233,7 +232,7 @@ Make.domain <- function(projtype="lambert", clonlat, nxny, dxdy,
                        "o_lat_p"=-reflat,"o_lon_p"=0,"lon_0"=reflon)
   }
   else stop("Unknown projection.")
-
+  projection <- c(projection, earth)
 ### project the center point
 
   cxy <- project(list(x=clonlat[1], y=clonlat[2]), proj=projection)
