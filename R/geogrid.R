@@ -203,14 +203,14 @@ zoomgrid <- function(geo, x, y, zoom=50){
 
 Make.domain <- function(projtype="lambert", clonlat, nxny, dxdy, 
                         reflat=clonlat[2], reflon=clonlat[1], tilt){
-### Lambert (as used in ALADIN: only 1 reference latitude)
+  earth <- c(a=6371229.0, es=0.0)
   if (length(dxdy)==1) dxdy <- rep(dxdy,2)
-  if (projtype %in% c("lcc", "lambert"))
-    projection <- list(proj="lcc",lon_0=reflon,lat_1=reflat,lat_2=reflat,a=6371229.0,es=0.0)
-
+  if (projtype %in% c("lcc", "lambert")) {
+### Lambert (as used in ALADIN: only 1 reference latitude)
+    projection <- list(proj="lcc", lon_0=reflon, lat_1=reflat, lat_2=reflat, earth)
+  } else if (projtype %in% c("merc", "somerc", "omerc", "mercator")){
 ### Rotated & tilted Mercator
 ### as used in ALADIN: reflon=clon, reflat=clat !!!
-  else if (projtype %in% c("merc", "somerc", "omerc", "mercator")){
     if (reflat!=clonlat[2] | reflon!=clonlat[1]) warning('This domain is not ALADIN-compatible!')
     if (abs(reflat)<.01)
       projection <- list(proj="merc",lon_0=reflon,a=6371229.0,es=0.0)
@@ -218,14 +218,12 @@ Make.domain <- function(projtype="lambert", clonlat, nxny, dxdy,
       if (abs(tilt)<1.0E-7) projection <- list(proj = "somerc", lonc = reflon,
                             lat_0 = reflat, a = 6371229, es = 0)
       else if (abs(abs(tilt)-90) < 1.0E-7)  projection <- list(proj = "tmerc", lonc = reflon,
-                            lat_0 = reflat, a = 6371229, es = 0)
+                            lat_0 = reflat, earth)
       else {
         if (tilt>0) projection <- list(proj = "omerc", lonc = reflon,
-                            lat_0 = reflat, alpha = -90 + tilt, a = 6371229,
-                            es = 0,no_rot=NA)
+                            lat_0 = reflat, alpha = -90 + tilt, earth,no_rot=NA)
         else projection <- list(proj = "omerc", lonc = reflon,
-                            lat_0 = reflat, alpha = 90 + tilt, a = 6371229,
-                            es = 0,no_rot=NA)
+                            lat_0 = reflat, alpha = 90 + tilt, earth,no_rot=NA)
       }
     }
   } else if (projtype %in% c("latlong")) {
