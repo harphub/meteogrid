@@ -16,6 +16,9 @@ trim <- function(x) sub(pattern=" +$",replacement="",
 ### To have the summary of a matrix or array
 matsum <- function(x,...) summary(as.vector(x), ...)
 
+### give a default value for NULL
+checknull <- function(x, default=0) if (is.null(x)) default else x
+
 ### click on the map and get the Lat-Lon coordinates
 laloclick <- function(n=1, ...){
   xy <- locator(n, ...)

@@ -38,16 +38,14 @@ project <- function(x, y, proj=.Last.domain()$projection, inv=FALSE)
   }
 
   if (proj$proj == "latlong") {
-### longitude should be in the interval [-180,180[
+### longitude should probably be in the interval [-180,180[
 ### unless e.g. if my global data is on a globe [0,360[
 ### we assume that the meridian = MinLon + 180
 ### so meridian-180 must not be transported.
-    meridian <- if (is.null(proj$lon0)) 0 else proj$lon0
-#    x <- ifelse(x < meridian-180,x+360,x)
-#    x <- ifelse(x >= meridian+180,x-360,x)
-## much faster (!):
-    x[which(x <  (meridian-180))] <- x[which(x <  (meridian-180))] + 360
-    x[which(x >= (meridian+180))] <- x[which(x >= (meridian+180))] - 360
+## BUG: this may introduce wrapping problems
+#    meridian <- checknull(proj$lon0, default=0)
+#    x[x <  (meridian-180)] <- x[x <  (meridian-180)] + 360
+#    x[x >= (meridian+180)] <- x[x >= (meridian+180)] - 360
     
     data.frame(x=x,y=y)
   } else  {
