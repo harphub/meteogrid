@@ -39,10 +39,13 @@ upscale_factor <- function(infield, factor, method="mean", ... ){
 # this could be an option...
   sw0 <- project(olddomain$SW, proj=olddomain$projection, inv=FALSE)
   sw1 <- c(sw0$x, sw0$y) + c(olddomain$dx, olddomain$dy) * (factor - 1)/2
-  newdomain$SW <- as.numeric(project(sw1[1], sw1[2], proj=newdomain$projection, inv=TRUE))
+  newdomain$SW <- as.numeric(project(sw1, proj=newdomain$projection, inv=TRUE))
 
   ne1 <- sw1 + c( (newdomain$nx-1) * newdomain$dx, (newdomain$ny-1) * newdomain$dy)
-  newdomain$NE <- as.numeric(project(ne1[1], ne1[2], proj=newdomain$projection, inv=TRUE))
+  newdomain$NE <- as.numeric(project(ne1, proj=newdomain$projection, inv=TRUE))
+
+## domains defined by their center should also be supported...
+  if (!is.null(olddomain$CLL)) newdomain$CLL <- as.numeric(project( (ne1+sw1)/2, proj=newdomain$projection, inv=TRUE))
 
 ### the actual data
 ### from Daan: we do this by reshaping the matrix to a 4d array

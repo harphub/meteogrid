@@ -32,8 +32,9 @@ print.geodomain = function(x, ...){
   cat(x$nx,"x",x$ny,"domain\n")
   cat("Projection summary:\n")
   cat("proj=",x$projection$proj,"\n")
-  cat("NE = (",x$NE[1],",",x$NE[2],")\n")
-  cat("SW = (",x$SW[1],",",x$SW[2],")\n")
+  if (!is.null(x$NE)) cat("NE = (",x$NE[1],",",x$NE[2],")\n")
+  if (!is.null(x$SW)) cat("SW = (",x$SW[1],",",x$SW[2],")\n")
+  if (!is.null(x$CLL)) cat("CLL = (",x$CLL[1],",",x$CLL[2],")\n")
 #  print.noquote(domain$projection)
 }
 
@@ -78,18 +79,29 @@ DomainExtent <- function(geo){
 
   if (!inherits(geo,"geodomain")) geo <- attr(geo,"domain")
 
-  xy <- project(list(x=c(geo$SW[1], geo$NE[1]),y=c(geo$SW[2], geo$NE[2])),
+  if (!is.null(geo$CLL) && !is.null(geo$dx) && !is.null(geo$dy)) {
+    cxy <- project(x=geo$CLL[1], y=geo$CLL[2], proj=geo$projection)
+    x0  <- cxy$x - dx*(geo$nx -1)/2
+    x1  <- cxy$x + dx*(geo$nx -1)/2
+    y0  <- cxy$y - dy*(geo$ny -1)/2
+    y1  <- cxy$y + dy*(geo$ny -1)/2
+    dx <- geo$dx
+    dy <- geo$dy
+    clonlat <- geo$CLL
+  } else {
+    xy <- project(list(x=c(geo$SW[1], geo$NE[1]),y=c(geo$SW[2], geo$NE[2])),
                 proj=geo$projection)
-  x0 <- xy$x[1]
-  y0 <- xy$y[1]
-  x1 <- xy$x[2]
-  y1 <- xy$y[2]
-  dx <- (x1-x0)/(geo$nx-1)
-  dy <- (y1-y0)/(geo$ny-1)
-  xc <- (x0+x1)/2
-  yc <- (y0+y1)/2
-
-  clonlat <- project(list(x=xc,y=yc),proj=geo$projection,inv=TRUE)
+    x0 <- xy$x[1]
+    y0 <- xy$y[1]
+    x1 <- xy$x[2]
+    y1 <- xy$y[2]
+    dx <- (x1-x0)/(geo$nx-1)
+    dy <- (y1-y0)/(geo$ny-1)
+    xc <- (x0+x1)/2
+    yc <- (y0+y1)/2
+    cll <- project(list(x=xc,y=yc),proj=geo$projection,inv=TRUE)
+    clonlat <- c(cll$x, cll$y)
+  }
   borders <- project(list(x=c(seq(x0,x1,length=geo$nx),rep(x1,geo$ny),
                               seq(x0,x1,length=geo$nx),rep(x0,geo$ny)),
                           y=c(rep(y0,geo$nx),seq(y0,y1,length=geo$ny),
@@ -98,13 +110,13 @@ DomainExtent <- function(geo){
 ### ATTENTION: if the map crosses or comes close to the date line (meridian 180/-180) this will not
 ### work correctly. In the map command we must then set lonlim=NULL !!!
 
-  lonlim <- range(borders$x,na.rm=TRUE)
+  lonlim <- range(borders$x, na.rm=TRUE)
   llr <- lonlim[2]-lonlim[1]
   if (llr <= 1 | llr > 300) lonlim <- NULL
 
-  list(lonlim = lonlim , latlim = range(borders$y,na.rm=TRUE),
-       clonlat=c(clonlat$x,clonlat$y),
-       x0=x0,y0=y0,x1=x1,y1=y1,dx=dx,dy=dy,nx=geo$nx,ny=geo$ny)
+  list(lonlim = lonlim , latlim = range(borders$y, na.rm=TRUE),
+       clonlat=clonlat,
+       x0=x0, y0=y0, x1=x1, y1=y1, dx=dx, dy=dy, nx=geo$nx, ny=geo$ny)
 }
 
 ##########################################################
@@ -113,8 +125,14 @@ DomainPoints <- function (geo,type="lalo"){
   
   if (!inherits(geo,"geodomain")) geo <- attr(geo,"domain")
 
-  lalo <- list(x=c(geo$SW[1],geo$NE[1]),y=c(geo$SW[2],geo$NE[2]))
-  xy <- project(lalo, proj = geo$projection)
+  if (!is.null(geo$CLL) && !is.null(geo$dx) && !is.null(geo$dy)) {
+    cxy <- project(x=geo$CLL[1], y=geo$CLL[2], proj=geo$projection)
+    xy <- data.frame(x= cxy$x + c(-1, +1)*dx*(geo$nx-1)/2 ,
+                     y= cxy$y + c(-1, +1)*dy*(geo$yx-1)/2) 
+  } else {
+    lalo <- list(x=c(geo$SW[1],geo$NE[1]),y=c(geo$SW[2],geo$NE[2]))
+    xy <- project(lalo, proj = geo$projection)
+  }
   xydomain <- expand.grid(x = seq(xy$x[1], xy$x[2], length = geo$nx),
                           y = seq(xy$y[1], xy$y[2], length = geo$ny))
   if (type == "lalo") {
@@ -201,29 +219,29 @@ zoomgrid <- function(geo, x, y, zoom=50){
 ### CREATE NEW DOMAINS  ###
 ###########################
 
-Make.domain <- function(projtype="lambert", clonlat, nxny, dxdy, 
+Make.domain <- function(projtype="lambert", clonlat, nxny, dxdy, exey=NULL,
                         reflat=clonlat[2], reflon=clonlat[1], tilt,
                         earth=list(a=6371229.0, es=0.0)){
   if (length(dxdy)==1) dxdy <- rep(dxdy,2)
   if (projtype %in% c("lcc", "lambert")) {
 ### Lambert (as used in ALADIN: only 1 reference latitude)
     projection <- list(proj="lcc", lon_0=reflon, lat_1=reflat, lat_2=reflat)
-  } else if (projtype %in% c("merc", "somerc", "omerc", "mercator")){
+  } else if (projtype %in% c("merc", "somerc", "omerc", "tmerc", "mercator")){
 ### Rotated & tilted Mercator
 ### as used in ALADIN: reflon=clon, reflat=clat !!!
-    if (reflat!=clonlat[2] | reflon!=clonlat[1]) warning('This domain is not ALADIN-compatible!')
-    if (abs(reflat)<.01)
+    if (reflat != clonlat[2] || reflon != clonlat[1]) warning('This domain is not ALADIN-compatible!')
+    if (abs(reflat)<.01) {
       projection <- list(proj="merc",lon_0=reflon)
-    else {
-      if (abs(tilt)<1.0E-7) projection <- list(proj = "somerc", lonc = reflon, lat_0 = reflat)
-      else if (abs(abs(tilt)-90) < 1.0E-7)  projection <- c(proj = "tmerc", lonc = reflon,
-                            lat_0 = reflat)
-      else {
-        if (tilt>0) projection <- list(proj = "omerc", lonc = reflon,
+    } else if (abs(tilt)<1.0E-7) {
+      projection <- list(proj = "somerc", lonc = reflon, lat_0 = reflat)
+    } else if (abs(abs(tilt)-90) < 1.0E-7) {
+      projection <- c(proj = "tmerc", lonc = reflon, lat_0 = reflat)
+    } else if (tilt>0) {
+      projection <- list(proj = "omerc", lonc = reflon,
                             lat_0 = reflat, alpha = -90 + tilt, no_rot=NA)
-        else projection <- list(proj = "omerc", lonc = reflon,
+    } else {
+      projection <- list(proj = "omerc", lonc = reflon,
                             lat_0 = reflat, alpha = 90 + tilt, no_rot=NA)
-      }
     }
   } else if (projtype %in% c("latlong")) {
     projection=list(proj="latlong")
@@ -245,7 +263,8 @@ Make.domain <- function(projtype="lambert", clonlat, nxny, dxdy,
   NE <- c(lims$x[2],lims$y[2])
 ### and the output is...
   result <- list(projection=projection, nx=nxny[1], ny=nxny[2], dx=dxdy[1], dy=dxdy[2],
-                 SW=SW, NE=NE, center=clonlat)
+                 SW=SW, NE=NE, CLL=clonlat)
+  if (!is.null(exey)) result <- c(result, ex=exey[1], ey=exey[2])
   class(result) <- "geodomain"
   result
 }
