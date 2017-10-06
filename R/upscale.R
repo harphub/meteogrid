@@ -44,8 +44,8 @@ upscale_factor <- function(infield, factor, method="mean", ... ){
   ne1 <- sw1 + c( (newdomain$nx-1) * newdomain$dx, (newdomain$ny-1) * newdomain$dy)
   newdomain$NE <- as.numeric(project(ne1, proj=newdomain$projection, inv=TRUE))
 
-## domains defined by their center should also be supported...
-  if (!is.null(olddomain$CLL)) newdomain$CLL <- as.numeric(project( (ne1+sw1)/2, proj=newdomain$projection, inv=TRUE))
+## domains defined by their centre should also be supported...
+  if (!is.null(olddomain$clonlat)) newdomain$clonlat <- as.numeric(project( (ne1+sw1)/2, proj=newdomain$projection, inv=TRUE))
 
 ### the actual data
 ### from Daan: we do this by reshaping the matrix to a 4d array
@@ -60,7 +60,7 @@ upscale_factor <- function(infield, factor, method="mean", ... ){
   as.geofield(result, domain=newdomain)
 }
 
-### take the mean value of all cells whose center falls in the new grid cell
+### take the mean value of all cells whose centre falls in the new grid cell
 upscale_regrid <- function(infield, newdomain, method="mean", weights=NULL, ... ) {
   if (!is.geodomain(newdomain)) {
     if ("domain" %in% names(attributes(newdomain))) newdomain <- attributes(newdomain)$domain

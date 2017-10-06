@@ -58,22 +58,29 @@ project <- function(x, y, proj=.Last.domain()$projection, inv=FALSE)
     if (!inv) {
       x <- x/180*pi
       y <- y/180*pi
-    }
-### to fix what *I think* is a bug in PROJ4 (never had a reply)
+    }  else {
+### to circumvent some bugs [ot]merc inverse in PROJ4 (versions 4.7 - 4.9) 
 ### If they ever solve this bug, I'll have to change this!
-    if (proj$proj=='omerc' & inv ){
-      if (proj$alpha<0 ) x <- -x
-      else y <- -y
+      if (proj$proj=='omerc'){
+        if (proj$alpha<0 ) x <- -x
+        else y <- -y
+      } 
     }
     result <- .C("Rproj4",x=x,y=y,npoints=npoints,par=par,
                  npar=npar,inv=as.integer(inv),NAOK=TRUE,PACKAGE="geogrid")
 ### again the same proj.4 bug:
-    if (proj$proj=='omerc' & !inv) {
-      if (proj$alpha<0 ) result$x <- -result$x
-      else result$y <- -result$y
+    if (!inv) {
+      if (proj$proj=='omerc') {
+        if (proj$alpha<0 ) result$x <- -result$x
+        else result$y <- -result$y
+      }
+      data.frame(x=result$x,y=result$y)
+    } else {
+      if (proj$proj=="tmerc") {
+        result$y[y<0] <- -result$y[y<0]
+      }
+      data.frame(x=result$x*180/pi,y=result$y*180/pi)
     }
-    if (!inv) data.frame(x=result$x,y=result$y)
-    else data.frame(x=result$x*180/pi,y=result$y*180/pi)
   }
 
 }

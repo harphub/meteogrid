@@ -34,7 +34,7 @@ print.geodomain = function(x, ...){
   cat("proj=",x$projection$proj,"\n")
   if (!is.null(x$NE)) cat("NE = (",x$NE[1],",",x$NE[2],")\n")
   if (!is.null(x$SW)) cat("SW = (",x$SW[1],",",x$SW[2],")\n")
-  if (!is.null(x$CLL)) cat("CLL = (",x$CLL[1],",",x$CLL[2],")\n")
+  if (!is.null(x$clonlat)) cat("centre = (",x$clonlat[1],",",x$clonlat[2],")\n")
 #  print.noquote(domain$projection)
 }
 
@@ -79,15 +79,15 @@ DomainExtent <- function(geo){
 
   if (!inherits(geo,"geodomain")) geo <- attr(geo,"domain")
 
-  if (!is.null(geo$CLL) && !is.null(geo$dx) && !is.null(geo$dy)) {
-    cxy <- project(x=geo$CLL[1], y=geo$CLL[2], proj=geo$projection)
+  if (!is.null(geo$clonlat) && !is.null(geo$dx) && !is.null(geo$dy)) {
+    dx <- geo$dx
+    dy <- geo$dy
+    clonlat <- geo$clonlat
+    cxy <- project(x=geo$clonlat[1], y=geo$clonlat[2], proj=geo$projection)
     x0  <- cxy$x - dx*(geo$nx -1)/2
     x1  <- cxy$x + dx*(geo$nx -1)/2
     y0  <- cxy$y - dy*(geo$ny -1)/2
     y1  <- cxy$y + dy*(geo$ny -1)/2
-    dx <- geo$dx
-    dy <- geo$dy
-    clonlat <- geo$CLL
   } else {
     xy <- project(list(x=c(geo$SW[1], geo$NE[1]),y=c(geo$SW[2], geo$NE[2])),
                 proj=geo$projection)
@@ -125,8 +125,8 @@ DomainPoints <- function (geo,type="lalo"){
   
   if (!inherits(geo,"geodomain")) geo <- attr(geo,"domain")
 
-  if (!is.null(geo$CLL) && !is.null(geo$dx) && !is.null(geo$dy)) {
-    cxy <- project(x=geo$CLL[1], y=geo$CLL[2], proj=geo$projection)
+  if (!is.null(geo$clonlat) && !is.null(geo$dx) && !is.null(geo$dy)) {
+    cxy <- project(x=geo$clonlat[1], y=geo$clonlat[2], proj=geo$projection)
     xy <- data.frame(x= cxy$x + c(-1, +1)*dx*(geo$nx-1)/2 ,
                      y= cxy$y + c(-1, +1)*dy*(geo$yx-1)/2) 
   } else {
@@ -220,50 +220,59 @@ zoomgrid <- function(geo, x, y, zoom=50){
 ###########################
 
 Make.domain <- function(projtype="lambert", clonlat, nxny, dxdy, exey=NULL,
-                        reflat=clonlat[2], reflon=clonlat[1], tilt,
-                        earth=list(a=6371229.0, es=0.0)){
+                        reflat=clonlat[2], reflon=clonlat[1], tilt=0,
+                        earth=list(R=6371229)){
+#                        earth=list(a=6371229.0, es=0.0)){
   if (length(dxdy)==1) dxdy <- rep(dxdy,2)
   if (projtype %in% c("lcc", "lambert")) {
 ### Lambert (as used in ALADIN: only 1 reference latitude)
     projection <- list(proj="lcc", lon_0=reflon, lat_1=reflat, lat_2=reflat)
-  } else if (projtype %in% c("merc", "somerc", "omerc", "tmerc", "mercator")){
+  } else if (projtype %in% c("merc", "omerc", "tmerc", "mercator")){
 ### Rotated & tilted Mercator
 ### as used in ALADIN: reflon=clon, reflat=clat !!!
-    if (reflat != clonlat[2] || reflon != clonlat[1]) warning('This domain is not ALADIN-compatible!')
-    if (abs(reflat)<.01) {
-      projection <- list(proj="merc",lon_0=reflon)
-    } else if (abs(tilt)<1.0E-7) {
-      projection <- list(proj = "somerc", lonc = reflon, lat_0 = reflat)
-    } else if (abs(abs(tilt)-90) < 1.0E-7) {
-      projection <- c(proj = "tmerc", lonc = reflon, lat_0 = reflat)
+### we simply *ignore* reflon and reflat (coming from FA file they are 0 !)
+#    if (reflat != clonlat[2] || reflon != clonlat[1]) warning('This domain is not ALADIN-compatible!')
+    rlon <- clonlat[1]
+    rlat <- clonlat[2]
+    if (abs(rlat) < 0.01 && abs(tilt) < 0.01) {
+# not necessary: this is OK in "omerc"
+      projection <- list(proj="merc",lon_0=rlon)
+    } else if (abs(abs(tilt)-90) < 1.0E-5) {
+# this would crash in "omerc" (alpha ~ 0)
+      projection <- c(proj = "tmerc", lon_0 = rlon, lat_0 = rlat)
+    } else if (abs(tilt) < 1.E-5) {
+      projection <- c(proj = "somerc", lon_0 = rlon, lat_0 = rlat)
     } else if (tilt>0) {
-      projection <- list(proj = "omerc", lonc = reflon,
-                            lat_0 = reflat, alpha = -90 + tilt, no_rot=NA)
+      projection <- list(proj = "omerc", lonc = rlon,
+                            lat_0 = rlat, alpha = -90 + tilt, no_rot=NA)
     } else {
-      projection <- list(proj = "omerc", lonc = reflon,
-                            lat_0 = reflat, alpha = 90 + tilt, no_rot=NA)
+      projection <- list(proj = "omerc", lonc = rlon,
+                            lat_0 = rlat, alpha = 90 + tilt, no_rot=NA)
     }
   } else if (projtype %in% c("latlong")) {
     projection=list(proj="latlong")
   } else if (projtype %in% c("ob_tran", "RotLatLon")){
-      projection <- list(proj="ob_tran","o_proj"="latlong",
+    projection <- list(proj="ob_tran","o_proj"="latlong",
                        "o_lat_p"=-reflat,"o_lon_p"=0,"lon_0"=reflon)
+  } else if (projtype %in% c("stere", "stereographic")) {
+    projection <- list(proj="stere",lon_0=reflon,lat_0=reflat)
+  } else {
+    stop("Unknown projection.")
   }
-  else stop("Unknown projection.")
   projection <- c(projection, earth)
-### project the center point
+### project the centre point
 
-  cxy <- project(list(x=clonlat[1], y=clonlat[2]), proj=projection)
+#  cxy <- project(list(x=clonlat[1], y=clonlat[2]), proj=projection)
 
-  SW0 <- c(cxy$x,cxy$y) - dxdy*(nxny - 1)/2
-  NE0 <- SW0 + dxdy*(nxny - 1)
+#  SW0 <- c(cxy$x,cxy$y) - dxdy*(nxny - 1)/2
+#  NE0 <- SW0 + dxdy*(nxny - 1)
 
-  lims <- project(list(x=c(SW0[1],NE0[1]),y=c(SW0[2],NE0[2])), proj=projection, inv=TRUE)
-  SW <- c(lims$x[1],lims$y[1])
-  NE <- c(lims$x[2],lims$y[2])
+#  lims <- project(list(x=c(SW0[1],NE0[1]),y=c(SW0[2],NE0[2])), proj=projection, inv=TRUE)
+#  SW <- c(lims$x[1],lims$y[1])
+#  NE <- c(lims$x[2],lims$y[2])
 ### and the output is...
   result <- list(projection=projection, nx=nxny[1], ny=nxny[2], dx=dxdy[1], dy=dxdy[2],
-                 SW=SW, NE=NE, CLL=clonlat)
+                 clonlat=clonlat)
   if (!is.null(exey)) result <- c(result, ex=exey[1], ey=exey[2])
   class(result) <- "geodomain"
   result
@@ -272,7 +281,7 @@ Make.domain <- function(projtype="lambert", clonlat, nxny, dxdy, exey=NULL,
 Make.domain.RLL <- function(Lon1,Lat1,SPlon,SPlat,SPangle=0,nxny,dxdy){
 ### This is for Rotated LatLon as used by Hirlam: central meridian is vertical.
 ### In the future, this should be merged with Make.domain
-### but that is not trivial: here, the center point is of no real consequence
+### but that is not trivial: here, the centre point is of no real consequence
 ### and you have to define the rotated South Pole
   if (length(dxdy)==1) dxdy <- rep(dxdy,2)
   Lon2 <- Lon1 + (nxny[1]-1)*dxdy[1]
