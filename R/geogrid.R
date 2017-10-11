@@ -83,7 +83,7 @@ DomainExtent <- function(geo){
     dx <- geo$dx
     dy <- geo$dy
     clonlat <- geo$clonlat
-    cxy <- project(x=geo$clonlat[1], y=geo$clonlat[2], proj=geo$projection)
+    cxy <- project(geo$clonlat, proj=geo$projection)
     x0  <- cxy$x - dx*(geo$nx -1)/2
     x1  <- cxy$x + dx*(geo$nx -1)/2
     y0  <- cxy$y - dy*(geo$ny -1)/2
@@ -120,15 +120,15 @@ DomainExtent <- function(geo){
 }
 
 ##########################################################
-DomainPoints <- function (geo,type="lalo"){
+DomainPoints <- function (geo, type="lalo"){
 ### return lat's and lon's of all domain points (or leave in projection if type = "xy")
   
   if (!inherits(geo,"geodomain")) geo <- attr(geo,"domain")
 
   if (!is.null(geo$clonlat) && !is.null(geo$dx) && !is.null(geo$dy)) {
-    cxy <- project(x=geo$clonlat[1], y=geo$clonlat[2], proj=geo$projection)
-    xy <- data.frame(x= cxy$x + c(-1, +1)*dx*(geo$nx-1)/2 ,
-                     y= cxy$y + c(-1, +1)*dy*(geo$yx-1)/2) 
+    cxy <- project(geo$clonlat, proj=geo$projection)
+    xy <- data.frame(x= cxy$x + c(-1, +1) * geo$dx * (geo$nx-1)/2 ,
+                     y= cxy$y + c(-1, +1) * geo$dy * (geo$ny-1)/2) 
   } else {
     lalo <- list(x=c(geo$SW[1],geo$NE[1]),y=c(geo$SW[2],geo$NE[2]))
     xy <- project(lalo, proj = geo$projection)
@@ -224,6 +224,9 @@ Make.domain <- function(projtype="lambert", clonlat, nxny, dxdy, exey=NULL,
                         earth=list(R=6371229)){
 #                        earth=list(a=6371229.0, es=0.0)){
   if (length(dxdy)==1) dxdy <- rep(dxdy,2)
+  if (length(nxny)==1) nxny <- rep(nxny,2)
+  if (!is.null(exey) && length(exey)==1) exey <- rep(exey,2)
+
   if (projtype %in% c("lcc", "lambert")) {
 ### Lambert (as used in ALADIN: only 1 reference latitude)
     projection <- list(proj="lcc", lon_0=reflon, lat_1=reflat, lat_2=reflat)

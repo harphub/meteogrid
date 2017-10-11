@@ -14,12 +14,18 @@ project <- function(x, y, proj=.Last.domain()$projection, inv=FALSE)
   if (missing(y)) {
 # apparantly, is.list gives TRUE for data.frames, but let's be careful:
     if (is.list(x) | is.data.frame(x)) {
-#      y <- x$y
-#      x <- x$x
+      if (all(is.element(c("x","y"), names(x)))) {
+        y <- x$y
+        x <- x$x
+    } else if (all(is.element(c("lon","lat"), tolower(substring(names(x), 1, 3))))) {
+        y <- x$lat
+        x <- x$lon
+    } else {
 ### we assume the first two list elements are longitude & latitude
-### whatever the actual names (could be x/y, lon/lat, Lon/Lat...)
-      y <- as.numeric(x[[2]])
-      x <- as.numeric(x[[1]])
+### whatever the actual names
+        y <- as.numeric(x[[2]])
+        x <- as.numeric(x[[1]])
+      }
       if (is.null(x) | is.null(y)) stop("No valid x and y co-ordinates found.")
     }
     else if (is.vector(x)) {
