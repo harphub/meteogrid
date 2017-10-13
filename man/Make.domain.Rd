@@ -5,7 +5,8 @@
 \description{This function returns a \code{geodomain} with the
   given parameters.}
 \usage{
-Make.domain(projtype="lambert",clonlat,nxny,dxdy,reflat=clonlat[2],reflon=clonlat[1],tilt)
+Make.domain(projtype="lambert", clonlat, nxny, dxdy, exey=NULL,
+            reflat=clonlat[2],reflon=clonlat[1],tilt=0, earth=list(R = 6371229))
 Make.domain.RLL(Lon1, Lat1, SPlon, SPlat, SPangle=0, nxny, dxdy)
 }
 \arguments{
@@ -17,10 +18,12 @@ Make.domain.RLL(Lon1, Lat1, SPlon, SPlat, SPangle=0, nxny, dxdy)
     the required grid.}
   \item{dxdy}{The resolution in meter. For lat-lon projection, the unit
     is (decimal) degrees.}
+  \item{exey}{Extension zone (ref. ALADIN domains). This is only added as an attribute and does not influence the domain itself. But if the domain is later saved in FA format, this is added to the grid dimensions.}
   \item{reflat}{The reference latitude of the projection.}
   \item{reflon}{The reference longitude of the projection.}
   \item{tilt}{Only for rotated mercator.}
   \item{Lon1,Lat1,SPlon,SPlat,SPangle}{HIRLAM-style rotated LatLon grid: rotation of South Pole.}
+  \item{earth}{The earth shape description (in proj4 format). Default is a sperical earth .}
 }
 \value{A \code{geodomain} domain. \code{Make.RLL} is a special function for Rotated LatLon using the HIRLAM conventions, which require location of the rotated South Pole.}
 \examples{

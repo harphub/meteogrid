@@ -4,11 +4,11 @@
 \title{Plotting a map for a given domain.}
 \description{This function plots country borders for a given domain.  }
 \usage{
-\method{plot}{geodomain}(x=.Last.domain(), add=!is.null(.Last.domain()),
+\method{plot}{geodomain}(x=.Last.domain(), add=FALSE,
               col=1, mapfill=c("sandybrown","steelblue"),
               add.dx=TRUE, box=TRUE,
               fill=FALSE, interior=TRUE,
-              map.database="world", ...)
+              map.database="world", asp=1, ...)
 \method{plot}{geofield}(x, ...)
 }
 \arguments{
@@ -21,6 +21,7 @@
 \item{add.dx}{If TRUE, the domain size is extended by half a grid interval in all directions, i.e. the co-ordinates are treated as the centers of grid boxes.}
 \item{box}{If TRUE, a rectangular box is drawn around the domain.}
 \item{add}{If TRUE, the plot is superposed on the current plot.}
+\item{asp}{Aspect ratio. Not considered if add=TRUE. For Lat/Lon domains, NULL may be a better choice!.}
 \item{...}{Other standard graphical parameters.}
 }
 \details{These plot methods only plot a map. For \code{geofield} objects there are various other functions that plot the actual data.

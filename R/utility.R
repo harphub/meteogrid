@@ -25,6 +25,18 @@ laloclick <- function(n=1, ...){
   project(xy,proj=.Last.domain()$projection,inv=TRUE)
 }
 
+### indicate particular grid points on a map (like points, but with grid indices)
+gridpoints <- function(x ,y=NULL, ...){
+  AllCoords <- DomainPoints(.Last.domain(),type="xy")
+  xy <- xy.coords(x,y)
+
+  xlist <- AllCoords$x[cbind(xy$x,xy$y)]
+  ylist <- AllCoords$y[cbind(xy$x,xy$y)]
+
+  points(xlist,ylist,...)
+}
+
+
 ### For fun: plot an orthographic projection of the world.
 orthoglobe <- function(reflon=0,reflat=90,map.database="world",...){
   projection <- list(proj="ortho",lon_0=reflon,lat_0=reflat,a=6371229.0,es=0.0)

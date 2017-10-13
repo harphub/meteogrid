@@ -1,6 +1,6 @@
 #-------------------------------------------#
 # Part of R-package geogrid                 #
-# Copyright (c) 2003-2016 Alex Deckmyn      #
+# Copyright (c) 2003-2017 Alex Deckmyn      #
 #   Royal Meteorological Institute, Belgium #
 # Released under GPL-3 license              #
 #-------------------------------------------#
@@ -368,8 +368,9 @@ plot.geodomain <- function(x=.Last.domain(),
   }
 }
 
+### retrieve the exact map for a domain
 getmap <- function(domain=.Last.domain(), interior=TRUE, 
-                   fill=FALSE, map.database="world", ...) {
+                   fill=FALSE, map.database="world") {
   if (fill && !interior) warning("When fill=TRUE, interior=FALSE is ignored.")
   if (!inherits(domain, "geodomain")) domain <- attributes(domain)$domain
   glimits <- DomainExtent(domain)
@@ -379,14 +380,14 @@ getmap <- function(domain=.Last.domain(), interior=TRUE,
   boundaries <- maps::map(database=map.database,
                      xlim=glimits$lonlim, ylim=glimits$latlim,
                      fill=fill, interior=interior, plot=FALSE)
-  geo <- as.list(project(boundaries, proj = domain$projection,inv = FALSE))
+  geo <- as.list(project(boundaries, proj = domain$projection, inv = FALSE))
   if (fill) {
     geo$names <- boundaries$names
     class(geo) <- "map"
   }
   if (packageVersion("maps") < "3.2") {
     if (fill) {
-     cat("maps version older than 3.2.0 does not support polygon clipping setting fill=FALSE.")
+     cat("maps version older than 3.2.0 does not support polygon clipping! Setting fill=FALSE.")
     }
     xyper <- periodicity(domain)
     geo <- map.restrict(geo,xlim=xlim,ylim=ylim,xperiod=xyper$xper,yperiod=xyper$yper)
@@ -396,6 +397,7 @@ getmap <- function(domain=.Last.domain(), interior=TRUE,
   invisible(geo)
 }
 
+### retrieve the 4 corners of a domain as a polygon
 getbox <- function(domain=.Last.domain()) {
   if (!inherits(domain, "geodomain")) domain <- attributes(domain)$domain
   glimits <- DomainExtent(domain)
@@ -406,20 +408,19 @@ getbox <- function(domain=.Last.domain()) {
   invisible(box)
 }
 
-getmask <- function(domain=.Last.domain(), ...) {
+### retrieve the inverted map of a domain (e.g. to erase values over sea)
+getmask <- function(domain=.Last.domain(), map.database="world") {
   if (!requireNamespace("sf")) stop("sf package not available.")
   if (!inherits(domain, "geodomain")) domain <- attributes(domain)$domain
 
-  mbox <- sf::st_as_sf(getbox(domain, ...))
-  mmap <- sf::st_as_sf(getmap(domain, fill=TRUE, ...))
+  mbox <- sf::st_geometry(sf::st_as_sf(getbox(domain)))
+  mmap <- sf::st_geometry(sf::st_as_sf(getmap(domain, fill=TRUE, map.database=map.database)))
   mdif <- sf::st_difference(mbox, sf::st_union(sf::st_combine(mmap)))
   mdif
-# mdif$geometry[1] is a sfc_MULTIPOLYGON
-# how extract is as a simple "map" list?
-# need sf2map()
-# BUT: polygons with holes, so will never work with simiple "polygon"
-# so simply use the "plot"
-#  plot(mdif, add=TRUE, col="white", border=0)
+# mdif is a sfc_MULTIPOLYGON
+# BUT: polygons with holes, so will never work with simple "polygon"
+# simply use the "plot" method from "sf"
+# plot(mdif, add=TRUE, col="white", border=0)
 }
 
 
@@ -433,7 +434,7 @@ plot.geofield <- function(x, ...){
 #####################################################
 
 domainbox <-
-  function (geo , add.dx = TRUE, length=200, ...)
+  function (geo , add.dx = TRUE, npoints=200, ...)
 {
   if (is.null(.Last.domain())) stop("There is no image yet to add the domainbox to.")
   if (is.geofield(geo)) domain <- attributes(geo)$domain
@@ -451,8 +452,8 @@ domainbox <-
   }
 
 
-  x <- seq(xlim[1], xlim[2], length = length)
-  y <- seq(ylim[1], ylim[2], length = length)
+  x <- seq(xlim[1], xlim[2], length = npoints)
+  y <- seq(ylim[1], ylim[2], length = npoints)
 
   domainframe <- cbind(c(rep(xlim[1],length(y)), x, rep(xlim[2],length(y)),rev(x)),
                        c(y,rep(ylim[2],length(x)), rev(y), rep(ylim[1],length(x)) ) )

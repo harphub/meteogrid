@@ -30,7 +30,7 @@ regrid <- function (infield, newdomain=.Last.domain(), method="bilin",
   }
 
   if (method %in% c("mean", "median")) {
-    return(upscale_regrid(infield, newdomain, method))
+    return(upscale_regrid(infield=infield, newdomain=newdomain, method=method, weights=weights))
   } else {
 # speed-up: if you already have the weights, no need to calculate lon/lat of the new domain!
     if (is.null(weights)) weights <- regrid.init(olddomain=infield, newdomain=newdomain, method=method, 
@@ -52,10 +52,16 @@ regrid.init <- function (olddomain, newdomain=.Last.domain(), method="bilin", ma
     if ("domain" %in% names(attributes(newdomain))) newdomain <- attributes(newdomain)$domain
     else stop("new domain not well defined!")
   }
-  newpoints <- DomainPoints(newdomain)
-  if (is.null(mask) != is.null(newmask)) stop("When using Land/Sea masks, you *must* provide both domains!")
-  point.interp.init(lon=as.vector(newpoints$lon), as.vector(newpoints$lat),
-                    method=method, domain=olddomain, mask=as.vector(mask), pointmask=as.vector(newmask), force=FALSE)
+  if (method %in% c("mean")) {
+    return(upscale_regrid_init(olddomain, newdomain))
+  } else if (method %in% c("median")) {
+    stop("Method", method, "not yet supported. Sorry.")
+  } else {
+    newpoints <- DomainPoints(newdomain)
+    if (is.null(mask) != is.null(newmask)) stop("When using Land/Sea masks, you *must* provide both domains!")
+    point.interp.init(lon=as.vector(newpoints$lon), as.vector(newpoints$lat),
+                      method=method, domain=olddomain, mask=as.vector(mask), pointmask=as.vector(newmask), force=FALSE)
+  }
 }
 
 
