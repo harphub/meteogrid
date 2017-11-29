@@ -18,6 +18,12 @@ is.geodomain <- function(x){
   inherits(x,"geodomain")
 }
 
+as.geodomain <- function(x) {
+  if (inherits(x, "geodomain")) return(x)
+  else if ("domain" %in% names(attributes(x))) return(attributes(x)$domain)
+  else stop("domain not well defined!")
+}
+
 print.geofield <- function(x, ...){
   cat(paste(attr(x,"info")$origin,":",attr(x,"info")$name),"\n")
   cat("Time:\n")

@@ -372,7 +372,7 @@ plot.geodomain <- function(x=.Last.domain(),
 getmap <- function(domain=.Last.domain(), interior=TRUE, 
                    fill=FALSE, map.database="world") {
   if (fill && !interior) warning("When fill=TRUE, interior=FALSE is ignored.")
-  if (!inherits(domain, "geodomain")) domain <- attributes(domain)$domain
+  domain <- as.geodomain(domain)
   glimits <- DomainExtent(domain)
   xlim <- c(glimits$x0,glimits$x1) + glimits$dx*c(-1,1)/2
   ylim <- c(glimits$y0,glimits$y1) + glimits$dy*c(-1,1)/2
@@ -401,7 +401,7 @@ getmap <- function(domain=.Last.domain(), interior=TRUE,
 
 ### retrieve the 4 corners of a domain as a polygon
 getbox <- function(domain=.Last.domain()) {
-  if (!inherits(domain, "geodomain")) domain <- attributes(domain)$domain
+  domain <- as.geodomain(domain)
   glimits <- DomainExtent(domain)
   xlim <- c(glimits$x0,glimits$x1) + glimits$dx*c(-1,1)/2
   ylim <- c(glimits$y0,glimits$y1) + glimits$dy*c(-1,1)/2
@@ -412,8 +412,8 @@ getbox <- function(domain=.Last.domain()) {
 
 ### retrieve the inverted map of a domain (e.g. to erase values over sea)
 getmask <- function(domain=.Last.domain(), map.database="world") {
-  if (!requireNamespace("sf")) stop("sf package not available.")
-  if (!inherits(domain, "geodomain")) domain <- attributes(domain)$domain
+  if (!suppressWarnings(suppressMessages(requireNamespace("sf")))) stop("sf package not available.")
+  domain <- as.geodomain(domain)
 
   mbox <- sf::st_geometry(sf::st_as_sf(getbox(domain)))
   mmap <- sf::st_geometry(sf::st_as_sf(getmap(domain, fill=TRUE, map.database=map.database)))
@@ -439,8 +439,7 @@ domainbox <-
   function (geo , add.dx = TRUE, npoints=200, ...)
 {
   if (is.null(.Last.domain())) stop("There is no image yet to add the domainbox to.")
-  if (is.geofield(geo)) domain <- attributes(geo)$domain
-  else domain <- geo
+  domain <- as.geodomain(geo)
 
   glimits <- DomainExtent(domain)
   if (!add.dx) {

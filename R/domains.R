@@ -123,36 +123,36 @@ DomainExtent <- function(geo){
 ### You could use DomainPoints in stead, but then you'd be projecting
 ### all domain points, which is a bit of an overkill...
 
-  if (!inherits(geo,"geodomain")) geo <- attr(geo,"domain")
+  domain <- as.geodomain(geo)
 
-  if (!is.null(geo$clonlat) && !is.null(geo$dx) && !is.null(geo$dy)) {
-    dx <- geo$dx
-    dy <- geo$dy
-    clonlat <- geo$clonlat
-    cxy <- project(geo$clonlat, proj=geo$projection)
-    x0  <- cxy$x - dx*(geo$nx -1)/2
-    x1  <- cxy$x + dx*(geo$nx -1)/2
-    y0  <- cxy$y - dy*(geo$ny -1)/2
-    y1  <- cxy$y + dy*(geo$ny -1)/2
+  if (!is.null(domain$clonlat) && !is.null(domain$dx) && !is.null(domain$dy)) {
+    dx <- domain$dx
+    dy <- domain$dy
+    clonlat <- domain$clonlat
+    cxy <- project(domain$clonlat, proj=domain$projection)
+    x0  <- cxy$x - dx*(domain$nx -1)/2
+    x1  <- cxy$x + dx*(domain$nx -1)/2
+    y0  <- cxy$y - dy*(domain$ny -1)/2
+    y1  <- cxy$y + dy*(domain$ny -1)/2
   } else {
-    xy <- project(list(x=c(geo$SW[1], geo$NE[1]),y=c(geo$SW[2], geo$NE[2])),
-                proj=geo$projection)
+    xy <- project(list(x=c(domain$SW[1], domain$NE[1]),y=c(domain$SW[2], domain$NE[2])),
+                proj=domain$projection)
     x0 <- xy$x[1]
     y0 <- xy$y[1]
     x1 <- xy$x[2]
     y1 <- xy$y[2]
-    dx <- (x1-x0)/(geo$nx-1)
-    dy <- (y1-y0)/(geo$ny-1)
+    dx <- (x1-x0)/(domain$nx-1)
+    dy <- (y1-y0)/(domain$ny-1)
     xc <- (x0+x1)/2
     yc <- (y0+y1)/2
-    cll <- project(list(x=xc,y=yc),proj=geo$projection,inv=TRUE)
+    cll <- project(list(x=xc,y=yc),proj=domain$projection,inv=TRUE)
     clonlat <- c(cll$x, cll$y)
   }
-  borders <- project(list(x=c(seq(x0,x1,length=geo$nx),rep(x1,geo$ny),
-                              seq(x0,x1,length=geo$nx),rep(x0,geo$ny)),
-                          y=c(rep(y0,geo$nx),seq(y0,y1,length=geo$ny),
-                              rep(y1,geo$nx),seq(y0,y1,length=geo$ny))),
-                      proj=geo$projection,inv=TRUE)
+  borders <- project(list(x=c(seq(x0,x1,length=domain$nx),rep(x1,domain$ny),
+                              seq(x0,x1,length=domain$nx),rep(x0,domain$ny)),
+                          y=c(rep(y0,domain$nx),seq(y0,y1,length=domain$ny),
+                              rep(y1,domain$nx),seq(y0,y1,length=domain$ny))),
+                      proj=domain$projection,inv=TRUE)
 ### ATTENTION: if the map crosses or comes close to the date line (meridian 180/-180) this will not
 ### work correctly. In the map command we must then set lonlim=NULL !!!
 
@@ -162,35 +162,32 @@ DomainExtent <- function(geo){
 
   list(lonlim = lonlim , latlim = range(borders$y, na.rm=TRUE),
        clonlat=clonlat,
-       x0=x0, y0=y0, x1=x1, y1=y1, dx=dx, dy=dy, nx=geo$nx, ny=geo$ny)
+       x0=x0, y0=y0, x1=x1, y1=y1, dx=dx, dy=dy, nx=domain$nx, ny=domain$ny)
 }
 
 ##########################################################
 DomainPoints <- function (geo, type="lalo"){
 ### return lat's and lon's of all domain points (or leave in projection if type = "xy")
-  if (!inherits(geo, "geodomain")) {
-    if ("domain" %in% names(attributes(geo))) geo <- attributes(geo)$domain
-    else stop("domain not well defined!")
-  }
+  domain <- as.geodomain(geo)
  
-  if (!is.null(geo$clonlat) && !is.null(geo$dx) && !is.null(geo$dy)) {
-    cxy <- project(geo$clonlat, proj=geo$projection)
-    xy <- data.frame(x= cxy$x + c(-1, +1) * geo$dx * (geo$nx-1)/2 ,
-                     y= cxy$y + c(-1, +1) * geo$dy * (geo$ny-1)/2) 
+  if (!is.null(domain$clonlat) && !is.null(domain$dx) && !is.null(domain$dy)) {
+    cxy <- project(domain$clonlat, proj=domain$projection)
+    xy <- data.frame(x= cxy$x + c(-1, +1) * domain$dx * (domain$nx-1)/2 ,
+                     y= cxy$y + c(-1, +1) * domain$dy * (domain$ny-1)/2) 
   } else {
-    lalo <- list(x=c(geo$SW[1],geo$NE[1]),y=c(geo$SW[2],geo$NE[2]))
-    xy <- project(lalo, proj = geo$projection)
+    lalo <- list(x=c(domain$SW[1],domain$NE[1]),y=c(domain$SW[2],domain$NE[2]))
+    xy <- project(lalo, proj = domain$projection)
   }
-  xydomain <- expand.grid(x = seq(xy$x[1], xy$x[2], length = geo$nx),
-                          y = seq(xy$y[1], xy$y[2], length = geo$ny))
+  xydomain <- expand.grid(x = seq(xy$x[1], xy$x[2], length = domain$nx),
+                          y = seq(xy$y[1], xy$y[2], length = domain$ny))
   if (type == "lalo") {
-    lalolist <- project(xydomain, proj = geo$projection, inv = TRUE)
-    list(lon = matrix(lalolist$x, ncol = geo$ny, nrow = geo$nx),
-         lat = matrix(lalolist$y, ncol = geo$ny, nrow = geo$nx))
+    lalolist <- project(xydomain, proj = domain$projection, inv = TRUE)
+    list(lon = matrix(lalolist$x, ncol = domain$ny, nrow = domain$nx),
+         lat = matrix(lalolist$y, ncol = domain$ny, nrow = domain$nx))
   }
   else if (type == "xy") {
-    list(x=matrix(xydomain$x, ncol = geo$ny, nrow = geo$nx),
-         y=matrix(xydomain$y, ncol = geo$ny, nrow = geo$nx))
+    list(x=matrix(xydomain$x, ncol = domain$ny, nrow = domain$nx),
+         y=matrix(xydomain$y, ncol = domain$ny, nrow = domain$nx))
   } else {
     print("Unknown type.")
   }

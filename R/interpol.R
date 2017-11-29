@@ -24,10 +24,7 @@ regrid <- function (infield, newdomain=.Last.domain(), method="bilin",
                     mask=NULL, newmask=NULL, weights=NULL)
 {
 ### regridding: bilinear, bi-cubic or nearest neighbour, and now also upscaling by mean
-  if (!is.geodomain(newdomain)) {
-    if ("domain" %in% names(attributes(newdomain))) newdomain <- attributes(newdomain)$domain
-    else stop("new domain not well defined!")
-  }
+  newdomain <- as.geodomain(newdomain)
 
   if (method %in% c("mean", "median")) {
     return(upscale_regrid(infield=infield, newdomain=newdomain, method=method, weights=weights))
@@ -48,10 +45,8 @@ regrid.init <- function (olddomain, newdomain=.Last.domain(), method="bilin", ma
 {
 ### regridding: either bilinear of nearest neighbour
 ### olddomain and newdomain may be geofields 
-  if (!is.geodomain(newdomain)) {
-    if ("domain" %in% names(attributes(newdomain))) newdomain <- attributes(newdomain)$domain
-    else stop("new domain not well defined!")
-  }
+  olddomain <- as.geodomain(olddomain)
+  newdomain <- as.geodomain(newdomain)
   if (method %in% c("mean")) {
     return(upscale_regrid_init(olddomain, newdomain))
   } else if (method %in% c("median")) {
@@ -70,7 +65,8 @@ regrid.init <- function (olddomain, newdomain=.Last.domain(), method="bilin", ma
 ### fractional indices of points whithin a grid
 ### clip means: only consider points that are less than half a grid box out of the domain
 point.index <- function(lon, lat, domain=.Last.domain(), clip=TRUE){
-  if (is.geofield(domain)) domain <- attributes(domain)$domain
+  domain <- as.geodomain(domain)
+
   if (missing(lat)){
     if (is.matrix(lon)){
       lat <- lon[,2]
@@ -120,7 +116,8 @@ point.interp.init <- function(lon, lat, domain=.Last.domain(), method="bilin", m
 
 ### bilinear interpolation
 point.bilin.init <- function(lon, lat, domain=.Last.domain(), mask=NULL, pointmask=NULL, force=FALSE){
-  if (is.geofield(domain)) domain <- attributes(domain)$domain
+  domain <- as.geodomain(domain)
+
   nx <- domain$nx
   ny <- domain$ny
   index <- point.index(lon,lat,domain)
@@ -192,7 +189,8 @@ point.bilin <- function(lon, lat, infield, mask=NULL, pointmask=NULL, force=FALS
 
 ### nearest neighbour (closest point)
 point.closest.init <- function(lon, lat, domain=.Last.domain(), mask=NULL, pointmask=NULL, force=FALSE) {
-  if (is.geofield(domain)) domain <- attributes(domain)$domain
+  domain <- as.geodomain(domain)
+
   nx <- domain$nx
   ny <- domain$ny
   index <- point.index(lon,lat,domain)
@@ -282,7 +280,7 @@ point.bicubic.init <- function(lon, lat, domain=.Last.domain()){
 ### "weights" in fact only contains the index of neighbouring points
 ### because the weights are computed from the field values.
 ### But it may make a little difference.
-  if (is.geofield(domain)) domain <- attributes(domain)$domain
+  domain <- as.geodomain(domain)
 
   nx <- domain$nx
   ny <- domain$ny

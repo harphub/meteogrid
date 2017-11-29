@@ -62,10 +62,8 @@ upscale_factor <- function(infield, factor, method="mean", ... ){
 
 ### take the mean value of all cells whose centre falls in the new grid cell
 upscale_regrid <- function(infield, newdomain, method="mean", weights=NULL, ... ) {
-  if (!is.geodomain(newdomain)) {
-    if ("domain" %in% names(attributes(newdomain))) newdomain <- attributes(newdomain)$domain
-    else stop("new domain not well defined!")
-  }
+  newdomain <- as.geodomain(newdomain)
+
   gnx <- newdomain$nx
   gny <- newdomain$ny
   if (is.null(weights)) {
@@ -95,14 +93,9 @@ upscale_regrid <- function(infield, newdomain, method="mean", weights=NULL, ... 
 }
 
 upscale_regrid_init <- function(olddomain, newdomain) {
-    if (!is.geodomain(olddomain)) {
-    if ("domain" %in% names(attributes(olddomain))) olddomain <- attributes(olddomain)$domain
-    else stop("old domain not well defined!")
-  }
-  if (!is.geodomain(newdomain)) {
-    if ("domain" %in% names(attributes(newdomain))) newdomain <- attributes(newdomain)$domain
-    else stop("new domain not well defined!")
-  }
+  olddomain <- as.geodomain(olddomain)
+  newdomain <- as.geodomain(newdomain)
+
   gnx <- newdomain$nx
   gny <- newdomain$ny
   opoints <- DomainPoints(olddomain)

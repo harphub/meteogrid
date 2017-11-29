@@ -103,7 +103,8 @@ geowind.init <- function(domain){
 ### $angle is the angle that must be added to the wind direction (=wind origin!) from grid
 ### to get the actual geographic value
 ### checked for LCC,RLL
-  if (is.geofield(domain)) domain <- attributes(domain)$domain
+  domain <- as.geodomain(domain)
+
   ww <- switch(domain$projection$proj,
           "ob_tran" = .geowind.RLL(domain),
           "lcc" = .geowind.LCC(domain),
@@ -120,6 +121,7 @@ geowind.init <- function(domain){
 
 ## rotated Lat/Lon
 .geowind.RLL <- function(domain){
+  domain <- as.geodomain(domain)
   rad <- pi/180.
   SPlat <- -domain$projection$o_lat_p
   SPlon <- domain$projection$lon_0
@@ -152,6 +154,7 @@ geowind.init <- function(domain){
 
 ## Lambert conformal conical
 .geowind.LCC <- function(domain){
+  domain <- as.geodomain(domain)
 ### 12/2014: change sign of angle for consistency
   rad <- pi/180.
 
@@ -169,6 +172,7 @@ geowind.init <- function(domain){
 }
 
 .geowind.LCC2 <- function(domain){
+  domain <- as.geodomain(domain)
 ### as coded in GL
 ### no mapfactor??? for the rest, identical result if lat1=lat2
   rad <- pi/180.
@@ -193,6 +197,7 @@ geowind.init <- function(domain){
 
 ## Polar Stereographic
 .geowind.PS <- function(domain){
+  domain <- as.geodomain(domain)
   warning("Polar Stereographic wind rotation: unvalidated!!!")
   rad <- pi/180.
   lalo <- DomainPoints(domain,"lalo")
@@ -211,6 +216,7 @@ geowind.init <- function(domain){
 
 ## Rotated Mercator
 .geowind.RM <- function(domain){
+  domain <- as.geodomain(domain)
   stop("Rotated Mercator wind rotation: unfinished!!!")
   rad <- pi/180.
   lalo <- DomainPoints(domain,"lalo")
