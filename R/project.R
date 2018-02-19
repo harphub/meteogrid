@@ -124,13 +124,16 @@ periodicity <- function(domain=.Last.domain()){
 ### Only cylindrical projections are periodic, I suppose.
 ### TO DO: there are more, but I am not interested in them.
 ### even
+  radius <- domain$projection$R
+  if (is.null(radius)) radius <- domain$projection$a
+  if (is.null(radius)) radius <- NA_real_
   xper <- switch(domain$projection$proj,
             "latlong"   = 360,
             "ob_tran"   = 2*pi, ### BUG: this could be any oblique projection
-            "merc"     = 2 * pi * domain$projection$a,
-            "omerc"    = 2 * pi * domain$projection$a,
-            "tmerc"    = 2 * pi * domain$projection$a,
-            "somerc"   = 2 * pi * domain$projection$a,
+            "merc"     = 2 * pi * radius,
+            "omerc"    = 2 * pi * radius,
+            "tmerc"    = 2 * pi * radius,
+            "somerc"   = 2 * pi * radius,
             NA_real_)
   yper <- NA_real_
   list(xper=xper,yper=yper)
