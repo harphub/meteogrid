@@ -49,14 +49,14 @@ function(U,V,x=1:dim(U)[1],y=1:dim(U)[2],thinx=10,thiny=thinx,aspect=1,
 ### you don't want arrows to overlap too much
 ### I simply ensure that u and v are smaller than .9 (maxscale) times the (thinned) domain distance
 ### can be overruled by rescale
-  if(missing(rescale)){
+  if (missing(rescale)) {
     dx <- xcoord[2]-xcoord[1]
     dy <- ycoord[2]-ycoord[1]
-    scale <-  maxscale * min( dx/max(abs(U[filterxy]),na.rm=TRUE) , dy/(max(abs(V[filterxy]),na.rm=TRUE)),na.rm=TRUE )
-  }
-  else
+    scale <-  maxscale * min( dx/max(abs(U[filterxy]),na.rm=TRUE),
+                              dy/(max(abs(V[filterxy]),na.rm=TRUE)),na.rm=TRUE )
+  } else {
     scale <- rescale
-
+  }
 ### The vector components are
 ### in fact nothing else than the end points of arrows
 ### v is scaled according to the aspect ratio (asp) of the axes.
@@ -66,11 +66,11 @@ function(U,V,x=1:dim(U)[1],y=1:dim(U)[2],thinx=10,thiny=thinx,aspect=1,
   v <- y + scale * as.vector(V[filterxy])
 
 ### create a plot area
-  if(!add) plot(c(x[1],x[length(x)]),c(y[1],y[length(y)]),col=0,axes=FALSE,xlab=xlab,ylab=ylab,...)
+  if (!add) plot(c(x[1],x[length(x)]),c(y[1],y[length(y)]),col=0,axes=FALSE,xlab=xlab,ylab=ylab,...)
 ### at last, the vectors...
 ### avoid a list of warnings when wind speed is 0...
   suppressWarnings(arrows(x,y,u,v,length=arrowsize,col=arrowcolor,lwd=lwd))
-  if(!add) box()
+  if (!add) box()
 }
 
 ###################################
@@ -79,23 +79,21 @@ function(U,V,x=1:dim(U)[1],y=1:dim(U)[2],thinx=10,thiny=thinx,aspect=1,
 ####################################
 
 limage <-
-  function(x=1:dim(z)[1],y=1:dim(z)[2],z,smooth=FALSE,
-           nlevels=15,levels=pretty(zlim,nlevels),
+  function(x=1:dim(z)[1], y=1:dim(z)[2], z, smooth=FALSE,
+           nlevels=15, levels=pretty(z,nlevels),
            color.palette=colorRampPalette(c("blue","white","red")),
            col=color.palette(length(levels)-1), na.col=par("bg"),
-           legend=FALSE,legend.cex=.7,
-           legend.width=1/12,legend.sep=c(1/4,1/2),
-           legend.skip=1,legend.digits=5,
-           plot.title,title.adjust=TRUE,
+           legend=FALSE, legend.cex=.7,
+           legend.width=1/12, legend.sep=c(1/4,1/2),
+           legend.skip=1, legend.digits=5,
+           plot.title, title.adjust=TRUE,
            legend.title,
            asp=1, useRaster=TRUE, ...){
-    zlim <- range(z,finite=TRUE)
     ncol <- length(levels)-1
-    if(smooth){
+    if (smooth) {
       xlim <- range(x)
       ylim <- range(y)
-    }
-    else {
+    } else {
       dx <- diff(x)[1]
       dy <- diff(y)[1]
       xlim <- c(min(x)-dx/2,max(x)+dx/2)
@@ -104,15 +102,14 @@ limage <-
     mapxlim <- xlim
     mapylim <- ylim
 
-    if(legend)xlim[2] <- xlim[1]+(xlim[2]-xlim[1])/(1-legend.width)
+    if (legend) xlim[2] <- xlim[1]+(xlim[2]-xlim[1])/(1-legend.width)
 
     nlevels <- length(levels)
-    if(smooth){
+    if (smooth) {
       plot.new()
       plot.window(xlim, ylim, "", xaxs="i", yaxs="i", asp=asp)
       .filled.contour(x,y,z,as.double(levels),col)
-    }
-    else {
+    } else {
 ### useRaster is available from v 2.13.0 on. It improves the quality enormously.
 ### but you may not want to use it if you are exporting to some other output device...
       if (na.col != par("bg") && any(is.na(z)) ) {
@@ -127,7 +124,7 @@ limage <-
     }
 ### The legend is drawn inside the same plot area, so using the same co-ordinate space as the map.
 ### That may seem weird, but it is quite effective, fast and easy to combine several plots.
-    if(legend){
+    if (legend) {
       legendlevels <- levels
 #      if(legendlevels[1]<min(z,na.rm=TRUE))legendlevels[1]=min(z,na.rm=TRUE)
 #      if(legendlevels[(ncol+1)]>max(z,na.rm=TRUE))
@@ -146,15 +143,14 @@ limage <-
       text(x=text.x,y=ylim[1],labels=format(min(legendlevels),digits=5),
            cex=legend.cex,adj=c(0,0))
       y.index <- seq(1+legend.skip,ncol,by=legend.skip)
-      if(ncol+1-y.index[length(y.index)]<legend.skip/2)
-        y.index=y.index[-length(y.index)]
+      if (ncol+1-y.index[length(y.index)]<legend.skip/2) y.index=y.index[-length(y.index)]
       text(x=text.x,y=text.y[y.index],
            labels=format(legendlevels[y.index],
            digits=legend.digits),
            cex=legend.cex,adj=c(0,.5))
       text(x=text.x,y=ylim[2],labels=format(max(legendlevels),digits=5),
            cex=legend.cex,adj=c(0,1))
-      if(!missing(legend.title)){
+      if (!missing(legend.title)) {
         oadj <- par("adj")
         nadj <- oadj+oadj*(1-legend.width)
         par(adj=nadj)
@@ -163,8 +159,8 @@ limage <-
       }
 
     }
-    if(!missing(plot.title)){
-      if(legend & title.adjust){
+    if (!missing(plot.title)) {
+      if (legend & title.adjust) {
         oadj <- par("adj")
         nadj <- oadj*(1-legend.width)
         par(adj=nadj)
@@ -178,43 +174,51 @@ limage <-
 ### SHORTCUTS            ###
 ############################
 
-iview <- function(x,nlevels=15,color.palette=irainbow,
+iview <- function(x, nlevels=15, color.palette=irainbow,
+            levels=pretty(x[1:gdomain$nx,1:gdomain$ny], nlevels),
+            col=color.palette(length(levels)-1),
             title=paste(attr(x,"info")$name,"\n",attr(x,"time")),
             legend=FALSE,mask=NULL,na.col=par("bg"),
             drawmap=TRUE, maplwd=.5, mapcol='black', map.database='world', 
             interior=TRUE, fill=FALSE, ...){
-  if(!inherits(x,"geofield")) stop("iview requires a geofield as input.")
-  if(!is.null(mask)){
-    if(is.character(mask)) mask <- eval(parse(text=mask))
+  if (!inherits(x,"geofield")) stop("iview requires a geofield as input.")
+  if (!is.null(mask)) {
+    if (is.character(mask)) mask <- eval(parse(text=mask))
     else if (is.expression(mask)) mask <- eval(mask)
     x[!eval(expression(mask))] <- NA
   }
   gdomain <- attr(x,"domain")
   glimits <- DomainExtent(gdomain)
 
+#  if (missing(levels)) levels <- pretty(x[1:gdomain$nx,1:gdomain$ny], nlevels)
+#  if (missing(col)) col <- color.palette(length(levels) - 1)
+
   limage(x=seq(glimits$x0,glimits$x1,length=glimits$nx),
          y=seq(glimits$y0,glimits$y1,length=glimits$ny),
          z=x[1:gdomain$nx,1:gdomain$ny],
          smooth=FALSE,
          plot.title=title(main=title),
-         color.palette=color.palette, legend=legend, nlevels=nlevels, na.col=na.col, ...)
+         color.palette=color.palette, legend=legend, nlevels=nlevels,
+         na.col=na.col, levels=levels, col=col, ...)
   .Last.domain(gdomain)
 
-  if (drawmap)
+  if (drawmap) {
     plot.geodomain(gdomain, add=TRUE,
          add.dx=TRUE, box=TRUE, lwd=maplwd, col=mapcol,
          interior=interior, fill=fill,
          map.database=map.database)
+  }
 }
 
 fcview <- function(x,nlevels=15,color.palette=irainbow,
+            levels=pretty(x[1:gdomain$nx,1:gdomain$ny], nlevels),
             title=paste(attr(x,"info")$name,"\n",attr(x,"time")),
             legend=TRUE,mask=NULL,
             drawmap=TRUE, maplwd=.5, mapcol='black', map.database='world',
             interior=TRUE, fill=FALSE, ...){
-  if(!inherits(x,"geofield")) stop("fcview requires a geofield as input.")
-  if(!is.null(mask)){
-    if(is.character(mask)) mask <- eval(parse(text=mask))
+  if (!inherits(x,"geofield")) stop("fcview requires a geofield as input.")
+  if (!is.null(mask)){
+    if (is.character(mask)) mask <- eval(parse(text=mask))
     else if (is.expression(mask)) mask <- eval(mask)
     x[!eval(expression(mask))] <- NA
   }
@@ -226,14 +230,15 @@ fcview <- function(x,nlevels=15,color.palette=irainbow,
          z=x[1:gdomain$nx,1:gdomain$ny],
          smooth=TRUE,
          plot.title=title(main=title),
-         color.palette=color.palette, legend=legend, nlevels=nlevels, ...)
+         color.palette=color.palette, legend=legend, nlevels=nlevels, levels=levels, col=col, ...)
   .Last.domain(gdomain)
 
-  if (drawmap)
+  if (drawmap) {
     plot.geodomain(gdomain, add=TRUE,
          add.dx=TRUE, box=TRUE, lwd=maplwd, col=mapcol,
          interior=interior, fill=fill,
          map.database=map.database)
+  }
 }
 
 cview <- function(x,nlevels=15,
@@ -241,9 +246,9 @@ cview <- function(x,nlevels=15,
            mask=NULL, add=FALSE,
            drawmap=!add, maplwd=.5, mapcol="black", map.database="world",
            interior=TRUE, fill=FALSE, ...){
-  if(!inherits(x,"geofield")) stop("cview requires a geofield as input.")
-  if(!is.null(mask)){
-    if(is.character(mask)) mask <- eval(parse(text=mask))
+  if (!inherits(x,"geofield")) stop("cview requires a geofield as input.")
+  if (!is.null(mask)) {
+    if (is.character(mask)) mask <- eval(parse(text=mask))
     else if (is.expression(mask)) mask <- eval(mask)
     x[!eval(expression(mask))] <- NA
   }
@@ -266,7 +271,7 @@ cview <- function(x,nlevels=15,
 vview <- function(U,V,add=FALSE,aspcorrect=TRUE,
                   drawmap=TRUE, maplwd=.5, mapcol="black", map.database='world',
                   interior=TRUE, fill=FALSE, ...){
-  if(!inherits(U,"geofield") | !inherits(V,"geofield")) stop("vview requires 2 geofields as input.")
+  if (!inherits(U,"geofield") | !inherits(V,"geofield")) stop("vview requires 2 geofields as input.")
   gdomain <- attr(U,"domain")
   glimits <- DomainExtent(gdomain)
   x <- seq(glimits$x0,glimits$x1,length=gdomain$nx)
@@ -278,7 +283,7 @@ vview <- function(U,V,add=FALSE,aspcorrect=TRUE,
 #    if ( attr(U,"domain")$projection[1]=="proj=lalo" & (aspcorrect) ){
 
   ppp <- gdomain$projection
-  if(is.list(ppp)) proj <- ppp$proj
+  if (is.list(ppp)) proj <- ppp$proj
   else proj <- substr(ppp[1],5,nchar(ppp[1]))
   if ( aspcorrect & (proj=="lalo" | proj=="rotlalo") ){
     print("LatLon domain: rescaling U components to correct for local aspect ratio U -> U / cos(lat).")
@@ -318,8 +323,9 @@ plot.geodomain <- function(x=.Last.domain(),
              map.database="world", asp=1, ...){
 
 ### consistency
-  if (add) domain <- .Last.domain()
-  else {
+  if (add) {
+    domain <- .Last.domain()
+  } else {
     domain <- x
     add.dx <- TRUE
   }
@@ -330,11 +336,9 @@ plot.geodomain <- function(x=.Last.domain(),
   if (!add.dx){
     xlim <- c(glimits$x0,glimits$x1)
     ylim <- c(glimits$y0,glimits$y1)
-  }
-  else {
+  } else {
     xlim <- c(glimits$x0,glimits$x1) + glimits$dx*c(-1,1)/2
     ylim <- c(glimits$y0,glimits$y1) + glimits$dy*c(-1,1)/2
-
   }
 
   if (!add){
@@ -445,13 +449,10 @@ domainbox <-
   if (!add.dx) {
     xlim <- c(glimits$x0, glimits$x1)
     ylim <- c(glimits$y0, glimits$y1)
-  }
-  else {
+  } else {
     xlim <- c(glimits$x0, glimits$x1) + glimits$dx*c(-1,1)/2
     ylim <- c(glimits$y0, glimits$y1) + glimits$dy*c(-1,1)/2
-
   }
-
 
   x <- seq(xlim[1], xlim[2], length = npoints)
   y <- seq(ylim[1], ylim[2], length = npoints)

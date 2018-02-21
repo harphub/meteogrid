@@ -10,6 +10,8 @@ methods of image, contour, fcontour and vecplot.
 }
 \usage{
 iview(x,nlevels=15,color.palette=irainbow,
+      levels=pretty(x[1:gdomain$nx,1:gdomain$ny], nlevels),
+      col=color.palette(length(levels)-1),
       title=paste(attr(x,"info")$name,"\n",attr(x,"time")),
       legend=FALSE, mask=NULL, na.col=par("bg"),
       drawmap=TRUE, maplwd=.5, mapcol='black', map.database='world',
@@ -20,6 +22,8 @@ cview(x,nlevels=15,
       drawmap=!add, maplwd=.5, mapcol="black", map.database="world",
       interior=TRUE, fill=FALSE, ...)
 fcview(x,nlevels=15,color.palette=irainbow,
+       levels=pretty(x[1:gdomain$nx,1:gdomain$ny], nlevels),
+       col=color.palette(length(levels)-1),
        title=paste(attr(x,"info")$name,"\n",attr(x,"time")),
        legend=TRUE,mask=NULL,
        drawmap=TRUE, maplwd=.5, mapcol='black', map.database='world',
@@ -33,6 +37,8 @@ vview(U, V, add=FALSE, aspcorrect=TRUE,
 \item{U,V}{\code{geofield} objects interpreted as U and V components of a wind field.}
 \item{nlevels}{Number of (colour) levels. You may also give the levels explicitely.}
 \item{color.palette}{Colours for the levels.}
+\item{levels}{A fixed set of breaks. If \code{levels} is defined, \code{nlevels} is ignored. If missing, the value range is devided in approximately \code{nlevels} breaks.}
+\item{col}{A fixed vector of colours. If provided, the length must be exactly equal to \code{length(levels)-1}. So it is only practicle to define this if you also have a fixed set of levels.}
 \item{title}{Title for the plot.}
 \item{add}{If TRUE, the plot is superposed on the current image,}
 \item{mask}{Defines a mask such that all grid points with mask==FALSE are set to NA. The mask may be a matrix with the same dimension as x, an expression involving x, or even a string that is parsed and which uses 'x' to represent the data.}
