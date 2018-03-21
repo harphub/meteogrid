@@ -151,8 +151,11 @@ proj4.str2list <- function(pp){
   prj
 }
 
-proj4.list2str <- function(pp){
-  paste(names(pp), lapply(pp, function(x) if (is.na(x)) "" else paste("=",x,sep="")),sep="")
+proj4.list2str <- function(pp, join=FALSE){
+  result <- paste0(names(pp), 
+                   lapply(pp, function(x) if (is.na(x)) "" else paste0("=",x)))
+  if (join) result <- paste0("+", result, collapse=" ")
+  result
 }
 
 
