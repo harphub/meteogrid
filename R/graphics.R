@@ -416,7 +416,7 @@ getbox <- function(domain=.Last.domain()) {
 
 ### retrieve the inverted map of a domain (e.g. to erase values over sea)
 getmask <- function(domain=.Last.domain(), map.database="world") {
-  if (!suppressWarnings(suppressMessages(requireNamespace("sf")))) stop("sf package not available.")
+  if (!requireNamespace("sf", quietly=TRUE)) stop("sf package not available.")
   domain <- as.geodomain(domain)
 
   mbox <- sf::st_geometry(sf::st_as_sf(getbox(domain)))
