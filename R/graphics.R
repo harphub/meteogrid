@@ -180,7 +180,7 @@ iview <- function(x, nlevels=15, color.palette=irainbow,
             title=paste(attr(x,"info")$name,"\n",attr(x,"time")),
             legend=FALSE,mask=NULL,na.col=par("bg"),
             drawmap=TRUE, maplwd=.5, mapcol='black', map.database='world', 
-            interior=TRUE, fill=FALSE, ...){
+            interior=TRUE, fill=FALSE, wrap=NULL, ...){
   if (!inherits(x,"geofield")) stop("iview requires a geofield as input.")
   if (!is.null(mask)) {
     if (is.character(mask)) mask <- eval(parse(text=mask))
@@ -206,7 +206,7 @@ iview <- function(x, nlevels=15, color.palette=irainbow,
     plot.geodomain(gdomain, add=TRUE,
          add.dx=TRUE, box=TRUE, lwd=maplwd, col=mapcol,
          interior=interior, fill=fill,
-         map.database=map.database)
+         map.database=map.database, wrap=wrap)
   }
 }
 
@@ -320,7 +320,7 @@ plot.geodomain <- function(x=.Last.domain(),
              col=1, mapfill=c("sandybrown","steelblue"),
              add.dx=TRUE, box=TRUE,
              fill=FALSE, interior=TRUE,
-             map.database="world", asp=1, ...){
+             map.database="world", asp=1, wrap=NULL, ...){
 
 ### consistency
   if (add) {
@@ -351,12 +351,12 @@ plot.geodomain <- function(x=.Last.domain(),
   }
 
   if (fill && !interior) {
-    geo1 <- getmap(domain, interior=TRUE, fill=TRUE, map.database=map.database)
-    geo2 <- getmap(domain, interior=FALSE, fill=FALSE, map.database=map.database)
+    geo1 <- getmap(domain, interior=TRUE, fill=TRUE, map.database=map.database, wrap=wrap)
+    geo2 <- getmap(domain, interior=FALSE, fill=FALSE, map.database=map.database, wrap=wrap)
     polygon(geo1, border=0, col=mapfill[1], ...)
     lines(geo2, col=col, ...)
   } else {
-    geo <- getmap(domain, interior=interior, fill=fill, map.database=map.database)
+    geo <- getmap(domain, interior=interior, fill=fill, map.database=map.database, wrap=wrap)
     if (fill) {
       polygon(geo, border=col, col=mapfill[1], ...)
     } else {
@@ -374,7 +374,7 @@ plot.geodomain <- function(x=.Last.domain(),
 
 ### retrieve the exact map for a domain
 getmap <- function(domain=.Last.domain(), interior=TRUE, 
-                   fill=FALSE, map.database="world") {
+                   fill=FALSE, map.database="world", ...) {
   if (fill && !interior) warning("When fill=TRUE, interior=FALSE is ignored.")
   domain <- as.geodomain(domain)
   glimits <- DomainExtent(domain)
@@ -385,7 +385,7 @@ getmap <- function(domain=.Last.domain(), interior=TRUE,
   }
   boundaries <- maps::map(database=map.database,
                      xlim=glimits$lonlim, ylim=glimits$latlim,
-                     fill=fill, interior=interior, plot=FALSE)
+                     fill=fill, interior=interior, plot=FALSE, ...)
   geo <- as.list(project(boundaries, proj = domain$projection, inv = FALSE))
   if (fill) {
     geo$names <- boundaries$names
