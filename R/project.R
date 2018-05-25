@@ -108,6 +108,8 @@ project <- function(x, y, proj=.Last.domain()$projection, inv=FALSE)
 }
 
 map.restrict <- function(bxy,xlim,ylim,xperiod=NA_real_,xfrac=0.5,yperiod=NA_real_,yfrac=NA_real_){
+# This can be replaces by maps::map.clip.poly (maps >= 3.2.0)
+#  maps::map.clip.poly(as.list(bxy), xlim=xlim, ylim=ylim, poly=FALSE)
   bxy <- .map.restrict1(bxy$x,bxy$y,xlim,xperiod,xfrac)
   byx <- .map.restrict1(bxy$y, bxy$x, ylim, yperiod, yfrac)
   list(x = byx$y, y = byx$x)
