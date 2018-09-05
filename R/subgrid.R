@@ -32,7 +32,8 @@ subgrid <- function(geo, x1, x2, y1, y2, reso=1) {
   gdomain$dx <- gdomain$dx * reso
   gdomain$dy <- gdomain$dy * reso
   cxy <- (project(gdomain$NE, proj=gdomain$projection) + project(gdomain$SW, proj=gdomain$projection)) / 2
-  gdomain$clonlat <- project(cxy, proj=gdomain$projection, inv=TRUE)
+  # use as.numeric()' to coerce a data.frame to a vector:
+  gdomain$clonlat <- as.numeric(project(cxy, proj=gdomain$projection, inv=TRUE))
   if (inherits(geo,"geofield")) {
     as.geofield(geo[xsub,ysub], domain=gdomain, time=attr(geo,"time"),
              info=c(attr(geo,"info"), extra="SUBFIELD"))

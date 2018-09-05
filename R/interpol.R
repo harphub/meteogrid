@@ -24,7 +24,11 @@ regrid <- function (infield, newdomain=.Last.domain(), method="bilin",
                     mask=NULL, newmask=NULL, weights=NULL)
 {
 ### regridding: bilinear, bi-cubic or nearest neighbour, and now also upscaling by mean
-  newdomain <- as.geodomain(newdomain)
+  if (!is.null(weights) && !is.null(attributes(weights)$newdomain))  {
+    newdomain <- attributes(weights)$newdomain
+  } else {
+    newdomain <- as.geodomain(newdomain)
+  }
 
   if (method %in% c("mean", "median")) {
     return(upscale_regrid(infield=infield, newdomain=newdomain, method=method, weights=weights))
@@ -48,15 +52,19 @@ regrid.init <- function (olddomain, newdomain=.Last.domain(), method="bilin", ma
   olddomain <- as.geodomain(olddomain)
   newdomain <- as.geodomain(newdomain)
   if (method %in% c("mean")) {
-    return(upscale_regrid_init(olddomain, newdomain))
+    result <- upscale_regrid_init(olddomain, newdomain)
   } else if (method %in% c("median")) {
     stop("Method", method, "not yet supported. Sorry.")
   } else {
     newpoints <- DomainPoints(newdomain)
     if (is.null(mask) != is.null(newmask)) stop("When using Land/Sea masks, you *must* provide both domains!")
-    point.interp.init(lon=as.vector(newpoints$lon), as.vector(newpoints$lat),
-                      method=method, domain=olddomain, mask=as.vector(mask), pointmask=as.vector(newmask), force=FALSE)
+    result <- point.interp.init(lon=as.vector(newpoints$lon), as.vector(newpoints$lat),
+                      method=method, domain=olddomain, mask=as.vector(mask),
+                      pointmask=as.vector(newmask), force=FALSE)
   }
+  attributes(result)$olddomain <- olddomain
+  attributes(result)$newdomain <- newdomain
+  result
 }
 
 
@@ -95,10 +103,13 @@ point.interp <- function(lon, lat, infield, method="bilin", mask=NULL, pointmask
   if (substring(method,1,3)=="bil") {
     point.bilin(lon, lat, infield=infield, mask=mask, pointmask=pointmask, force=force, weights=weights)
   } else if (substring(method,1,3)=="bic") {
-    if (!is.null(mask) | !is.null(pointmask) | force) warning("Mask is not supported for bicubic interpolation.")
+    if (!is.null(mask) | !is.null(pointmask) | force) {
+      warning("Mask is not supported for bicubic interpolation.")
+    }
     point.bicubic(lon, lat, infield=infield, weights=weights)
   } else if (is.element(substring(method,1,1),c("n","c"))) {
-    point.closest(lon, lat, infield=infield, mask=mask, pointmask=pointmask, force=force, weights=weights)
+    point.closest(lon, lat, infield=infield, mask=mask, pointmask=pointmask,
+                  force=force, weights=weights)
   } else stop(paste("Unknown interpolation method",method))
 }
 
