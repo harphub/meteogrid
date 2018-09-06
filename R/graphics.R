@@ -230,7 +230,7 @@ fcview <- function(x,nlevels=15,color.palette=irainbow,
          z=x[1:gdomain$nx,1:gdomain$ny],
          smooth=TRUE,
          plot.title=title(main=title),
-         color.palette=color.palette, legend=legend, nlevels=nlevels, levels=levels, col=col, ...)
+         color.palette=color.palette, legend=legend, nlevels=nlevels, levels=levels, ...)
   .Last.domain(gdomain)
 
   if (drawmap) {
