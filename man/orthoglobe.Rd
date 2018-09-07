@@ -12,6 +12,6 @@ orthoglobe(reflon=0,reflat=90,map.database='world',...)
 \item{map.database}{Map database.}
 \item{...}{Options for 'plot' (colour, line type etc.).}
 }
-\seealso{\code{\link[geogrid]{limage}},\code{\link[geogrid]{vecplot}}
+\seealso{\code{\link[meteogrid]{limage}},\code{\link[meteogrid]{vecplot}}
 }
 \keyword{file}

@@ -19,6 +19,6 @@ mask <- project(map("world","Belgium",fill=0,plot=FALSE))
 xylim <- DomainExtent(datafield)
 antipolygon(mask,xylim=xylim)
 } }
-\seealso{\code{\link[geogrid]{limage}},\code{\link[geogrid]{vecplot}}
+\seealso{\code{\link[meteogrid]{limage}},\code{\link[meteogrid]{vecplot}}
 }
 \keyword{file}

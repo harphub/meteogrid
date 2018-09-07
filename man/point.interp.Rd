@@ -45,5 +45,5 @@ w1 <- point.interp.init(lon, lat, domain=.Last.domain(), method="bilin")
 f1 <- point.interp(lon, lat, infield, weights=w1, method="bilin")
 }
 }
-\seealso{\code{\link[geogrid]{regrid}} }
+\seealso{\code{\link[meteogrid]{regrid}} }
 \keyword{file}

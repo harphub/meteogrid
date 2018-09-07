@@ -23,6 +23,6 @@ upscale_regrid_init(olddomain, newdomain)
 }
 \details{ These routines aggregate all grid boxes of the original domain into the new domain. When a factor is used, the result is exactly as expected. When regridding to a different domain, the average is taken of all original cells whose center falls inside the new grid cell. There is no compensation (yet?) for partial grid cells.
 }
-\seealso{\code{\link[geogrid]{zoomgrid}},\code{\link[geogrid]{subgrid}},\code{\link[geogrid]{regrid}}
+\seealso{\code{\link[meteogrid]{zoomgrid}},\code{\link[meteogrid]{subgrid}},\code{\link[meteogrid]{regrid}}
 }
 \keyword{file}

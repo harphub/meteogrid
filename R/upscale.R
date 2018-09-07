@@ -1,5 +1,5 @@
 #-------------------------------------------#
-# Part of R-package geogrid                 #
+# Part of R-package meteogrid                 #
 # Copyright (c) 2003-2016 Alex Deckmyn      #
 #   Royal Meteorological Institute, Belgium #
 # Released under GPL-3 license              #
@@ -78,7 +78,7 @@ upscale_regrid <- function(infield, newdomain, method="mean", weights=NULL, ... 
                                     gnx=as.integer(gnx), gny=as.integer(gny),
                                     gcount=integer(gnx * gny),
                                     gval=numeric(gnx * gny),
-                                    NAOK=TRUE, PACKAGE="geogrid")
+                                    NAOK=TRUE, PACKAGE="meteogrid")
 # we don't really use gcount, but it is available if necessary...
   } else {
     result <- .C("upscale_by_mean_from_init", npoints=as.integer(weights$npoints),
@@ -87,7 +87,7 @@ upscale_regrid <- function(infield, newdomain, method="mean", weights=NULL, ... 
                                     gcount=as.integer(weights$gcount),
                                     gcell=as.integer(weights$gcell),
                                     gval=numeric(gnx * gny),
-                                    NAOK=TRUE, PACKAGE="geogrid")
+                                    NAOK=TRUE, PACKAGE="meteogrid")
   }
   as.geofield(result$gval, domain=newdomain)
 }
@@ -107,7 +107,7 @@ upscale_regrid_init <- function(olddomain, newdomain) {
                                     gnx=as.integer(gnx), gny=as.integer(gny),
                                     gcount=integer(gnx * gny),
                                     gcell=integer(npoints),
-                                    NAOK=TRUE, PACKAGE="geogrid")
+                                    NAOK=TRUE, PACKAGE="meteogrid")
   result[c("npoints","gnx","gny","gcount","gcell")]
 }
 

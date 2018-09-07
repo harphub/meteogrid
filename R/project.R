@@ -1,5 +1,5 @@
 #-------------------------------------------#
-# Part of R-package geogrid                 #
+# Part of R-package meteogrid                 #
 # Copyright (c) 2003-2016 Alex Deckmyn      #
 #   Royal Meteorological Institute, Belgium #
 # Released under GPL-3 license              #
@@ -73,7 +73,7 @@ project <- function(x, y, proj=.Last.domain()$projection, inv=FALSE)
       } 
     }
     result <- .C("Rproj4",x=x,y=y,npoints=npoints,par=par,
-                 npar=npar,inv=as.integer(inv),NAOK=TRUE,PACKAGE="geogrid")
+                 npar=npar,inv=as.integer(inv),NAOK=TRUE,PACKAGE="meteogrid")
 ### again the same proj.4 bug:
     if (!inv) {
       if (proj$proj=='omerc') {

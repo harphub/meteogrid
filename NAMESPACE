@@ -12,5 +12,5 @@ S3method(plot,geodomain)
 S3method(plot,geofield)
 S3method(print,geofield)
 S3method(print,geodomain)
-useDynLib("geogrid")
+useDynLib("meteogrid")
 

@@ -27,6 +27,6 @@ getmask(domain=.Last.domain(), map.database="world")
   plot(getmask(), col="white", border=1, add=TRUE)
   }
 }
-\seealso{\code{\link[geogrid]{limage}},\code{\link[geogrid]{vecplot}}
+\seealso{\code{\link[meteogrid]{limage}},\code{\link[meteogrid]{vecplot}}
 }
 \keyword{file}

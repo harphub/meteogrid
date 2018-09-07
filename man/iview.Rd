@@ -5,7 +5,7 @@
 \alias{vview}
 \title{Visualisation shortcuts}
 \description{
-Routines for visualisation of geogrid objects. They use the geogrid
+Routines for visualisation of meteogrid objects. They use the meteogrid
 methods of image, contour, fcontour and vecplot.
 }
 \usage{

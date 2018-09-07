@@ -16,6 +16,6 @@ domainbox(geo, add.dx=TRUE, npoints=200, ...)
 \value{
 The outline of the domain is added to a pre-existing plot. If the projection is the same, this may be a square, but otherwise it is re-projected.
 }
-\seealso{\code{\link[geogrid]{iview}}
+\seealso{\code{\link[meteogrid]{iview}}
 }
 \keyword{file}

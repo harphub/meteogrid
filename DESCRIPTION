@@ -1,5 +1,5 @@
-Package: geogrid
-Version: 3.5.5
+Package: meteogrid
+Version: 3.6.0
 Date: 2018-09-06
 Title: Geographical Grids - Mainly Meteorological
 Description: A toolbox for working with and viewing gridded data. 

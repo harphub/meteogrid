@@ -1,5 +1,5 @@
 ".onUnload" <- function (libpath){
-  library.dynam.unload("geogrid",libpath)
+  library.dynam.unload("meteogrid",libpath)
 }
 
 

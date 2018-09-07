@@ -34,8 +34,8 @@ iview(field1)
 cview(regrid(field2),add=TRUE) # add contours of field2, interpolated to the last plotted grid, which is field1.
 }
 }
-\seealso{\code{\link[geogrid]{zoomgrid}}, \code{\link[geogrid]{subgrid}},
-         \code{\link[geogrid]{Make.domain}}, \code{\link[geogrid]{point.interp}},
-         \code{\link[geogrid]{upscale}}
+\seealso{\code{\link[meteogrid]{zoomgrid}}, \code{\link[meteogrid]{subgrid}},
+         \code{\link[meteogrid]{Make.domain}}, \code{\link[meteogrid]{point.interp}},
+         \code{\link[meteogrid]{upscale}}
 }
 \keyword{file}
