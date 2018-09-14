@@ -37,15 +37,18 @@ regrid <- function (infield, newdomain=.Last.domain(), method="bilin",
     if (is.null(weights)) weights <- regrid.init(olddomain=infield, newdomain=newdomain, method=method, 
                                                  mask=mask, newmask=newmask)
 
-    result <- point.interp(lon=NULL, lat=NULL, infield=infield, method=method, weights=weights)
-
-    return(as.geofield(matrix(result, ncol = newdomain$ny, nrow = newdomain$nx),
+    result <- point.interp(infield=infield, method=method, weights=weights)
+    # 3d data
+    cat("dimensions", paste(dim(infield),sep="x"), paste(dim(result), sep="x"), "\n")
+    return(as.geofield(numeric(result),
                 domain = newdomain,time=attr(infield,"time"),
-                info=attr(infield,"info")))
+                info=attr(infield,"info")),
+                extra_dimensions = if (length(dim(infield)) > 2) dim(infield)[-(1:2)] else NULL)
   }
 }
 
-regrid.init <- function (olddomain, newdomain=.Last.domain(), method="bilin", mask=NULL, newmask=NULL)
+regrid.init <- function (olddomain, newdomain=.Last.domain(),
+                         method="bilin", mask=NULL, newmask=NULL)
 {
 ### regridding: either bilinear of nearest neighbour
 ### olddomain and newdomain may be geofields 
@@ -99,7 +102,8 @@ point.index <- function(lon, lat, domain=.Last.domain(), clip=TRUE){
 }
 
 
-point.interp <- function(lon, lat, infield, method="bilin", mask=NULL, pointmask=NULL, force=FALSE, weights=NULL){
+point.interp <- function(lon, lat, infield, method="bilin",
+                         mask=NULL, pointmask=NULL, force=FALSE, weights=NULL){
   if (substring(method,1,3)=="bil") {
     point.bilin(lon, lat, infield=infield, mask=mask, pointmask=pointmask, force=force, weights=weights)
   } else if (substring(method,1,3)=="bic") {
@@ -113,7 +117,9 @@ point.interp <- function(lon, lat, infield, method="bilin", mask=NULL, pointmask
   } else stop(paste("Unknown interpolation method",method))
 }
 
-point.interp.init <- function(lon, lat, domain=.Last.domain(), method="bilin", mask=NULL, pointmask=NULL, force=FALSE){
+point.interp.init <- function(lon, lat, domain=.Last.domain(), 
+                              method="bilin", mask=NULL, pointmask=NULL, 
+                              force=FALSE){
   if (substring(method,1,3)=="bil") {
     point.bilin.init(lon, lat, domain=domain, mask=mask, pointmask=pointmask, force=force)
   } else if (substring(method,1,3)=="bic") {
@@ -185,26 +191,35 @@ point.bilin.init <- function(lon, lat, domain=.Last.domain(), mask=NULL, pointma
 }
 
 
-point.bilin <- function(lon, lat, infield, mask=NULL, pointmask=NULL, force=FALSE, weights=NULL)
+point.bilin <- function(lon, lat, infield, mask=NULL, 
+                        pointmask=NULL, force=FALSE, weights=NULL)
 {
-  if(is.null(weights)){
+  if (is.null(weights)){
 ## for gaussian grid: call different init function!
 #    if(inherits(infield,"gaussian")) weights <- point.bilin.gaussian.init(lon,lat,infield)
 #    else
     weights <- point.bilin.init(lon, lat, infield, mask=mask, pointmask=pointmask, force=force)
   }
-
-  weights$w00*infield[weights$F00] + weights$w01*infield[weights$F01] +
-         weights$w10*infield[weights$F10] + weights$w11*infield[weights$F11]
+  ndim <- length(dim(infield))
+  if (ndim==2) {
+    weights$w00*infield[weights$F00] + weights$w01*infield[weights$F01] +
+              weights$w10*infield[weights$F10] + weights$w11*infield[weights$F11]
+  } else {
+    result <- apply(infield, 3:ndim, function(x)  
+                    weights$w00*x[weights$F00] + weights$w01*x[weights$F01] +
+                    weights$w10*x[weights$F10] + weights$w11*x[weights$F11])
+    result
+  }
 }
 
 ### nearest neighbour (closest point)
-point.closest.init <- function(lon, lat, domain=.Last.domain(), mask=NULL, pointmask=NULL, force=FALSE) {
+point.closest.init <- function(lon, lat, domain=.Last.domain(),
+                               mask=NULL, pointmask=NULL, force=FALSE) {
   domain <- as.geodomain(domain)
 
   nx <- domain$nx
   ny <- domain$ny
-  index <- point.index(lon,lat,domain)
+  index <- point.index(lon, lat, domain)
 # closest point is just a matter of rounding the index to closest integer
   i <- round(index$i)
   j <- round(index$j)
@@ -252,19 +267,22 @@ point.closest.init <- function(lon, lat, domain=.Last.domain(), mask=NULL, point
   data.frame(index=I(cbind(i,j)))
 }
 
-point.closest <- function(lon, lat, infield, mask=NULL, pointmask=NULL, force=FALSE, weights=NULL){
+point.closest <- function(lon, lat, infield, mask=NULL, 
+                          pointmask=NULL, force=FALSE, weights=NULL){
 ### where mask != pointmask (default 1): take next closest point
 ### but only from the four closest !
   if (is.null(weights)) weights <- point.closest.init(lon, lat, infield, mask, pointmask, force)
 
-  infield[weights$index]
+  ndim <- length(dim(infield))
+  if (ndim==2) infield[weights$index]
+  else apply(infield, 3:ndim, function(x) x[weights$index])
 }
 
 
 ### bicubic spline interpolation
 
 ### 1D routine (for testing purposes)
-.interp.cubic.1D <- function(i,data){
+.interp.cubic.1D <- function(i, data){
   nx <- length(data)
   fi <- floor(i)
   di <- i - fi
@@ -325,6 +343,8 @@ point.bicubic.init <- function(lon, lat, domain=.Last.domain()){
 
 
 point.bicubic <- function(lon, lat, infield, weights=NULL){
+  ndim <- length(dim(infield))
+  if (ndim != 2) stop("bicubic interpolation only for 2d fields.")
   if (is.null(weights)) weights <- point.bicubic.init(lon, lat, infield)
   di <- weights$di
   dj <- weights$dj

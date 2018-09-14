@@ -182,6 +182,7 @@ iview <- function(x, nlevels=15, color.palette=irainbow,
             drawmap=TRUE, maplwd=.5, mapcol='black', map.database='world', 
             interior=TRUE, fill=FALSE, wrap=NULL, ...){
   if (!inherits(x,"geofield")) stop("iview requires a geofield as input.")
+  if (length(dim(x)) > 2) stop("iview currently only works for 2d geofields.")
   if (!is.null(mask)) {
     if (is.character(mask)) mask <- eval(parse(text=mask))
     else if (is.expression(mask)) mask <- eval(mask)
@@ -217,6 +218,7 @@ fcview <- function(x,nlevels=15,color.palette=irainbow,
             drawmap=TRUE, maplwd=.5, mapcol='black', map.database='world',
             interior=TRUE, fill=FALSE, ...){
   if (!inherits(x,"geofield")) stop("fcview requires a geofield as input.")
+  if (length(dim(x)) > 2) stop("fcview currently only works for 2d geofields.")
   if (!is.null(mask)){
     if (is.character(mask)) mask <- eval(parse(text=mask))
     else if (is.expression(mask)) mask <- eval(mask)
@@ -247,6 +249,7 @@ cview <- function(x,nlevels=15,
            drawmap=!add, maplwd=.5, mapcol="black", map.database="world",
            interior=TRUE, fill=FALSE, ...){
   if (!inherits(x,"geofield")) stop("cview requires a geofield as input.")
+  if (length(dim(x)) > 2) stop("cview currently only works for 2d geofields.")
   if (!is.null(mask)) {
     if (is.character(mask)) mask <- eval(parse(text=mask))
     else if (is.expression(mask)) mask <- eval(mask)
@@ -272,6 +275,7 @@ vview <- function(U,V,add=FALSE,aspcorrect=TRUE,
                   drawmap=TRUE, maplwd=.5, mapcol="black", map.database='world',
                   interior=TRUE, fill=FALSE, ...){
   if (!inherits(U,"geofield") | !inherits(V,"geofield")) stop("vview requires 2 geofields as input.")
+  if (length(dim(U)) > 2) stop("vview currently only works for 2d geofields.")
   gdomain <- attr(U,"domain")
   glimits <- DomainExtent(gdomain)
   x <- seq(glimits$x0,glimits$x1,length=gdomain$nx)

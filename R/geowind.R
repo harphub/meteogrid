@@ -21,7 +21,7 @@
 ###########################################################
 
 wind.dirspeed <- function(u,v,fieldname=c("Wind direction","Wind speed"),rad=FALSE){
-  if (missing(v) & is.list(u)) {
+  if (missing(v) && is.list(u)) {
     v <- u[[2]]
     u <- u[[1]]
   }
