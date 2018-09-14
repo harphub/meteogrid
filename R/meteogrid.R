@@ -49,19 +49,28 @@ print.geodomain = function(x, ...){
 
 as.geofield <- function (x=NA, domain, time = attr(domain, "time"),
                          info = attr(domain, "info"),
-                         extra_dimensions=NULL) {
+                         extra_dim=list()) {
   mydomain <- as.geodomain(domain)
   if (is.geofield(x)) return(x)
-  if (is.vector(x)) {
-    x <- array(x, dim=c(mydomain$nx, mydomain$ny, extra_dimensions))
+  if (!is.list(extra_dim)) {
+    dims <- c("x"=mydomain$nx, "y"=mydomain$ny, extra_dim)
+    extra_dim <- lapply(extra_dim, function(x) 1:x)
+    have_dimnames <- !is.null(dimnames(x))
   } else {
-    if (any(dim(x)[1:2] != c(mydomain$nx, mydomain$ny))) stop(
-          "Wrong dimensions.", paste(dim(x), sep=" x "), " vs ", 
-          mydomain$nx , " x ", mydomain$ny)
+    have_dimnames <- (length(extra_dim) > 0)
+    dims <- c("x"=mydomain$nx, "y"=mydomain$ny, vapply(extra_dim, FUN=length, FUN.VALUE=1))
   }
-  if (!is.null(extra_dimensions)) {
-    names(dim(x))[-(1:2)] <- names(extra_dimensions)
+
+  if (is.vector(x)) {
+    x <- array(x, dim=dims)
+  } else {
+    if (any(dim(x) != dims)) stop(
+          "Wrong dimensions.", paste(dim(x), sep=" x "), " vs ", paste(dims(x), sep=" x "))
   }
+  noname <- which(is.na(names(dims)) | names(dims)=="" )
+  names(dims)[noname] <- paste0("D", noname)
+  names(dim(x)) <- names(dims)
+  if (have_dimnames) dimnames(x) <- c(list(x=NULL, y=NULL), extra_dim)
 
   attr(x, "domain") <- mydomain
   attr(x, "time")   <- time
@@ -72,34 +81,37 @@ as.geofield <- function (x=NA, domain, time = attr(domain, "time"),
 
 # a simple method for >2d geofields using x[[i,j...]]
 # max 3 extra dimensions are allowed (e.g. time, level, members).
-# NOT COMPLETELY CORRECT
-# with 2 extra dimensions z[[n]] should give an error, not z[[n,]]
+# ATTENTION: with 2 extra dimensions z[[n]] gives z[[n,]]
+#            it should throw an error
 # but that is (almost?) impossible to solve with R code
-# "ellipsis" can't deal with empty dimensions
-# I guess that's exactly why "[" is primitive
+# e.g. ellipsis (...) can't deal with empty dimensions
+# I guess that's exactly why "[" is a primitive
 .subset.geofield <- function(x, i, j, k) {
   dimx <- length(dim(x))
   if (dimx <= 2) stop("Subsetting a geofield requires extra dimensions")
+  if (dimx > 3) warning("Working more than 3 dimensions in a geofield is dangerous.")
+  if ( (dimx < 5 && !missing(k)) || (dimx < 4 && !missing(j))) stop("Bad dimensioning.")
   if (missing(i) && dimx >= 3) i <- 1:dim(x)[3]
   if (missing(j) && dimx >= 4) j <- 1:dim(x)[4]
   if (missing(k) && dimx >= 5) k <- 1:dim(x)[5]
 
-  result <- switch(dimx - 2, x[,,i], x[,,i,j], x[,,i,j,k])
-  as.geofield(result, x)
+  result <- as.geofield(switch(dimx - 2, x[,,i], x[,,i,j], x[,,i,j,k]))
+  # when dropping a dimension (e.g. length(i)=1), you fix a level/member/...
+  # so that should be in the info field
+  if (length(i)==1) attributes(result)$info[[names(dim(x))[3] ]] <- dimnames(x)[[3]][i]
+  if (length(j)==1) attributes(result)$info[[names(dim(x))[4] ]] <- dimnames(x)[[4]][j]
+  if (length(k)==1) attributes(result)$info[[names(dim(x))[5] ]] <- dimnames(x)[[5]][k]
+
 }
 
 # ASSIGNMENT:
 # MUCH HARDER: with missing dimensions, how do you find the data?
 # only simple with 1 extra dimension
-.subset.assign.geofield <- function(x, i, j, k, value) {
-  stop("Please use standard subscripting [,,,] for geofield assignment.")
+.subset.assign.geofield <- function(x, i, value) {
   dimx <- length(dim(x))
   if (dimx <= 2) stop("Subsetting a geofield requires extra dimensions")
-  if (missing(i) && dimx >= 3) i <- 1:dim(x)[3]
-  if (missing(j) && dimx >= 4) j <- 1:dim(x)[4]
-  if (missing(k) && dimx >= 5) k <- 1:dim(x)[5]
-
-  if (dimx==3) x[,,i] <- value
+  if (dimx > 3) stop("Please use standard subscripting [,,,] for geofield assignment.")
+  x[,,i] <- value
   x
 }
 
