@@ -70,7 +70,7 @@ upscale_regrid <- function(infield, newdomain, method="mean", weights=NULL, ... 
     if (method != "mean") stop("Only mean is available for upscale regridding.") 
     opoints <- DomainPoints(infield)
 #  opoints$value <- as.vector(infield)
-    pind <- point.index(as.vector(opoints$lon), as.vector(opoints$lat), domain=newdomain, clip=FALSE)
+    pind <- point.index(domain=newdomain, lon=as.vector(opoints$lon), lat=as.vector(opoints$lat), clip=FALSE)
 
     result <- .C("upscale_by_mean", npoints=as.integer(prod(dim(infield))),
                                     px=as.integer(round(pind$i)), py=as.integer(round(pind$j)), 
@@ -100,7 +100,7 @@ upscale_regrid_init <- function(olddomain, newdomain) {
   gny <- newdomain$ny
   opoints <- DomainPoints(olddomain)
   npoints <- olddomain$nx * olddomain$ny
-  pind <- point.index(as.vector(opoints$lon), as.vector(opoints$lat), domain=newdomain, clip=FALSE)
+  pind <- point.index(domain=newdomain, lon=as.vector(opoints$lon), lat=as.vector(opoints$lat), clip=FALSE)
 
   result <- .C("upscale_by_mean_init", npoints=as.integer(npoints),
                                     px=as.integer(round(pind$i)), py=as.integer(round(pind$j)), 
