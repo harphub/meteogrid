@@ -58,15 +58,21 @@ as.geofield <- function (x=NA, domain, time = attr(domain, "time"),
     have_dimnames <- !is.null(dimnames(x))
   } else {
     have_dimnames <- (length(extra_dim) > 0)
-    dims <- c("x"=mydomain$nx, "y"=mydomain$ny, vapply(extra_dim, FUN=length, FUN.VALUE=1))
+    dims <- c("x"=mydomain$nx, "y"=mydomain$ny, 
+              vapply(extra_dim, FUN=length, FUN.VALUE=1))
   }
 
   if (is.vector(x)) {
     x <- array(x, dim=dims)
   } else {
-    if (any(dim(x) != dims)) stop(
-          "Wrong dimensions.", paste(dim(x), sep=" x "), " vs ", paste(dims(x), sep=" x "))
+    if (length(dim(x))>2 && is.null(extra_dim)) dims <- c(dims, dim(x)[-(1:2)])
+    # extra_dimensions is probably not given in this case
+    # so only check the first 2 dimensions
+    if (any(dim(x)[1:2] != dims[1:2])) stop("Wrong dimensions.", 
+				     paste(dim(x), collapsp=" x "), " vs ",
+				     paste(dim(x), collapse=" x "))
   }
+  dims <- dim(x)
   noname <- which(is.na(names(dims)) | names(dims)=="" )
   names(dims)[noname] <- paste0("D", noname)
   names(dim(x)) <- names(dims)
@@ -94,13 +100,14 @@ as.geofield <- function (x=NA, domain, time = attr(domain, "time"),
   if (missing(i) && dimx >= 3) i <- 1:dim(x)[3]
   if (missing(j) && dimx >= 4) j <- 1:dim(x)[4]
   if (missing(k) && dimx >= 5) k <- 1:dim(x)[5]
-
-  result <- as.geofield(switch(dimx - 2, x[,,i], x[,,i,j], x[,,i,j,k]))
+  result <- as.geofield(switch(dimx - 2, x[,,i], x[,,i,j], x[,,i,j,k]),
+			domain=x)
   # when dropping a dimension (e.g. length(i)=1), you fix a level/member/...
   # so that should be in the info field
-  if (length(i)==1) attributes(result)$info[[names(dim(x))[3] ]] <- dimnames(x)[[3]][i]
-  if (length(j)==1) attributes(result)$info[[names(dim(x))[4] ]] <- dimnames(x)[[4]][j]
-  if (length(k)==1) attributes(result)$info[[names(dim(x))[5] ]] <- dimnames(x)[[5]][k]
+  if (dimx >= 3 && length(i)==1) attributes(result)$info[[names(dim(x))[3] ]] <- dimnames(x)[[3]][i]
+  if (dimx >= 4 && length(j)==1) attributes(result)$info[[names(dim(x))[4] ]] <- dimnames(x)[[4]][j]
+  if (dimx == 5 && length(k)==1) attributes(result)$info[[names(dim(x))[5] ]] <- dimnames(x)[[5]][k]
+  result
 
 }
 
