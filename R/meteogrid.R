@@ -26,7 +26,7 @@ as.geodomain <- function(x) {
 
 print.geofield <- function(x, ...){
   cat(paste(attr(x,"info")$origin,":",attr(x,"info")$name),"\n")
-  if (length(dim(x) > 2)) {
+  if (length(dim(x)) > 2) {
     cat("Extra dimensions: ", paste(names(dim(x)), dim(x), sep="=", collapse=", "), "\n")
   }
   cat("Time:\n")
@@ -52,31 +52,33 @@ as.geofield <- function (x=NA, domain, time = attr(domain, "time"),
                          extra_dim=list()) {
   mydomain <- as.geodomain(domain)
   if (is.geofield(x)) return(x)
+
+  # fix the dimensions  
   if (!is.list(extra_dim)) {
     dims <- c("x"=mydomain$nx, "y"=mydomain$ny, extra_dim)
     extra_dim <- lapply(extra_dim, function(x) 1:x)
-    have_dimnames <- !is.null(dimnames(x))
+    set_dimnames <- FALSE
   } else {
-    have_dimnames <- (length(extra_dim) > 0)
     dims <- c("x"=mydomain$nx, "y"=mydomain$ny, 
               vapply(extra_dim, FUN=length, FUN.VALUE=1))
+    set_dimnames <- (length(dims) > 2)
   }
 
   if (is.vector(x)) {
     x <- array(x, dim=dims)
   } else {
-    if (length(dim(x))>2 && is.null(extra_dim)) dims <- c(dims, dim(x)[-(1:2)])
     # extra_dimensions is probably not given in this case
-    # so only check the first 2 dimensions
-    if (any(dim(x)[1:2] != dims[1:2])) stop("Wrong dimensions.", 
-				     paste(dim(x), collapsp=" x "), " vs ",
-				     paste(dim(x), collapse=" x "))
+    if (length(dim(x))>2 && is.null(extra_dim)) dims <- c(dims, dim(x)[-(1:2)])
+    # check all dimensions
+    if (any(dim(x) != dims)) stop("Wrong dimensions.", 
+				     paste(dim(x), collapse=" x "), " vs ",
+				     paste(dims, collapse=" x "))
   }
-  dims <- dim(x)
   noname <- which(is.na(names(dims)) | names(dims)=="" )
   names(dims)[noname] <- paste0("D", noname)
   names(dim(x)) <- names(dims)
-  if (have_dimnames) dimnames(x) <- c(list(x=NULL, y=NULL), extra_dim)
+  # also set dimnames (not for x,y!)
+  if (set_dimnames) dimnames(x) <- c(list(x=NULL, y=NULL), extra_dim)
 
   attr(x, "domain") <- mydomain
   attr(x, "time")   <- time

@@ -45,7 +45,7 @@ regrid <- function (infield, newdomain=.Last.domain(), method="bilin",
                        domain = newdomain,
                        time   = attr(infield,"time"),
                        info   = attr(infield,"info"),
-                       extra_dimensions = edim))
+                       extra_dim = edim))
   }
 }
 
@@ -203,7 +203,7 @@ point.bilin <- function(infield, lon, lat, mask=NULL,
 ## for gaussian grid: call different init function!
 #    if(inherits(infield,"gaussian")) weights <- point.bilin.gaussian.init(lon,lat,infield)
 #    else
-    weights <- point.bilin.init(infield=infield, lon=lon, lat=lat,
+    weights <- point.bilin.init(infield, lon=lon, lat=lat,
                                 mask=mask, pointmask=pointmask, force=force)
   }
   ndim <- length(dim(infield))
