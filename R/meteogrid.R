@@ -68,7 +68,9 @@ as.geofield <- function (x=NA, domain, time = attr(domain, "time"),
     x <- array(x, dim=dims)
   } else {
     # extra_dimensions is probably not given in this case
-    if (length(dim(x))>2 && is.null(extra_dim)) dims <- c(dims, dim(x)[-(1:2)])
+    if (length(dim(x))>2 && length(extra_dim)==0) {
+	    dims <- c(dims, dim(x)[-(1:2)])
+    }
     # check all dimensions
     if (any(dim(x) != dims)) stop("Wrong dimensions.", 
 				     paste(dim(x), collapse=" x "), " vs ",
