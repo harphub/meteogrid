@@ -108,7 +108,21 @@ as.geofield <- function (x=NA, domain, time = attr(domain, "time"),
 			domain=x)
   # when dropping a dimension (e.g. length(i)=1), you fix a level/member/...
   # so that should be in the info field
-  if (dimx >= 3 && length(i)==1) attributes(result)$info[[names(dim(x))[3] ]] <- dimnames(x)[[3]][i]
+  if (dimx >= 3 && length(i)==1) {
+    attributes(result)$info[[names(dim(x))[3] ]] <- dimnames(x)[[3]][i]
+    # we also add the 3rd dimesnion to the name (for e.g. iview)
+    # supported z_types: level, mbr, hPa, m, ldt
+    if (!is.null(attributes(result)$info$z_type)) {
+      attributes(result)$info$name <- switch((attributes(result)$info$z_type),
+              "mbr" = paste0(attributes(result)$info$name, " mbr",i2a(dimnames(x)[[3]][i],3)),
+              "hPa" = paste0(attributes(result)$info$name, " ",dimnames(x)[[3]][i], "hPa"),
+	      "level"=,
+              "hybrid" = paste0(attributes(result)$info$name, " lev ",dimnames(x)[[3]][i]),
+              "m" = paste0(attributes(result)$info$name, " ",dimnames(x)[[3]][i],"m"),
+              "ldt" = paste0(attributes(result)$info$name, " +",dimnames(x)[[3]][i]),
+	      attributes(result)$info$name)
+    }
+  }
   if (dimx >= 4 && length(j)==1) attributes(result)$info[[names(dim(x))[4] ]] <- dimnames(x)[[4]][j]
   if (dimx == 5 && length(k)==1) attributes(result)$info[[names(dim(x))[5] ]] <- dimnames(x)[[5]][k]
   result
