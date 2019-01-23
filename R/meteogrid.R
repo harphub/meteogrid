@@ -129,6 +129,21 @@ as.geofield <- function (x=NA, domain, time = attr(domain, "time"),
 
 }
 
+# to make sum & mean over 3d geofields a bit faster (rowSums is much faste than apply(...,sum) )
+# if you ever want to add more function: they should accept "dims=2"
+apply_geo3d <- function(x, func="sum", newname=NULL, ...) {
+  afun <- switch(func,
+                 "sum" = rowSums,
+                 "mean" = rowMeans,
+                 stop("Only sum and mean are available."))
+
+  if (!is.geofield(x) || length(dim(x)) != 3) stop("Only available for 3d geofields.")
+  result <- as.geofield(afun(x, dims=2, ...), domain=x)
+  if (!is.null(newname)) attributes(result)$info$name <- newname
+  result
+}
+  
+
 # ASSIGNMENT:
 # MUCH HARDER: with missing dimensions, how do you find the data?
 # only simple with 1 extra dimension
