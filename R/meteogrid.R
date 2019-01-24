@@ -135,14 +135,20 @@ apply_geo3d <- function(x, func="sum", newname=NULL, ...) {
   afun <- switch(func,
                  "sum" = rowSums,
                  "mean" = rowMeans,
-                 stop("Only sum and mean are available."))
+                 # e.g. for wind speed :
+                 "norm" = function(x, ...) sqrt(rowSums(x^2, ...)),
+                 # wind direction (attention: in R, sign(0)=0, atan(x/0) == atan(x/"+0")
+                 # TODO: this is WRONG when u==0
+                 "wdir" = function(x, ...) 
+                   (-180 - atan(x[,,2]/x[,,1]) * 180/pi + sign(x[,,1] ) * 90) %% 360,
+                 stop("Unknown function", func)
 
   if (!is.geofield(x) || length(dim(x)) != 3) stop("Only available for 3d geofields.")
   result <- as.geofield(afun(x, dims=2, ...), domain=x)
   if (!is.null(newname)) attributes(result)$info$name <- newname
   result
 }
-  
+
 
 # ASSIGNMENT:
 # MUCH HARDER: with missing dimensions, how do you find the data?
