@@ -99,7 +99,7 @@ as.geofield <- function (x=NA, domain, time = attr(domain, "time"),
 .subset.geofield <- function(x, i, j, k) {
   dimx <- length(dim(x))
   if (dimx <= 2) stop("Subsetting a geofield requires extra dimensions")
-  if (dimx > 3) warning("Working more than 3 dimensions in a geofield is dangerous.")
+  if (dimx > 3) warning("Working with more than 3 dimensions in a geofield is dangerous.")
   if ( (dimx < 5 && !missing(k)) || (dimx < 4 && !missing(j))) stop("Bad dimensioning.")
   if (missing(i) && dimx >= 3) i <- 1:dim(x)[3]
   if (missing(j) && dimx >= 4) j <- 1:dim(x)[4]
@@ -138,10 +138,11 @@ apply_geo3d <- function(x, func="sum", newname=NULL, ...) {
                  # e.g. for wind speed :
                  "norm" = function(x, ...) sqrt(rowSums(x^2, ...)),
                  # wind direction (attention: in R, sign(0)=0, atan(x/0) == atan(x/"+0")
-                 # TODO: this is WRONG when u==0
+                 # We should have "sign(0)=1", so we use sign(1/u)
+                 # because x/0.0 defaults to +Inf
                  "wdir" = function(x, ...) 
-                   (-180 - atan(x[,,2]/x[,,1]) * 180/pi + sign(x[,,1] ) * 90) %% 360,
-                 stop("Unknown function", func)
+                   (-180 - atan(x[,,2]/x[,,1]) * 180/pi + sign(1/x[,,1] ) * 90) %% 360,
+                 stop("Unknown function", func))
 
   if (!is.geofield(x) || length(dim(x)) != 3) stop("Only available for 3d geofields.")
   result <- as.geofield(afun(x, dims=2, ...), domain=x)
@@ -166,6 +167,7 @@ apply_geo3d <- function(x, func="sum", newname=NULL, ...) {
 # which I suppose makes an extra copy of the whole array
 # very messy and buggy, because you can not detect errors
 # AVOID
+# -> this function is NOT exported as a S3method("[", geofield)
 .geosub1 <- function(x,i,j,k,l,m, ..., drop) {
   dimx=length(dim(x))
   if (missing(i) && dimx >= 1) i <- 1:dim(x)[1]

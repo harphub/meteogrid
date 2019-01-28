@@ -1,5 +1,5 @@
-AC_INIT(meteogrid, 3.3.5, alex.deckmyn@meteo.be)
-AC_CONFIG_SRCDIR(src/meteogrid.c)
+AC_INIT(meteogrid, 3.7.2.9000, alex.deckmyn@meteo.be)
+AC_CONFIG_SRCDIR(src/project.c)
 
 # find R home and set correct compiler + flags
 : ${R_HOME=`R RHOME`}

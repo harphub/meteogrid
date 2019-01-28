@@ -122,7 +122,7 @@ DomainExtent <- function(geo){
 ### and project it back to LatLon
 ### You could use DomainPoints in stead, but then you'd be projecting
 ### all domain points, which is a bit of an overkill...
-
+### old domain definitions may have SW and NE points, but newer ones have central point only
   domain <- as.geodomain(geo)
 
   if (!is.null(domain$clonlat) && !is.null(domain$dx) && !is.null(domain$dy)) {
@@ -145,24 +145,36 @@ DomainExtent <- function(geo){
     dy <- (y1-y0)/(domain$ny-1)
     xc <- (x0+x1)/2
     yc <- (y0+y1)/2
-    cll <- project(list(x=xc,y=yc),proj=domain$projection,inv=TRUE)
+    cll <- project(list(x=xc,y=yc), proj=domain$projection, inv=TRUE)
     clonlat <- c(cll$x, cll$y)
   }
-  borders <- project(list(x=c(seq(x0,x1,length=domain$nx),rep(x1,domain$ny),
-                              seq(x0,x1,length=domain$nx),rep(x0,domain$ny)),
-                          y=c(rep(y0,domain$nx),seq(y0,y1,length=domain$ny),
-                              rep(y1,domain$nx),seq(y0,y1,length=domain$ny))),
-                      proj=domain$projection,inv=TRUE)
-### ATTENTION: if the map crosses or comes close to the date line (meridian 180/-180) this will not
-### work correctly. In the map command we must then set lonlim=NULL !!!
+  borders <- project(list(x=c(seq(x0, x1, length=domain$nx), rep(x1,domain$ny),
+                              seq(x0, x1, length=domain$nx), rep(x0,domain$ny)),
+                          y=c(rep(y0, domain$nx), seq(y0,y1, length=domain$ny),
+                              rep(y1, domain$nx), seq(y0,y1, length=domain$ny))),
+                      proj=domain$projection, inv=TRUE)
 
-  lonlim <- range(borders$x, na.rm=TRUE)
-  llr <- lonlim[2]-lonlim[1]
-  if (llr <= 1 | llr > 300) lonlim <- NULL
+
+### ATTENTION: check if the map crosses or comes close to the date line (meridian 180/-180)
+### this will require "wrapping" of the boundaries
+### usually c(0, 360) should work, but in theory, there could be exceptions
+### TODO: this needs fixing
+  SW <- borders$x[1]
+  NE <- borders$x[(domain$nx + domain$ny)]
+  if ( SW < -180 || NE  > 180 || NE < SW || abs(NE - SW) < 1) {
+    wrap <- c(0, 360)
+    lonlim <- NULL
+  } else {
+    wrap = FALSE
+    lonlim <- range(borders$x, na.rm=TRUE)
+    llr <- lonlim[2] - lonlim[1]
+    if (llr <= 1 | llr > 300) lonlim <- NULL
+  }
 
   list(lonlim = lonlim , latlim = range(borders$y, na.rm=TRUE),
        clonlat=clonlat,
-       x0=x0, y0=y0, x1=x1, y1=y1, dx=dx, dy=dy, nx=domain$nx, ny=domain$ny)
+       x0=x0, y0=y0, x1=x1, y1=y1, dx=dx, dy=dy, nx=domain$nx, ny=domain$ny,
+       wrap = wrap)
 }
 
 ##########################################################

@@ -180,7 +180,7 @@ iview <- function(x, nlevels=15, color.palette=irainbow,
             title=paste(attr(x,"info")$name,"\n",attr(x,"time")),
             legend=FALSE,mask=NULL,na.col=par("bg"),
             drawmap=TRUE, maplwd=.5, mapcol='black', map.database='world', 
-            interior=TRUE, fill=FALSE, wrap=NULL, ...){
+            interior=TRUE, fill=FALSE, ...){
   if (!inherits(x,"geofield")) stop("iview requires a geofield as input.")
   if (length(dim(x)) > 2) stop("iview currently only works for 2d geofields.")
   if (!is.null(mask)) {
@@ -207,7 +207,7 @@ iview <- function(x, nlevels=15, color.palette=irainbow,
     plot.geodomain(gdomain, add=TRUE,
          add.dx=TRUE, box=TRUE, lwd=maplwd, col=mapcol,
          interior=interior, fill=fill,
-         map.database=map.database, wrap=wrap)
+         map.database=map.database)
   }
 }
 
@@ -321,10 +321,10 @@ vview <- function(U,V,add=FALSE,aspcorrect=TRUE,
 
 plot.geodomain <- function(x=.Last.domain(),
              add=FALSE,
-             col=1, mapfill=c("sandybrown","steelblue"),
+             col=1, mapfill=c("sandybrown", "steelblue"),
              add.dx=TRUE, box=TRUE,
              fill=FALSE, interior=TRUE,
-             map.database="world", asp=1, wrap=NULL, ...){
+             map.database="world", asp=1, ...){
 
 ### consistency
   if (add) {
@@ -355,12 +355,12 @@ plot.geodomain <- function(x=.Last.domain(),
   }
 
   if (fill && !interior) {
-    geo1 <- getmap(domain, interior=TRUE, fill=TRUE, map.database=map.database, wrap=wrap)
-    geo2 <- getmap(domain, interior=FALSE, fill=FALSE, map.database=map.database, wrap=wrap)
+    geo1 <- getmap(domain, interior=TRUE, fill=TRUE, map.database=map.database)
+    geo2 <- getmap(domain, interior=FALSE, fill=FALSE, map.database=map.database)
     polygon(geo1, border=0, col=mapfill[1], ...)
     lines(geo2, col=col, ...)
   } else {
-    geo <- getmap(domain, interior=interior, fill=fill, map.database=map.database, wrap=wrap)
+    geo <- getmap(domain, interior=interior, fill=fill, map.database=map.database)
     if (fill) {
       polygon(geo, border=col, col=mapfill[1], ...)
     } else {
@@ -389,7 +389,7 @@ getmap <- function(domain=.Last.domain(), interior=TRUE,
   }
   boundaries <- maps::map(database=map.database,
                      xlim=glimits$lonlim, ylim=glimits$latlim,
-                     fill=fill, interior=interior, plot=FALSE, ...)
+                     fill=fill, interior=interior, plot=FALSE, wrap=glimits$wrap, ...)
   geo <- as.list(project(boundaries, proj = domain$projection, inv = FALSE))
   if (fill) {
     geo$names <- boundaries$names
@@ -464,7 +464,16 @@ domainbox <-
   domainframe <- cbind(c(rep(xlim[1],length(y)), x, rep(xlim[2],length(y)),rev(x)),
                        c(y,rep(ylim[2],length(x)), rev(y), rep(ylim[1],length(x)) ) )
   domainlalo <- project(domainframe, proj=domain$projection, inv=TRUE)
-  lines(project(domainlalo, proj=.Last.domain()$projection), ...)
+  domainxy <- project(domainlalo, proj=.Last.domain()$projection)
+  ### TODO: FIXME
+  ### what if the new domain or the background are wrapping around -180/180
+  ### If the background has a projection, that should take care of it
+  ### but latlong needs fixing
+  if (.Last.domain()$projection$proj=="latlong" && length(glimits$wrap)>=2 ) {
+    domainxy$x[domainxy$x < glimits$wrap[1]]  <- domainxy$x[domainxy$x < glimits$wrap[1]] + 360
+    domainxy$x[domainxy$x > glimits$wrap[2]]  <- domainxy$x[domainxy$x > glimits$wrap[2]] - 360
+  }
+  lines(domainxy, ...)
 
 }
 

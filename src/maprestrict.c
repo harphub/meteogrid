@@ -5,6 +5,7 @@
 #   Royal Meteorological Institute, Belgium #
 # Released under GPL-3 license              #
 #-------------------------------------------#
+# SOON TO BE OBSOLETE ! Only for maps < 3.3.0
 */
 
 #include<stdio.h>
