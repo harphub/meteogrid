@@ -525,7 +525,6 @@ DrawLatLon <- function(nx=9, ny=9, lines=TRUE, labels=TRUE,
   xlim <- glimits$lonlim
   ylim <- glimits$latlim
 
-
   x <- pretty(xlim, nx)
   lonlist <- x[which(x >= xlim[1] & x <= xlim[2])]
 
@@ -560,8 +559,10 @@ DrawLatLon <- function(nx=9, ny=9, lines=TRUE, labels=TRUE,
 
 #BUG: for fcview, don't subtract glimits$dx/2
 
-    axis(1,at=at.x, labels=format(lonlist), tick=!lines, col.axis=col, cex.axis=lab.size, pos=glimits$y0-glimits$dy/2, ...)
-    axis(2,at=at.y, labels=format(latlist), tick=!lines, col.axis=col, cex.axis=lab.size, pos=glimits$x0-glimits$dx/2, ...)
+    axis(1,at=at.x, labels=format(lonlist), tick=!lines, 
+         col.axis=col, cex.axis=lab.size, pos=glimits$y0-glimits$dy/2, ...)
+    axis(2,at=at.y, labels=format(latlist), tick=!lines,
+         col.axis=col, cex.axis=lab.size, pos=glimits$x0-glimits$dx/2, ...)
 
   }
 }

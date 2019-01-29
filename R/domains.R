@@ -148,30 +148,44 @@ DomainExtent <- function(geo){
     cll <- project(list(x=xc,y=yc), proj=domain$projection, inv=TRUE)
     clonlat <- c(cll$x, cll$y)
   }
+  border_bottom <- project(list(x=seq(x0, x1, length=domain$nx), y=rep(y0, domain$nx)),
+                      proj=domain$projection, inv=TRUE)
+  border_right <- project(list(x=rep(x1, domain$ny), y=seq(y0, y1, length=domain$ny)),
+                      proj=domain$projection, inv=TRUE)
+  border_top <- project(list(x=seq(x0, x1, length=domain$nx), y=rep(y1, domain$nx)),
+                      proj=domain$projection, inv=TRUE)
+  border_left <- project(list(x=rep(x0, domain$ny), y=seq(y0, y1, length=domain$ny)),
+                      proj=domain$projection, inv=TRUE)
+
   borders <- project(list(x=c(seq(x0, x1, length=domain$nx), rep(x1,domain$ny),
                               seq(x0, x1, length=domain$nx), rep(x0,domain$ny)),
                           y=c(rep(y0, domain$nx), seq(y0,y1, length=domain$ny),
                               rep(y1, domain$nx), seq(y0,y1, length=domain$ny))),
                       proj=domain$projection, inv=TRUE)
 
-
-### ATTENTION: check if the map crosses or comes close to the date line (meridian 180/-180)
-### this will require "wrapping" of the boundaries
-### usually c(0, 360) should work, but in theory, there could be exceptions
-### TODO: this needs fixing
-  SW <- borders$x[1]
-  NE <- borders$x[(domain$nx + domain$ny)]
-  if ( SW < -180 || NE  > 180 || NE < SW || abs(NE - SW) < 1) {
-    wrap <- c(0, 360)
-    lonlim <- NULL
-  } else {
-    wrap = FALSE
-    lonlim <- range(borders$x, na.rm=TRUE)
-    llr <- lonlim[2] - lonlim[1]
-    if (llr <= 1 | llr > 300) lonlim <- NULL
+  ### FIX ME: should we make sure that, before checking, all borders are in [-180, 180] ?
+  t1 <- which(diff(border_top$x) < 0)
+  if (length(t1) == 1) { # there is a date line jump
+    tail(border_top$x, -t1) <- tail(border_top$x, -t1) + 360
+    if (any(border_top$x > 360)) border_top$x <- border_top$x - 360
+  } else if (length(t1) > 1) {
+    stop("Multiple longitude jumps detected. Don't know how to handle.")
   }
 
-  list(lonlim = lonlim , latlim = range(borders$y, na.rm=TRUE),
+  t2 <- which(diff(border_bottom$x) < 0)
+  if (length(t2) == 1) { # there is a date line jump
+    tail(border_bottom$x, -t2) <- tail(border_bottom$x, -t2) + 360
+    if (any(border_bottom$x > 360)) border_bottom$x <- border_bottom$x - 360
+  } else if (length(t2) > 1) {
+    stop("Multiple longitude jumps detected. Don't know how to handle.")
+  }
+
+  lonlim <- range(c(border_top$x, border_right$x, border_bottom$x, border_left$x))
+  latlim <- range(c(border_top$y, border_right$y, border_bottom$y, border_left$y))
+  if (lonlim[2] > 180) wrap <- c(0,360)
+  else wrap <- FALSE
+
+  list(lonlim = lonlim , latlim = latlim,
        clonlat=clonlat,
        x0=x0, y0=y0, x1=x1, y1=y1, dx=dx, dy=dy, nx=domain$nx, ny=domain$ny,
        wrap = wrap)
