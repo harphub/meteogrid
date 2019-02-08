@@ -108,7 +108,7 @@ Make.domain.RLL <- function(Lon1, Lat1, SPlon, SPlat, SPangle=0, nxny, dxdy){
 #  SW <- c(RR$x[1], RR$y[1])
 #  NE <- c(RR$x[2], RR$y[2])
   
-  result <- list(projection=projection, nx=nxny[1], ny=nxny[2], clonlat=)
+  result <- list(projection=projection, nx=nxny[1], ny=nxny[2], clonlat=c(cll$x, cll$y))
   class(result) <- "geodomain"
   result
 }
@@ -117,7 +117,7 @@ Make.domain.RLL <- function(Lon1, Lat1, SPlon, SPlat, SPangle=0, nxny, dxdy){
 ### Domain points and borders ###
 #################################
 
-DomainExtent <- function(geo){
+DomainExtent <- function(geo) {
 ### We look for the extreme LatLon values of a domain domain
 ### these are useful to select the right part from the world map
 ### first find the SW and NE point, then draw a rectangular box
