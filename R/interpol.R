@@ -39,7 +39,7 @@ regrid <- function (infield, newdomain=.Last.domain(), method="bilin",
 
     result <- point.interp(infield=infield, method=method, weights=weights)
     # 3d data
-    cat("dimensions", paste(dim(infield),sep="x"), paste(dim(result), sep="x"), "\n")
+#    cat("dimensions", paste(dim(infield),sep="x"), paste(dim(result), sep="x"), "\n")
     edim <- if (length(dim(infield)) > 2) dim(infield)[-(1:2)] else NULL
     return(as.geofield(as.numeric(result),
                        domain = newdomain,
@@ -65,7 +65,7 @@ regrid.init <- function (olddomain, newdomain=.Last.domain(),
     if (is.null(mask) != is.null(newmask)) stop("When using Land/Sea masks, you *must* provide both domains!")
     result <- point.interp.init(domain=olddomain,
                                 lon=as.vector(newpoints$lon),lat=as.vector(newpoints$lat),
-                                method=method, mask=as.vector(mask),
+                                method=method, mask=mask,
                                 pointmask=as.vector(newmask), force=FALSE)
   }
   attributes(result)$olddomain <- olddomain
