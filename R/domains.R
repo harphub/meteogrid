@@ -96,8 +96,11 @@ Make.domain.RLL <- function(Lon1, Lat1, SPlon, SPlat, SPangle=0, nxny, dxdy){
 ### In the future, this should be merged with Make.domain
 ### but that is not trivial: here, the centre point is of no real consequence
 ### and you have to define the rotated South Pole
+### RLL projection uses radians, so we have to rescale dxdy at the end
+### BUT that is rather ugly...
   if (length(dxdy)==1) dxdy <- rep(dxdy, 2)
-  cxy <- c(Lon1, Lat1) + (nxny -1) * dxdy / 2
+  if (length(nxny)==1) nxny <- rep(nxny, 2)
+  cxy <- (c(Lon1, Lat1) + (nxny -1) * dxdy / 2) / 180 * pi
   projection <- list(proj="ob_tran", "o_proj"="latlong",
                        "o_lat_p"=-SPlat, "o_lon_p"=0, "lon_0"=SPlon)
   cll <- project(cxy[1], cxy[2], proj=projection, inv=TRUE)
@@ -109,7 +112,7 @@ Make.domain.RLL <- function(Lon1, Lat1, SPlon, SPlat, SPangle=0, nxny, dxdy){
 #  NE <- c(RR$x[2], RR$y[2])
   
   result <- list(projection=projection, nx=nxny[1], ny=nxny[2],
-		 clonlat=c(cll$x, cll$y), dx=dxdy[1], dy=dxdy[2])
+		 clonlat=c(cll$x, cll$y), dx=dxdy[1]/180*pi, dy=dxdy[2]/180*pi)
   class(result) <- "geodomain"
   result
 }
