@@ -19,7 +19,7 @@ iview2 <- function(x,nlevels=15,color.palette=irainbow,
     else if (is.expression(mask)) mask <- eval(mask)
     x[eval(expression(mask))] <- NA
   }
-  gdomain <- attributes(x)$domain
+  gdomain <- attr(x, "domain")
   glimits <- DomainExtent(gdomain)
   xc <- seq(glimits$x0,glimits$x1,length=glimits$nx)
   yc <- seq(glimits$y0,glimits$y1,length=glimits$ny)

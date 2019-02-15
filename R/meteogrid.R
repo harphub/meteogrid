@@ -15,7 +15,7 @@ is.geodomain <- function(x){
 
 as.geodomain <- function(x) {
   if (inherits(x, "geodomain")) return(x)
-  else if ("domain" %in% names(attributes(x))) return(attributes(x)$domain)
+  else if (!is.null(attr(x, "domain"))) return(attr(x, "domain"))
   else stop("domain not well defined!")
 }
 

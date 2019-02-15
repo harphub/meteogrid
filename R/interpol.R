@@ -25,13 +25,13 @@ regrid <- function (infield, newdomain=.Last.domain(), method="bilin",
 {
 ### regridding: bilinear, bi-cubic or nearest neighbour, and now also upscaling by mean
   if (!is.null(weights)) {
-    if (!is.null(attributes(weights)$newdomain))  {
-      newdomain <- attributes(weights)$newdomain
+    if (!is.null(attr(weights, "newdomain")))  {
+      newdomain <- attr(weights, "newdomain")
     } else {
       newdomain <- as.geodomain(newdomain)
     }
-    if (!is.null(attributes(weights)$method))  {
-      method <- attributes(weights)$method
+    if (!is.null(attr(weights, "method")))  {
+      method <- attr(weights, "method")
     }
   }
 
@@ -73,8 +73,8 @@ regrid.init <- function (olddomain, newdomain=.Last.domain(),
                                 method=method, mask=mask,
                                 pointmask=as.vector(newmask), force=FALSE)
   }
-  attributes(result)$olddomain <- olddomain
-  attributes(result)$newdomain <- newdomain
+  attr(result, "olddomain") <- olddomain
+  attr(result, "newdomain") <- newdomain
   result
 }
 
@@ -112,7 +112,7 @@ point.index <- function(domain=.Last.domain(), lon, lat, clip=TRUE){
 
 point.interp <- function(infield, lon=NULL, lat=NULL, method="bilin",
                          mask=NULL, pointmask=NULL, force=FALSE, weights=NULL){
-  if (!is.null(weights) && !is.null(attributes(weights)$method)) method <- attributes(weights)$method
+  if (!is.null(weights) && !is.null(attr(weights, "method"))) method <- attr(weights, "method")
   if (substring(method, 1, 3)=="bil") {
     point.bilin(infield=infield, lon=lon, lat=lat, mask=mask,
                 pointmask=pointmask, force=force, weights=weights)
@@ -211,8 +211,8 @@ point.bilin.init <- function(domain=.Last.domain(), lon, lat,
   result <- data.frame(w00=w[,1], w10=w[,2], w01=w[,3], w11=w[,4],
       F00=I(cbind(fi,fj)), F01=I(cbind(fi,cj)),
       F10=I(cbind(ci,fj)), F11=I(cbind(ci,cj)))
-  attributes(result)$method <- "bilin"
-  attributes(result)$mask <- is.null(mask)
+  attr(result, "method") <- "bilin"
+  attr(result, "mask") <- is.null(mask)
   result
 }
 
@@ -292,8 +292,8 @@ point.closest.init <- function(domain=.Last.domain(), lon, lat,
   }
 #  list(index=cbind(i,j))
   result <- data.frame(i=i, j=j)
-  attributes(result)$method <- "closest"
-  attributes(result)$mask <- !is.null(mask)
+  attr(result, "method") <- "closest"
+  attr(result, "mask") <- !is.null(mask)
   result
 }
 
@@ -369,7 +369,7 @@ point.bicubic.init <- function(domain=.Last.domain(), lon, lat){
   ffj[ffj>ny] <- ny
   result <- data.frame(di=di, ffi=ffi, fi=fi, ci=ci, cci=cci,
                        dj=dj, ffj=ffj, fj=fj, cj=cj, ccj=ccj)
-  attributes(result)$method <- "bicubic"
+  attr(result, "method") <- "bicubic"
   result
 }
 

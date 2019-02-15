@@ -34,9 +34,9 @@ wind.dirspeed <- function(u,v,fieldname=c("Wind direction","Wind speed"),rad=FAL
   if (rad) wdir <- wdir*pi/180.
   if (is.geofield(u)) {
     attributes(wdir) <- attributes(u)
-    attributes(wdir)$info$name <- fieldname[1]
+    attr(wdir, "info")$name <- fieldname[1]
     attributes(wspeed) <- attributes(u)
-    attributes(wspeed)$info$name <- fieldname[2]
+    attr(wspeed, "info")$name <- fieldname[2]
   }
   if (is.vector(u)) return(data.frame(wdir=wdir,wspeed=wspeed))
   else return(list(wdir=wdir,wspeed=wspeed))
@@ -51,8 +51,8 @@ wind.uv <- function(wspeed,wdir,fieldname=c("U","V"),rad=FALSE){
   u <- wspeed*cos(wdir)
   v <- wspeed*sin(wdir)
   if (is.geofield(wdir)) {
-    attributes(u)$info$name <- fieldname[1]
-    attributes(v)$info$name <- fieldname[2]
+    attr(u, "info")$name <- fieldname[1]
+    attr(v, "info")$name <- fieldname[2]
   }
   if (is.vector(wspeed)) return(data.frame(U=u,V=v))
   else return(list(U=u,V=v))
@@ -65,7 +65,7 @@ wind.uv <- function(wspeed,wdir,fieldname=c("U","V"),rad=FALSE){
 
 geowind <- function(u, v, inv=FALSE, init=NULL){
   if (is.null(init)) {
-    domain <- attributes(u)$domain
+    domain <- attr(u, "domain")
     ww <- geowind.init(domain)
   }
   else ww <- init
@@ -80,15 +80,15 @@ geowind <- function(u, v, inv=FALSE, init=NULL){
     attributes(U) <- attributes(u)
     attributes(V) <- attributes(v)
     if (!inv){
-      attributes(U)$info$name <- paste(attributes(u)$info$name,
+      attr(U, "info")$name <- paste(attr(u, "info")$name,
               "Rotated to N/E axes.")
-      attributes(V)$info$name <- paste(attributes(v)$info$name,
+      attr(V, "info")$name <- paste(attr(v, "info")$name,
               "Rotated to N/E axes.")
     }
     else {
-      attributes(U)$info$name <- paste(attributes(u)$info$name,
+      attr(U, "info")$name <- paste(attr(u, "info")$name,
               "grid axes.")
-      attributes(V)$info$name <- paste(attributes(v)$info$name,
+      attr(V, "info")$name <- paste(attr(v, "info")$name,
               "grid axes.")
     }
     list(U=U, V=V)

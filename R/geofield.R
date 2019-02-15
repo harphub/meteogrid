@@ -10,7 +10,7 @@ is.geofield <- function(x){
 }
 
 print.geofield <- function(x, ...){
-  cat(paste(attr(x,"info")$origin,":",attr(x,"info")$name),"\n")
+  cat(paste(attr(x, "info")$origin, ":", attr(x, "info")$name), "\n")
   if (length(dim(x)) > 2) {
     cat("Extra dimensions: ", paste(names(dim(x)), dim(x), sep="=", collapse=", "), "\n")
   }
@@ -82,8 +82,8 @@ as.geofield <- function (x=NA, domain, time = attr(domain, "time"),
   if (missing(k) && dimx >= 5) k <- 1:dim(x)[5]
   result <- as.geofield(switch(dimx - 2, x[,,i], x[,,i,j], x[,,i,j,k]),
 			domain=x)
-  info <- attributes(result)$info
-  time <- attributes(result)$time
+  info <- attr(result, "info")
+  time <- attr(result, "time")
   if (is.null(info)) info <- list()
   if (is.null(time)) time <- NA_integer_
   # when dropping a dimension (e.g. length(i)=1), you fix a level/member/...
@@ -111,12 +111,12 @@ as.geofield <- function (x=NA, domain, time = attr(domain, "time"),
   # we add the "squashed" dimension to the name or time tags (for e.g. iview)
   # use [[ ]] rather than $, because $m would also point at $mbr
   if (!is.null(squashed[["ldt"]]) ) {
-    attributes(time)$leadtime <- as.numeric(squashed$ldt)
+    attr(time, "leadtime") <- as.numeric(squashed$ldt)
     # by assigning to time[1] you keep all attributes!
-    time[1] <- sprintf("%s +%s", format(attributes(time)$basedate, "%Y/%m/%d %H:%M"), squashed$ldt)
+    time[1] <- sprintf("%s +%s", format(attr(time, "basedate"), "%Y/%m/%d %H:%M"), squashed$ldt)
     # TODO: fix leadtime scaling etc
-    if (!is.null(attributes(time)$basedate)) {
-      attributes(time)$validdate <- attributes(time)$basedate + as.numeric(squashed$ldt)
+    if (!is.null(attr(time, "basedate"))) {
+      attr(time, "validdate") <- attr(time, "basedate") + as.numeric(squashed$ldt)
     }
   }
   # TODO: add other info fields like "level", "mbr"...
@@ -125,8 +125,8 @@ as.geofield <- function (x=NA, domain, time = attr(domain, "time"),
   if (!is.null(squashed[["mbr"]])) info$name <- paste0(info$name, " mbr", squashed[["mbr"]])
   if (!is.null(squashed[["m"]])) info$name <- paste0(info$name, " ", squashed[["m"]], "m")
 
-  attributes(result)$info <- info
-  attributes(result)$time <- time
+  attr(result, "info") <- info
+  attr(result, "time") <- time
   result
 }
 
@@ -147,7 +147,7 @@ apply_geo3d <- function(x, func="sum", newname=NULL, ...) {
 
   if (!is.geofield(x) || length(dim(x)) != 3) stop("Only available for 3d geofields.")
   result <- as.geofield(afun(x, dims=2, ...), domain=x)
-  if (!is.null(newname)) attributes(result)$info$name <- newname
+  if (!is.null(newname)) attr(result, "info")$name <- newname
   result
 }
 
