@@ -24,10 +24,15 @@ regrid <- function (infield, newdomain=.Last.domain(), method="bilin",
                     mask=NULL, newmask=NULL, weights=NULL)
 {
 ### regridding: bilinear, bi-cubic or nearest neighbour, and now also upscaling by mean
-  if (!is.null(weights) && !is.null(attributes(weights)$newdomain))  {
-    newdomain <- attributes(weights)$newdomain
-  } else {
-    newdomain <- as.geodomain(newdomain)
+  if (!is.null(weights)) {
+    if (!is.null(attributes(weights)$newdomain))  {
+      newdomain <- attributes(weights)$newdomain
+    } else {
+      newdomain <- as.geodomain(newdomain)
+    }
+    if (!is.null(attributes(weights)$method))  {
+      method <- attributes(weights)$method
+    }
   }
 
   if (method %in% c("mean", "median")) {
@@ -105,9 +110,10 @@ point.index <- function(domain=.Last.domain(), lon, lat, clip=TRUE){
 }
 
 
-point.interp <- function(infield, lon, lat, method="bilin",
+point.interp <- function(infield, lon=NULL, lat=NULL, method="bilin",
                          mask=NULL, pointmask=NULL, force=FALSE, weights=NULL){
-  if (substring(method,1,3)=="bil") {
+  if (!is.null(weights) && !is.null(attributes(weights)$method)) method <- attributes(weights)$method
+  if (substring(method, 1, 3)=="bil") {
     point.bilin(infield=infield, lon=lon, lat=lat, mask=mask,
                 pointmask=pointmask, force=force, weights=weights)
   } else if (substring(method,1,3)=="bic") {
@@ -145,58 +151,73 @@ point.bilin.init <- function(domain=.Last.domain(), lon, lat,
   index <- point.index(domain=domain, lon=lon, lat=lat)
   fi <- floor(index$i)
   fj <- floor(index$j)
+  fi[fi<1 | fi>(nx-1)] <- NA
+  fj[fj<1 | fj>(ny-1)] <- NA
   ci <- fi + 1
   cj <- fj + 1
+#  ci[ci<2 | ci>nx] <- NA
+#  cj[cj<2 | cj>ny] <- NA
+  not_in_domain <- (is.na(ci) | is.na(cj) | is.na(fi) | is.na(fj))
+# interpolation weights (sum is always 1 or NA)
   di <- index$i - fi
   dj <- index$j - fj
-  ci[ci<1|ci>nx] <- NA
-  cj[cj<1|cj>ny] <- NA
-  fi[fi<1|fi>nx] <- NA
-  fj[fj<1|fj>ny] <- NA
+  w <- matrix(0, ncol=4, nrow=length(lon))
+  w[,1] <- (1-di)*(1-dj)
+  w[,2] <- dj*(1-di)
+  w[,3] <- di*(1-dj)
+  w[,4] <- di*dj
 
-# interpolation weights (sum is always 1 or NA)
-  w00 <- (1-di)*(1-dj)
-  w01 <- dj*(1-di)
-  w10 <- di*(1-dj)
-  w11 <- di*dj
+  if (any(not_in_domain)) {
+    message("Warning: ", sum(not_in_domain), " points are outside of the domain.")
+  }
 
   if (!is.null(mask)) {
-# if some of the 4 points are masked: set weight to zero, and renormalise the remaining weights to sum=1
+    # if some of the 4 points are masked: set weight to zero, and renormalise the remaining weights to sum=1
     if (is.null(pointmask)) pointmask <- rep(1, length(fi))
-    w00[mask[cbind(fi,fj)] != pointmask] <- 0
-    w01[mask[cbind(fi,cj)] != pointmask] <- 0
-    w10[mask[cbind(ci,fj)] != pointmask] <- 0
-    w11[mask[cbind(ci,cj)] != pointmask] <- 0
-    wsum <- w00 + w01 + w10 + w11
-    wnn <- (wsum>1.E-9)
-    w00[wnn] <- w00[wnn] / wsum[wnn]
-    w01[wnn] <- w01[wnn] / wsum[wnn]
-    w10[wnn] <- w10[wnn] / wsum[wnn]
-    w11[wnn] <- w11[wnn] / wsum[wnn]
-# if all weights are 0, make sure the result is NA, not 0:
+    w[mask[cbind(fi,fj)] != pointmask, 1] <- 0
+    w[mask[cbind(fi,cj)] != pointmask, 2] <- 0
+    w[mask[cbind(ci,fj)] != pointmask, 3] <- 0
+    w[mask[cbind(ci,cj)] != pointmask, 4] <- 0
+    wsum <- rowSums(w) # w00 + w01 + w10 + w11
+    # if some indices are NA, this should not crash, so use which()!
+    # it should be OK to use 0 and not some delta=1.E-9 :
+    wnn <- which(wsum > 0 & wsum < 1. - 1.E-9)
+    w[wnn,1] <- w[wnn,1] / wsum[wnn]
+    w[wnn,2] <- w[wnn,2] / wsum[wnn]
+    w[wnn,3] <- w[wnn,3] / wsum[wnn]
+    w[wnn,4] <- w[wnn,4] / wsum[wnn]
+# if all 4 weights are 0, make sure the result is NA, not 0:
 # unless force==FALSE: then take the original weights
-    if (any(!wnn)) {
-      if (force) w00[!wnn] <- NA
-      else if (any(!wnn)) { # restore original
-        w00[!wnn] <- ((1-di)*(1-dj))[!wnn]
-        w01[!wnn] <- (dj*(1-di))[!wnn]
-        w10[!wnn] <- (di*(1-dj))[!wnn]
-        w11[!wnn] <- (di*dj)[!wnn]
+    if (any(wsum == 0, na.rm=TRUE)) {
+      w0 <- which(wsum == 0)
+      message("Warning: ", length(w0), "points have no source points with similar L/S mask!")
+      if (force) {
+        message("Set to NA.")
+        w[w0,] <- NA
+      } else { # restore original
+        message("Set to original (4 point) interpolation.")
+        ddi=di[w0]
+        ddj=dj[w0]
+        w[w0, 1] <- (1-ddi)*(1-ddj)
+        w[w0, 2] <- ddj*(1-ddi)
+        w[w0, 3] <- ddi*(1-ddj)
+        w[w0, 4] <- ddi*ddj
       }
     }
   }
 #  list(w00=w00, w10=w10, w01=w01, w11=w11,
 #       F00=cbind(fi,fj), F01=cbind(fi,cj),
 #       F10=cbind(ci,fj), F11=cbind(ci,cj))
-  data.frame(w00=w00, w10=w10, w01=w01, w11=w11,
+  result <- data.frame(w00=w[,1], w10=w[,2], w01=w[,3], w11=w[,4],
       F00=I(cbind(fi,fj)), F01=I(cbind(fi,cj)),
       F10=I(cbind(ci,fj)), F11=I(cbind(ci,cj)))
-
-
+  attributes(result)$method <- "bilin"
+  attributes(result)$mask <- is.null(mask)
+  result
 }
 
 
-point.bilin <- function(infield, lon, lat, mask=NULL, 
+point.bilin <- function(infield, lon=NULL, lat=NULL, mask=NULL, 
                         pointmask=NULL, force=FALSE, weights=NULL)
 {
   if (is.null(weights)){
@@ -237,8 +258,8 @@ point.closest.init <- function(domain=.Last.domain(), lon, lat,
     if (is.null(pointmask)) pointmask=rep(1, length(i))
 # with a mask, we need a bit more work
 # we do this only for those points where the closest point is masked...
-    ismasked <- mask[cbind(i,j)] != pointmask
-    nmasked <- sum(ismasked)
+    ismasked <- which(mask[cbind(i,j)] != pointmask)
+    nmasked <- length(ismasked)
     if (nmasked>0) {
       fi <- floor(index$i[ismasked])
       fj <- floor(index$j[ismasked])
@@ -257,23 +278,26 @@ point.closest.init <- function(domain=.Last.domain(), lon, lat,
       novalue <- is.na(dist$d00) &  is.na(dist$d01) & is.na(dist$d10) & is.na(dist$d11)
 # if we don't force NA (=> never NA inside the domain), just leave the original closest point
       if (force && any(novalue)) {
-        i[ismasked[novalue]] <- NA
-        j[ismasked[novalue]] <- NA
+        i[ismasked][novalue] <- NA
+        j[ismasked][novalue] <- NA
       }
       if (any(!novalue)) {
-        closest <- apply(dist[!novalue,],1,which.min)
-        mi <- ifelse(closest <= 2,fi,ci)
-        mj <- ifelse(closest%%2 == 1,fj,cj)
-        i[ismasked[!novalue]] <- mi
-        j[ismasked[!novalue]] <- mj
+        closest <- apply(dist[!novalue, ], 1, which.min)
+        mi <- ifelse(closest <= 2, fi, ci)
+        mj <- ifelse(closest%%2 == 1, fj, cj)
+        i[ismasked][!novalue] <- mi
+        j[ismasked][!novalue] <- mj
       }
     }
   }
 #  list(index=cbind(i,j))
-  data.frame(index=I(cbind(i,j)))
+  result <- data.frame(index=I(cbind(i,j)))
+  attributes(result)$method <- "closest"
+  attributes(result)$mask <- !is.null(mask)
+  result
 }
 
-point.closest <- function(infield, lon, lat, mask=NULL, 
+point.closest <- function(infield, lon=NULL, lat=NULL, mask=NULL, 
                           pointmask=NULL, force=FALSE, weights=NULL){
 ### where mask != pointmask (default 1): take next closest point
 ### but only from the four closest !
@@ -343,12 +367,14 @@ point.bicubic.init <- function(domain=.Last.domain(), lon, lat){
   ffj[ffj<1] <- 1
   ccj[ccj>ny] <- ny
   ffj[ffj>ny] <- ny
-  data.frame(di=di, ffi=ffi, fi=fi, ci=ci, cci=cci,
-             dj=dj, ffj=ffj, fj=fj, cj=cj, ccj=ccj)
+  result <- data.frame(di=di, ffi=ffi, fi=fi, ci=ci, cci=cci,
+                       dj=dj, ffj=ffj, fj=fj, cj=cj, ccj=ccj)
+  attributes(result)$method <- "bicubic"
+  result
 }
 
 
-point.bicubic <- function(infield, lon, lat, weights=NULL){
+point.bicubic <- function(infield, lon=NULL, lat=NULL, weights=NULL){
   ndim <- length(dim(infield))
   if (ndim != 2) stop("bicubic interpolation only for 2d fields.")
   if (is.null(weights)) weights <- point.bicubic.init(infield, lon=lon, lat=lat)
@@ -376,7 +402,6 @@ point.bicubic <- function(infield, lon, lat, weights=NULL){
 
   result <- di*(-di^2/2+di-1/2)*FFi + di^2*(di-1)/2*CCi +
              (1+3/2*di^3 -5/2*di^2) * Fi + di*(-3/2*di^2+2*di+1/2)*Ci
-
   result
 }
 

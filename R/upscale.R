@@ -107,7 +107,9 @@ upscale_regrid_init <- function(olddomain, newdomain) {
                                     gnx=as.integer(gnx), gny=as.integer(gny),
                                     gcount=integer(gnx * gny),
                                     gcell=integer(npoints),
-                                    NAOK=TRUE, PACKAGE="meteogrid")
-  result[c("npoints","gnx","gny","gcount","gcell")]
+                                    NAOK=TRUE, PACKAGE="meteogrid"
+                                    )[c("npoints", "gnx", "gny", "gcount", "gcell")]
+  attributes(result)$method <- "mean"
+  result
 }
 
