@@ -291,7 +291,7 @@ point.closest.init <- function(domain=.Last.domain(), lon, lat,
     }
   }
 #  list(index=cbind(i,j))
-  result <- data.frame(index=I(cbind(i,j)))
+  result <- data.frame(i=i, j=j)
   attributes(result)$method <- "closest"
   attributes(result)$mask <- !is.null(mask)
   result
@@ -302,10 +302,10 @@ point.closest <- function(infield, lon=NULL, lat=NULL, mask=NULL,
 ### where mask != pointmask (default 1): take next closest point
 ### but only from the four closest !
   if (is.null(weights)) weights <- point.closest.init(infield, lon=lon, lat=lat, mask, pointmask, force)
-
+  index <- cbind(weights$i, weights$j)
   ndim <- length(dim(infield))
-  if (ndim==2) infield[weights$index]
-  else apply(infield, 3:ndim, function(x) x[weights$index])
+  if (ndim==2) infield[index]
+  else apply(infield, 3:ndim, function(x) x[index])
 }
 
 
