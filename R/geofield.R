@@ -32,30 +32,35 @@ as.geofield <- function (x=NA, domain, time = attr(domain, "time"),
   if (!is.list(extra_dim)) {
     dims <- c("x"=mydomain$nx, "y"=mydomain$ny, extra_dim)
     extra_dim <- lapply(extra_dim, function(x) 1:x)
-    set_dimnames <- FALSE
+    dimnam <- NULL
   } else {
     dims <- c("x"=mydomain$nx, "y"=mydomain$ny, 
               vapply(extra_dim, FUN=length, FUN.VALUE=1))
-    set_dimnames <- (length(dims) > 2)
+    if (length(dims) == 2) dimnam <- NULL
+    else dimnam <- c(list("x"=NULL, "y"=NULL), extra_dim)
   }
 
   if (is.vector(x)) {
     x <- array(x, dim=dims)
   } else {
-    # extra_dimensions is probably not given in this case
-    if (length(dim(x))>2 && length(extra_dim)==0) {
-	    dims <- c(dims, dim(x)[-(1:2)])
+    ### the array is already provided
+    ### so any extra dimensions are only passed to supply dimension names
+    ### if they are not given, we can try whether x already has dimnames
+    if (length(extra_dim)==0) {
+      dims <- c(dims, dim(x)[-(1:2)])
+      dimnam <- dimnames(x)
     }
     # check all dimensions
     if (any(dim(x) != dims)) stop("Wrong dimensions.", 
-				     paste(dim(x), collapse=" x "), " vs ",
-				     paste(dims, collapse=" x "))
+			     paste(dim(x), collapse=" x "), " vs ",
+			     paste(dims, collapse=" x "))
   }
   noname <- which(is.na(names(dims)) | names(dims)=="" )
   names(dims)[noname] <- paste0("D", noname)
   names(dim(x)) <- names(dims)
   # also set dimnames (not for x,y!)
-  if (set_dimnames) dimnames(x) <- c(list(x=NULL, y=NULL), extra_dim)
+  # after names(dim(x)) <- , dimnames is always reset to NULL !
+  dimnames(x) <- dimnam
 
   attr(x, "domain") <- mydomain
   attr(x, "time")   <- time
@@ -75,8 +80,9 @@ as.geofield <- function (x=NA, domain, time = attr(domain, "time"),
 .subset.geofield <- function(x, i, j, k) {
   dimx <- length(dim(x))
   if (dimx <= 2) stop("Subsetting a geofield requires extra dimensions")
-#  if (dimx > 3) warning("Working with more than 3 dimensions in a geofield is dangerous.")
-  if ( (dimx < 5 && !missing(k)) || (dimx < 4 && !missing(j))) stop("Bad dimensioning.")
+  if ( (dimx < 5 && !missing(k)) || (dimx < 4 && !missing(j))) {
+    stop("Bad dimensioning. Object has ", dimx-2, " extra dimensions.")
+  }
   if (missing(i) && dimx >= 3) i <- 1:dim(x)[3]
   if (missing(j) && dimx >= 4) j <- 1:dim(x)[4]
   if (missing(k) && dimx >= 5) k <- 1:dim(x)[5]
@@ -107,7 +113,7 @@ as.geofield <- function (x=NA, domain, time = attr(domain, "time"),
 #    }
   }
   if (dimx >= 4 && length(j)==1) squashed[[names(dim(x))[4] ]] <- dimnames(x)[[4]][j]
-  if (dimx == 5 && length(k)==1) squashed[[names(dim(x))[5] ]] <- dimnames(x)[[5]][k]
+  if (dimx >= 5 && length(k)==1) squashed[[names(dim(x))[5] ]] <- dimnames(x)[[5]][k]
   # we add the "squashed" dimension to the name or time tags (for e.g. iview)
   # use [[ ]] rather than $, because $m would also point at $mbr
   if (!is.null(squashed[["ldt"]]) ) {
@@ -127,6 +133,7 @@ as.geofield <- function (x=NA, domain, time = attr(domain, "time"),
 
   attr(result, "info") <- info
   attr(result, "time") <- time
+###  dimnames(result) <- c(list(x=NULL, y=NULL), extra_dim)
   result
 }
 
@@ -145,7 +152,8 @@ apply_geo3d <- function(x, func="sum", newname=NULL, ...) {
                    (-180 - atan(x[,,2]/x[,,1]) * 180/pi + sign(1/x[,,1] ) * 90) %% 360,
                  stop("Unknown function", func))
 
-  if (!is.geofield(x) || length(dim(x)) != 3) stop("Only available for 3d geofields.")
+  if (!is.geofield(x) || length(dim(x)) != 3) stop("Only available for 3d geofields. dim=",
+                                                   length(dim(x)))
   result <- as.geofield(afun(x, dims=2, ...), domain=x)
   if (!is.null(newname)) attr(result, "info")$name <- newname
   result
