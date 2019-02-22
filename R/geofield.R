@@ -9,20 +9,25 @@ is.geofield <- function(x){
   inherits(x,"geofield")
 }
 
-print.geofield <- function(x, ...){
-  cat(paste(attr(x, "info")$origin, ":", attr(x, "info")$name), "\n")
+print.geofield <- function(x, ...) {
+  with(attr(x, "info"), cat(origin, ":", name), "\n")
   if (length(dim(x)) > 2) {
-    cat("Extra dimensions: ", paste(names(dim(x)), dim(x), sep="=", collapse=", "), "\n")
+    cat("Dimensions: ", paste(names(dim(x)), dim(x), sep="=", collapse=", "), "\n")
   }
-  cat("Time:\n")
-  cat(attr(x,"time"),"\n")
-  cat("Domain summary:\n")
-  print(attr(x,"domain"))
+  with(attr(x, "info"), {
+    if (length(time) > 0) {
+      cat("Time:\n", 
+          sprintf("%s +%s", format(basedate, "%Y/%m/%d %H:%M"), leadtime),
+          "\n")
+    }
+    cat("Domain summary:\n")
+    print(domain)
+  })
   cat("Data summary:\n")
   cat(summary(as.vector(x)),"\n")
 }
 
-as.geofield <- function (x=NA, domain, time = attr(domain, "time"),
+as.geofield <- function (x=NA, domain,
                          info = attr(domain, "info"),
                          extra_dim=list()) {
   mydomain <- as.geodomain(domain)
@@ -34,14 +39,14 @@ as.geofield <- function (x=NA, domain, time = attr(domain, "time"),
     extra_dim <- lapply(extra_dim, function(x) 1:x)
     dimnam <- NULL
   } else {
-    dims <- c("x"=mydomain$nx, "y"=mydomain$ny, 
+    dims <- c("x" = mydomain$nx, "y" = mydomain$ny, 
               vapply(extra_dim, FUN=length, FUN.VALUE=1))
     if (length(dims) == 2) dimnam <- NULL
-    else dimnam <- c(list("x"=NULL, "y"=NULL), extra_dim)
+    else dimnam <- c(list("x" = NULL, "y" = NULL), extra_dim)
   }
 
   if (is.vector(x)) {
-    x <- array(x, dim=dims)
+    x <- array(x, dim = dims)
   } else {
     ### the array is already provided
     ### so any extra dimensions are only passed to supply dimension names
@@ -63,8 +68,7 @@ as.geofield <- function (x=NA, domain, time = attr(domain, "time"),
   dimnames(x) <- dimnam
 
   attr(x, "domain") <- mydomain
-  attr(x, "time")   <- time
-  attr(x, "info")   <- if (is.null(info)) list() else info
+  attr(x, "info")   <- if (is.null(info)) list(name="", time=list()) else info
   class(x) <- "geofield"
   return(x)
 }
@@ -89,51 +93,31 @@ as.geofield <- function (x=NA, domain, time = attr(domain, "time"),
   result <- as.geofield(switch(dimx - 2, x[,,i], x[,,i,j], x[,,i,j,k]),
 			domain=x)
   info <- attr(result, "info")
-  time <- attr(result, "time")
-  if (is.null(info)) info <- list()
-  if (is.null(time)) time <- NA_integer_
+  if (is.null(info)) info <- list(name="", time=list())
   # when dropping a dimension (e.g. length(i)=1), you fix a level/member/...
   # so that should be in the info field
   # TODO: fix this if you drop multiple dimensions!
-  # ATTENTION: if there is a squashed dimension called "name", info$name will be overwritten!
-  squashed <- list()
-  if (dimx >= 3 && length(i)==1) {
-    squashed[[names(dim(x))[3] ]] <- dimnames(x)[[3]][i]
-    # supported z_types: level, mbr, hPa, m, ldt
-#    if (!is.null(info$z_type)) {
-#      info$name <- switch((info$z_type),
-#              "mbr" = paste0(info$name, " mbr",i2a(dimnames(x)[[3]][i],3)),
-#              "hPa" = paste0(info$name, " ",dimnames(x)[[3]][i], "hPa"),
-#	      "level"=,
-#              "hybrid" = paste0(info$name, " lev ",dimnames(x)[[3]][i]),
-#              "m" = paste0(info$name, " ",dimnames(x)[[3]][i],"m"),
-#              "ldt" = paste0(info$name, " +",dimnames(x)[[3]][i]),
-#              "prm" = paste0(dimnames(x)[[3]][i]),
-#	      info$name)
-#    }
-  }
-  if (dimx >= 4 && length(j)==1) squashed[[names(dim(x))[4] ]] <- dimnames(x)[[4]][j]
-  if (dimx >= 5 && length(k)==1) squashed[[names(dim(x))[5] ]] <- dimnames(x)[[5]][k]
+  # ATTENTION: if there is a collapsed dimension called "name", info$name will be overwritten!
+  collapse <- list()
+  if (dimx >= 3 && length(i)==1) collapse[[names(dim(x))[3] ]] <- dimnames(x)[[3]][i]
+  if (dimx >= 4 && length(j)==1) collapse[[names(dim(x))[4] ]] <- dimnames(x)[[4]][j]
+  if (dimx >= 5 && length(k)==1) collapse[[names(dim(x))[5] ]] <- dimnames(x)[[5]][k]
   # we add the "squashed" dimension to the name or time tags (for e.g. iview)
   # use [[ ]] rather than $, because $m would also point at $mbr
-  if (!is.null(squashed[["ldt"]]) ) {
-    attr(time, "leadtime") <- as.numeric(squashed$ldt)
-    # by assigning to time[1] you keep all attributes!
-    time[1] <- sprintf("%s +%s", format(attr(time, "basedate"), "%Y/%m/%d %H:%M"), squashed$ldt)
-    # TODO: fix leadtime scaling etc
-    if (!is.null(attr(time, "basedate"))) {
-      attr(time, "validdate") <- attr(time, "basedate") + as.numeric(squashed$ldt)
+  if (!is.null(collapse[["ldt"]]) ) {
+    info$time$leadtime <- as.numeric(collapse$ldt)
+    # TODO: fix leadtime scaling etc FOR NOW: assume ldt is in hours
+    if (!is.null(info$time$basedate)) {
+      info$time$validdate <- info$time$basedate + as.numeric(collapse$ldt)*3600
+      info$time$print <- sprintf("%s +%s", format(attr(time, "basedate"), "%Y/%m/%d %H:%M"), collapse$ldt)
     }
   }
-  # TODO: add other info fields like "level", "mbr"...
-  if (!is.null(squashed[["prm"]])) info$name <- paste0(squashed$prm, info$name)
-  if (!is.null(squashed[["hPa"]])) info$name <- paste0(info$name, " ", squashed[["hPa"]], "hPa")
-  if (!is.null(squashed[["mbr"]])) info$name <- paste0(info$name, " mbr", squashed[["mbr"]])
-  if (!is.null(squashed[["m"]])) info$name <- paste0(info$name, " ", squashed[["m"]], "m")
+  if (!is.null(collapse[["prm"]]))   info$name <- paste0(collapse$prm, info$name)
+  if (!is.null(collapse[["hPa"]]))   info$name <- paste0(info$name, " ", collapse[["hPa"]], "hPa")
+  if (!is.null(collapse[["mbr"]]))   info$name <- paste0(info$name, " mbr", collapse[["mbr"]])
+  if (!is.null(collapse[["level"]])) info$name <- paste0(info$name, " level ", collapse[["level"]])
 
   attr(result, "info") <- info
-  attr(result, "time") <- time
-###  dimnames(result) <- c(list(x=NULL, y=NULL), extra_dim)
   result
 }
 

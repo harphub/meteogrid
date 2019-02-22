@@ -21,8 +21,11 @@
 
 
 vecplot <-
-function(U,V,x=1:dim(U)[1],y=1:dim(U)[2],thinx=10,thiny=thinx,aspect=1,
-         add=FALSE,arrowcolor=1,arrowsize=.03,maxscale=.9,lwd=.5,rescale,xlab="",ylab="",...)
+function(U, V ,x = 1:dim(U)[1], y = 1:dim(U)[2],
+         thinx = 10, thiny = thinx, aspect = 1,
+         arrowcolor = 1, arrowsize = .03, maxscale = .9, lwd = .5, rescale,
+         add = FALSE,
+         xlab = "", ylab = "", ...)
 {
 ### The vectors are plotted as "arrows" (line elements!) in the current co-ordinate system.
 ### warning("VECPLOT is quite primitive. Use it only for a rough idea of vector fields.")
@@ -173,11 +176,15 @@ limage <-
 ############################
 ### SHORTCUTS            ###
 ############################
+geofield_title <- function(x) {
+  with(attr(x, "info"),
+    sprintf("%s : %s\n%s +%s", origin, name, format(basedate, "%Y/%m/%d %H:%M"), leadtime))
+}
 
 iview <- function(x, nlevels=15, color.palette=irainbow,
             levels=pretty(x[1:gdomain$nx,1:gdomain$ny], nlevels),
             col=color.palette(length(levels)-1),
-            title=paste(attr(x,"info")$name,"\n",attr(x,"time")),
+            title=geofield_title(x),
             legend=FALSE,mask=NULL,na.col=par("bg"),
             drawmap=TRUE, maplwd=.5, mapcol='black', map.database='world', 
             interior=TRUE, fill=FALSE, ...){
@@ -213,7 +220,7 @@ iview <- function(x, nlevels=15, color.palette=irainbow,
 
 fcview <- function(x,nlevels=15,color.palette=irainbow,
             levels=pretty(x[1:gdomain$nx,1:gdomain$ny], nlevels),
-            title=paste(attr(x,"info")$name,"\n",attr(x,"time")),
+            title=geofield_title(x),
             legend=TRUE,mask=NULL,
             drawmap=TRUE, maplwd=.5, mapcol='black', map.database='world',
             interior=TRUE, fill=FALSE, ...){
@@ -244,7 +251,7 @@ fcview <- function(x,nlevels=15,color.palette=irainbow,
 }
 
 cview <- function(x,nlevels=15,
-           title=paste(attr(x,"info")$name,"\n",attr(x,"time")),
+           title=geofield_title(x),
            mask=NULL, add=FALSE,
            drawmap=!add, maplwd=.5, mapcol="black", map.database="world",
            interior=TRUE, fill=FALSE, ...){
