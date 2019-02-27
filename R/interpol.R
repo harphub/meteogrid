@@ -48,7 +48,6 @@ regrid <- function (infield, newdomain=.Last.domain(), method="bilin",
     edim <- if (length(dim(infield)) > 2) dim(infield)[-(1:2)] else NULL
     return(as.geofield(as.numeric(result),
                        domain = newdomain,
-                       time   = attr(infield,"time"),
                        info   = attr(infield,"info"),
                        extra_dim = edim))
   }

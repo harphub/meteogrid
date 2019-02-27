@@ -44,7 +44,7 @@ subgrid <- function(geo, x1, x2, y1, y2, reso=1) {
 
   # use as.numeric()' to coerce a data.frame to a vector:
   if (inherits(geo, "geofield")) {
-    as.geofield(geo[xsub,ysub], domain=newdomain, time=attr(geo,"time"),
+    as.geofield(geo[xsub,ysub], domain=newdomain,
                 info=c(attr(geo,"info"), extra="SUBFIELD"))
   } else {
     newdomain

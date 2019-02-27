@@ -10,19 +10,20 @@ is.geofield <- function(x){
 }
 
 print.geofield <- function(x, ...) {
-  with(attr(x, "info"), cat(origin, ":", name), "\n")
+  # don't use "with(attr(x, "info"), ...)
+  # because that fails if an element does not exists
+  # while now it just returns NULL...
+  cat(attr(x, "info")$origin, ":", attr(x, "info")$name, "\n")
   if (length(dim(x)) > 2) {
     cat("Dimensions: ", paste(names(dim(x)), dim(x), sep="=", collapse=", "), "\n")
   }
-  with(attr(x, "info"), {
-    if (length(time) > 0) {
-      cat("Time:\n", 
-          sprintf("%s +%s", format(basedate, "%Y/%m/%d %H:%M"), leadtime),
-          "\n")
-    }
-    cat("Domain summary:\n")
-    print(domain)
-  })
+  cat("Time:\n", format(attr(x, "info")$time$basedate, "%Y/%m/%d %H:%M"))
+  if (!is.null(attr(x, "info")$time$leadtime)) cat(sprintf(" +%s\n", attr(x, "info")$time$leadtime))
+  else cat("\n")
+
+  cat("Domain summary:\n")
+  print(attr(x, "domain"))
+
   cat("Data summary:\n")
   cat(summary(as.vector(x)),"\n")
 }
@@ -67,8 +68,13 @@ as.geofield <- function (x=NA, domain,
   # after names(dim(x)) <- , dimnames is always reset to NULL !
   dimnames(x) <- dimnam
 
+  if (is.null(info)) info <- list(name="", time=list())
+  else {
+    if (is.null(info$name)) info$name <- ""
+    if (is.null(info$time)) info$time <- list()
+  }
   attr(x, "domain") <- mydomain
-  attr(x, "info")   <- if (is.null(info)) list(name="", time=list()) else info
+  attr(x, "info")   <- info
   class(x) <- "geofield"
   return(x)
 }
@@ -113,6 +119,7 @@ as.geofield <- function (x=NA, domain,
     }
   }
   if (!is.null(collapse[["prm"]]))   info$name <- paste0(collapse$prm, info$name)
+  if (!is.null(collapse[["name"]]))   info$name <- paste0(collapse$name, info$name)
   if (!is.null(collapse[["hPa"]]))   info$name <- paste0(info$name, " ", collapse[["hPa"]], "hPa")
   if (!is.null(collapse[["mbr"]]))   info$name <- paste0(info$name, " mbr", collapse[["mbr"]])
   if (!is.null(collapse[["level"]])) info$name <- paste0(info$name, " level ", collapse[["level"]])

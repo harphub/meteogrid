@@ -177,8 +177,15 @@ limage <-
 ### SHORTCUTS            ###
 ############################
 geofield_title <- function(x) {
-  with(attr(x, "info"),
-    sprintf("%s : %s\n%s +%s", origin, name, format(basedate, "%Y/%m/%d %H:%M"), leadtime))
+  # don't use "with(attr(x, "info"), ...)
+  # because that fails if an element does not exists
+  # while now it just returns NULL...
+  mytitle <- sprintf("%s\n%s", attr(x, "info")$name, 
+                     format(attr(x, "info")$time$basedate, "%Y/%m/%d %H:%M"))
+  if (!is.null(attr(x, "info")$time$leadtime)) {
+    mytitle <- paste0(mytitle, " +", attr(x, "info")$time$leadtime)
+  }
+  mytitle
 }
 
 iview <- function(x, nlevels=15, color.palette=irainbow,
@@ -281,9 +288,13 @@ cview <- function(x,nlevels=15,
 vview <- function(U,V,add=FALSE,aspcorrect=TRUE,
                   drawmap=TRUE, maplwd=.5, mapcol="black", map.database='world',
                   interior=TRUE, fill=FALSE, ...){
+  if (missing(V) && length(dim(U)==3) && dim(U)[3]==2) {
+    V <- U[[2]]
+    U <- U[[1]]
+  }
   if (!inherits(U,"geofield") | !inherits(V,"geofield")) stop("vview requires 2 geofields as input.")
   if (length(dim(U)) > 2) stop("vview currently only works for 2d geofields.")
-  gdomain <- attr(U,"domain")
+  gdomain <- attr(U, "domain")
   glimits <- DomainExtent(gdomain)
   x <- seq(glimits$x0,glimits$x1,length=gdomain$nx)
   y <- seq(glimits$y0,glimits$y1,length=gdomain$ny)
