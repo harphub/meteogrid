@@ -23,7 +23,7 @@
 regrid <- function (infield, newdomain=.Last.domain(), method="bilin",
                     mask=NULL, newmask=NULL, weights=NULL)
 {
-### regridding: bilinear, bi-cubic or nearest neighbour, and now also upscaling by mean
+### regridding: bilinear, bi-cubic or nearest neighbour, and now also upscaling by mean, subgrid
   if (!is.null(weights)) {
     if (!is.null(attr(weights, "newdomain")))  {
       newdomain <- attr(weights, "newdomain")
@@ -37,6 +37,22 @@ regrid <- function (infield, newdomain=.Last.domain(), method="bilin",
 
   if (method %in% c("mean", "median")) {
     return(upscale_regrid(infield=infield, newdomain=newdomain, method=method, weights=weights))
+  } else if (method == "subgrid") {
+    if (is.null(weights)) weights <- regrid.init(olddomain=infield, newdomain=newdomain, method="subgrid")
+    if (length(dim(infield)) > 2) {
+      edim(infield)[-(1:2)]
+      result <- apply(infield, 3:length(dim(infield)),
+                      function(x) x[weights$i0:weights$i1, weights$j0:weights$j1])
+      dim(result) <- c(newdomain$nx, newdomain$ny, dim(infield)[-(1:2)])
+    } else {
+      result <- infield[weights$i0:weights$i1, weights$j0:weights$j1]
+      edim <- NULL
+    }
+    return(as.geofield(result,
+                       domain = newdomain,
+                       info   = attr(infield, "info"),
+                       extra_dim = edim))
+
   } else {
 # speed-up: if you already have the weights, no need to calculate lon/lat of the new domain!
     if (is.null(weights)) weights <- regrid.init(olddomain=infield, newdomain=newdomain, method=method, 
@@ -48,7 +64,7 @@ regrid <- function (infield, newdomain=.Last.domain(), method="bilin",
     edim <- if (length(dim(infield)) > 2) dim(infield)[-(1:2)] else NULL
     return(as.geofield(as.numeric(result),
                        domain = newdomain,
-                       info   = attr(infield,"info"),
+                       info   = attr(infield, "info"),
                        extra_dim = edim))
   }
 }
@@ -64,6 +80,22 @@ regrid.init <- function (olddomain, newdomain=.Last.domain(),
     result <- upscale_regrid_init(olddomain, newdomain)
   } else if (method %in% c("median")) {
     stop("Method", method, "not yet supported. Sorry.")
+  } else if (method == "subgrid") {
+    # identify how newdomain is a subgrid of olddomain
+    if (newdomain$dx != olddomain$dx || newdomain$dy != olddomain$dy) {
+      stop("Grids do not conform. Clearly not a subgrid.")
+    }
+    odp <- DomainPoints(olddomain, type="xy")
+    ndp <- DomainPoints(newdomain, type="xy") # you only need SW and NE point...
+    i0 <- which.min(abs(odp$x[,1] - ndp$x[1,1]))
+    i1 <- which.min(abs(odp$x[,1] - ndp$x[newdomain$nx, newdomain$ny]))
+    j0 <- which.min(abs(odp$y[1,] - ndp$y[1,1]))
+    j1 <- which.min(abs(odp$y[1,] - ndp$y[newdomain$nx, newdomain$ny]))
+    if (i1 - i0 + 1 != newdomain$nx || j1 - j0 + 1 != newdomain$ny) {
+      stop("Domains do not correspond. Not a subgrid.")
+    }
+    result <- list(i0 = i0, i1 = i1, j0 = j0, j1 = j1)
+    attr(result, "method") <- "subgrid"
   } else {
     newpoints <- DomainPoints(newdomain)
     if (is.null(mask) != is.null(newmask)) stop("When using Land/Sea masks, you *must* provide both domains!")
