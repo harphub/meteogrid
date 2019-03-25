@@ -143,10 +143,14 @@ apply_geo3d <- function(x, func="sum", newname=NULL, ...) {
                    (-180 - atan(x[,,2]/x[,,1]) * 180/pi + sign(1/x[,,1] ) * 90) %% 360,
                  stop("Unknown function", func))
 
-  if (!is.geofield(x) || length(dim(x)) != 3) stop("Only available for 3d geofields. dim=",
+  if (length(dim(x)) != 3) stop("Only available for 3d geofields. dim=",
                                                    length(dim(x)))
-  result <- as.geofield(afun(x, dims=2, ...), domain=x)
-  if (!is.null(newname)) attr(result, "info")$name <- newname
+  if (is.geofield(x)) {
+    result <- as.geofield(afun(x, dims=2, ...), domain=x)
+    if (!is.null(newname)) attr(result, "info")$name <- newname
+  } else {
+    result <- afun(x, dims=2, ...)
+  }
   result
 }
 
