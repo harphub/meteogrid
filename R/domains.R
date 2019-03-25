@@ -1,11 +1,3 @@
-#-------------------------------------------#
-# Part of R-package meteogrid                 #
-# Copyright (c) 2003-2017 Alex Deckmyn      #
-#   Royal Meteorological Institute, Belgium #
-# alex.deckmyn@meteo.be                     #
-# Released under GPL-3 license              #
-#-------------------------------------------#
-
 compare.geodomain <- function(x, y, eps=1e-10){
 ### TRUE if they are equal, FALSE if they are not
 ### this is not exhaustive, but I am in a hurry!

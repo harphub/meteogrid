@@ -1,10 +1,3 @@
-#-------------------------------------------#
-# Part of R-package meteogrid                 #
-# Copyright (c) 2003-2016 Alex Deckmyn      #
-#   Royal Meteorological Institute, Belgium #
-# Released under GPL-3 license              #
-#-------------------------------------------#
-
 # geowind: rotation of wind fields
 # not easy to do in a generic way, so we only implement for a few projections:
 # rotated LatLon and Lambert.

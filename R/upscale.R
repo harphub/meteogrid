@@ -1,10 +1,3 @@
-#-------------------------------------------#
-# Part of R-package meteogrid                 #
-# Copyright (c) 2003-2016 Alex Deckmyn      #
-#   Royal Meteorological Institute, Belgium #
-# Released under GPL-3 license              #
-#-------------------------------------------#
-
 ###################
 ### UPSCALING   ###
 ###################

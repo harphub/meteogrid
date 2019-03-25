@@ -1,11 +1,3 @@
-#-------------------------------------------#
-# Part of R-package meteogrid               #
-# Copyright (c) 2003-2018 Alex Deckmyn      #
-#   Royal Meteorological Institute, Belgium #
-# alex.deckmyn@meteo.be                     #
-# Released under GPL-3 license              #
-#-------------------------------------------#
-
 ######################
 ### meteogrid
 ######################
