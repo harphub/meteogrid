@@ -23,15 +23,16 @@ CPPFLAGS="${CPPFLAGS} ${PKG_CPPFLAGS}"
 
 proj4ok=yes
 AC_CHECK_HEADERS(proj_api.h,,proj4ok=no)
-if test "${proj4ok}" = no; then
-   AC_MSG_ERROR([proj_api.h not found.
-*** Install PROJ.4 and if necessary set PKG_CPPFLAGS/PKG_LIBS accordingly.])
-fi
+# don't fail when proj is not found, maybe it's OK for R (Makevars)
+#if test "${proj4ok}" = no; then
+#   AC_MSG_ERROR([proj_api.h not found.
+#*** Install PROJ.4 and if necessary set PKG_CPPFLAGS/PKG_LIBS accordingly.])
+#fi
 AC_CHECK_LIB(proj,pj_init,,proj4ok=no)
-if test "${proj4ok}" = no; then
-   AC_MSG_ERROR([libproj not found.
-*** Install PROJ.4 and if necessary set PKG_CPPFLAGS/PKG_LIBS accordingly.])
-fi
+#if test "${proj4ok}" = no; then
+#   AC_MSG_ERROR([libproj not found.
+#*** Install PROJ.4 and if necessary set PKG_CPPFLAGS/PKG_LIBS accordingly.])
+#fi
 
 AC_ARG_VAR([PKG_CPPFLAGS],[custom C preprocessor flags for packages compilation])
 AC_ARG_VAR([PKG_LIBS],[custom libraries for package compilation])
