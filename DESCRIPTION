@@ -1,6 +1,6 @@
 Package: meteogrid
-Version: 3.8.1
-Date: 2019-11-24
+Version: 3.8.2
+Date: 2020-01-09
 Title: Geographical Grids - Mainly Meteorological
 Description: A toolbox for working with and viewing gridded data. 
 Author: Alex Deckmyn (Royal Meteorological Institute of Belgium) <Alex.Deckmyn@meteo.be> 
