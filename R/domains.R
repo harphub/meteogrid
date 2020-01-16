@@ -162,7 +162,9 @@ DomainExtent <- function(geo) {
                       proj=domain$projection, inv=TRUE)
 
   ### FIX ME: should we make sure that, before checking, all borders are in [-180, 180] ?
-  t1 <- which(diff(border_top$x) < 0)
+  ### look for *large* negative jumps (e.g. 360 -> 0)
+
+  t1 <- which(diff(border_top$x) < -300)
   if (length(t1) == 1) { # there is a date line jump
     tail(border_top$x, -t1) <- tail(border_top$x, -t1) + 360
     if (any(border_top$x > 360)) border_top$x <- border_top$x - 360
@@ -170,7 +172,7 @@ DomainExtent <- function(geo) {
     stop("Multiple longitude jumps detected. Don't know how to handle.")
   }
 
-  t2 <- which(diff(border_bottom$x) < 0)
+  t2 <- which(diff(border_bottom$x) < -300)
   if (length(t2) == 1) { # there is a date line jump
     tail(border_bottom$x, -t2) <- tail(border_bottom$x, -t2) + 360
     if (any(border_bottom$x > 360)) border_bottom$x <- border_bottom$x - 360
