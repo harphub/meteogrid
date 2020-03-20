@@ -121,19 +121,31 @@ as.geofield <- function (x=NA, domain,
   result
 }
 
-# to make sum & mean over 3d geofields a bit faster (rowSums is much faste than apply(...,sum) )
-# if you ever want to add more function: they should accept "dims=2"
+# to make sum & mean over 3d geofields faster (e.g. rowSums is much faster than apply(...,sum) )
+# if you ever want to add more functions: they should accept "dims=2"
+#     so best is to always add "..." to the arguments!
 apply_geo3d <- function(x, func="sum", newname=NULL, ...) {
+#  if (func %in% c("wdir", "wspeed")) {
+#    # TODO: can we use pre-initialised values for rotation angle and map factor?
+#    geo <- geowind.init(x)
+#  }
   afun <- switch(func,
                  "sum" = rowSums,
                  "mean" = rowMeans,
                  # e.g. for wind speed :
-                 "norm" = function(x, ...) sqrt(rowSums(x^2, ...)),
+                 "norm" = function(y, ...) sqrt(rowSums(y^2, ...)),
                  # wind direction (attention: in R, sign(0)=0, atan(x/0) == atan(x/"+0")
                  # We should have "sign(0)=1", so we use sign(1/u)
                  # because x/0.0 defaults to +Inf
-                 "wdir" = function(x, ...) 
-                   (-180 - atan(x[,,2]/x[,,1]) * 180/pi + sign(1/x[,,1] ) * 90) %% 360,
+                 # TODO: may be a bit slow for repeated use...
+                 # NOTE: for geowind, the u component's geodomain is needed
+                 #   so we must use x[[1]] rather than x[,,1]
+                 #   for v it doesn't matter, so we take the slightly faster x[,,2]
+                 "rotwdir" = function(y, ...) wind.dirspeed(u=y[[1]], v=y[[2]], rotate_wind=TRUE)$wdir,
+                 "wdir" = function(y, ...) wind.dirspeed(u=y[[1]], v=y[[2]], rotate_wind=FALSE)$wdir ,
+                   # (-180 - atan(x[,,2]/x[,,1]) * 180/pi + sign(1/x[,,1] ) * 90) %% 360,
+                 "rotu" = function(y, ...) geowind(u=y[[1]], v=y[,,2])$U,
+                 "rotv" = function(y, ...) geowind(u=y[[1]], v=y[,,2])$V,
                  stop("Unknown function", func))
 
   if (length(dim(x)) != 3) stop("Only available for 3d geofields. dim=",

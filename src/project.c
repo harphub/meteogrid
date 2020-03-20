@@ -35,7 +35,7 @@ void Rproj(double *u, double *v, int *npoints,
 #endif
 
 /* old interface (OK until 2020) */
-
+#define ACCEPT_USE_OF_DEPRECATED_PROJ_API_H
 #include "proj_api.h"
 
 void Rproj4(double *u,double *v,int *npoints,char **parms,

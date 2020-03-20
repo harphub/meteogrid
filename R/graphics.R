@@ -395,7 +395,8 @@ getmap <- function(domain=.Last.domain(), interior=TRUE,
   xlim <- c(glimits$x0,glimits$x1) + glimits$dx*c(-1,1)/2
   ylim <- c(glimits$y0,glimits$y1) + glimits$dy*c(-1,1)/2
   if (!suppressWarnings(suppressMessages(requireNamespace("maps", quietly=TRUE)))) {
-    stop("maps package not available.")
+    stop("maps package not available.\n",
+         "Please install it with install.packages(\"maps\").")
   }
   boundaries <- maps::map(database=map.database,
                      xlim=glimits$lonlim, ylim=glimits$latlim,

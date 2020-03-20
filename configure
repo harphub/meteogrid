@@ -3259,10 +3259,11 @@ fi
 
 done
 
-if test "${proj4ok}" = no; then
-   as_fn_error $? "proj_api.h not found.
-*** Install PROJ.4 and if necessary set PKG_CPPFLAGS/PKG_LIBS accordingly." "$LINENO" 5
-fi
+# don't fail when proj is not found, maybe it's OK for R (Makevars)
+#if test "${proj4ok}" = no; then
+#   AC_MSG_ERROR([proj_api.h not found.
+#*** Install PROJ.4 and if necessary set PKG_CPPFLAGS/PKG_LIBS accordingly.])
+#fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for pj_init in -lproj" >&5
 $as_echo_n "checking for pj_init in -lproj... " >&6; }
 if ${ac_cv_lib_proj_pj_init+:} false; then :
@@ -3310,10 +3311,10 @@ else
   proj4ok=no
 fi
 
-if test "${proj4ok}" = no; then
-   as_fn_error $? "libproj not found.
-*** Install PROJ.4 and if necessary set PKG_CPPFLAGS/PKG_LIBS accordingly." "$LINENO" 5
-fi
+#if test "${proj4ok}" = no; then
+#   AC_MSG_ERROR([libproj not found.
+#*** Install PROJ.4 and if necessary set PKG_CPPFLAGS/PKG_LIBS accordingly.])
+#fi
 
 
 

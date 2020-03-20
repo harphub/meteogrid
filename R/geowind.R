@@ -13,7 +13,7 @@
 ### 1. very basic functions for (u,v) <-> (wdir,wspeed) ###
 ###########################################################
 
-wind.dirspeed <- function(u,v,fieldname=c("Wind direction","Wind speed"),rad=FALSE){
+wind.dirspeed <- function(u, v, fieldname=c("Wind direction","Wind speed"),rad=FALSE, rotate_wind=FALSE){
   if (missing(v) && is.list(u)) {
     v <- u[[2]]
     u <- u[[1]]
@@ -24,6 +24,14 @@ wind.dirspeed <- function(u,v,fieldname=c("Wind direction","Wind speed"),rad=FAL
   wdir <- ifelse(abs(u)>MINSPEED,
                       ( -180 - atan(v/u) * 180/pi + sign(u)*90 ) %% 360,
                       ifelse(abs(v)<MINSPEED,NA, ifelse(v>0,180,0) ) )
+  if (rotate_wind) {
+    domain <- attr(u, "domain")
+    if (is.null(domain)) stop("rotate_wind requires geodomain information!")
+    ww <- geowind.init(domain)
+    wdir <- wdir + ww$angle
+#    wspeed <- wspeed * ww$mapfactor
+  }
+
   if (rad) wdir <- wdir*pi/180.
   if (is.geofield(u)) {
     attributes(wdir) <- attributes(u)
@@ -56,9 +64,12 @@ wind.uv <- function(wspeed,wdir,fieldname=c("U","V"),rad=FALSE){
 ### 2. main routine for rotation grid axes <-> N/E axes ###
 ###########################################################
 
+# NOTE: u must be a geofield (we need the domain!) unless there is an initialisation
+#       v can just be a matrix with ethe same dimensions as u
 geowind <- function(u, v, inv=FALSE, init=NULL){
   if (is.null(init)) {
     domain <- attr(u, "domain")
+    if (is.null(domain)) stop("u must be a geofield!")
     ww <- geowind.init(domain)
   }
   else ww <- init
@@ -103,6 +114,7 @@ geowind.init <- function(domain){
           "lcc" = .geowind.LCC(domain),
           "stere" = .geowind.PS(domain),
           "omerc" = .geowind.RM(domain),
+          "latlon" = list(angle=0, mapfactor=1),
           stop(paste("unimplemented projection: ",domain$projection$proj))
         )
   ww
@@ -159,7 +171,7 @@ geowind.init <- function(domain){
   refcos <- cos(reflat * rad)
 
   lalo <- DomainPoints(domain,"lalo")
-
+  # FIXME: do we really need the mapfactor?
   mapfactor <- (refcos/cos(lalo$lat * rad))^(1 - refcos) * ((1 + refsin)/(1 + sin(lalo$lat * rad)))^refsin
   angle <- refsin * (lalo$lon - reflon) * rad
   list(angle = as.geofield(angle, domain=domain, 
@@ -179,9 +191,11 @@ geowind.init <- function(domain){
   lat2 <- domain$projection$lat_2
   lon0 <- domain$projection$lon_0
 
-  if (abs(lat1-lat2)<1.E-6) {n <- sin(lat1 * rad)
-  }else n <- log(cos(lat1*rad)/cos(lat2*rad)) / log(tan((lat2/2+45)*rad)/tan((lat1/2+45)*rad))
-
+  if (abs(lat1-lat2)<1.E-6) {
+    n <- sin(lat1 * rad)
+  } else {
+    n <- log(cos(lat1*rad)/cos(lat2*rad)) / log(tan((lat2/2+45)*rad)/tan((lat1/2+45)*rad))
+  }
   diff <- lalo$lon - lon0
   diff[diff < -180] <- diff[diff < -180]+360
   diff[diff >  180] <- diff[diff >  180]-360

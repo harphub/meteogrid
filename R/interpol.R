@@ -185,10 +185,10 @@ point.bilin.init <- function(domain=.Last.domain(), lon, lat,
   di <- index$i - fi
   dj <- index$j - fj
   w <- matrix(0, ncol=4, nrow=length(lon))
-  w[,1] <- (1-di)*(1-dj)
-  w[,2] <- dj*(1-di)
-  w[,3] <- di*(1-dj)
-  w[,4] <- di*dj
+  w[,1] <- (1-di)*(1-dj)  # w00
+  w[,2] <- dj*(1-di)      # w01
+  w[,3] <- di*(1-dj)      # w10
+  w[,4] <- di*dj          # w11
 
   if (any(not_in_domain)) {
     message("Warning: ", sum(not_in_domain), " points are outside of the domain.")
@@ -231,7 +231,7 @@ point.bilin.init <- function(domain=.Last.domain(), lon, lat,
 #  list(w00=w00, w10=w10, w01=w01, w11=w11,
 #       F00=cbind(fi,fj), F01=cbind(fi,cj),
 #       F10=cbind(ci,fj), F11=cbind(ci,cj))
-  result <- data.frame(w00=w[,1], w10=w[,2], w01=w[,3], w11=w[,4],
+  result <- data.frame(w00=w[,1], w01=w[,2], w10=w[,3], w11=w[,4],
       F00=I(cbind(fi,fj)), F01=I(cbind(fi,cj)),
       F10=I(cbind(ci,fj)), F11=I(cbind(ci,cj)))
   attr(result, "method") <- "bilin"
