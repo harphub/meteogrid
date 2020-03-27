@@ -137,7 +137,7 @@ periodicity <- function(domain=.Last.domain()){
 ### turn a proj4 string into a list
 proj4.str2list <- function(pp){
   tryNum <- function(x) if ( !is.na(suppressWarnings(as.numeric(x))) ) as.numeric(x) else x
-  p1 <- strsplit(pp,"+",fixed=TRUE)[[1]][-1]  # vector of "x=n" strings
+  p1 <- strsplit(pp,"[ ]+[+]|^[+]")[[1]][-1] # vector of "x=n" strings
   p2 <- gsub(' ','',p1) # remove all blanks
   p3 <- strsplit(p2,"=")
   parNam <- vapply(p3, function(x) x[1], FUN.VALUE="a")
