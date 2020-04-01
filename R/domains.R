@@ -169,7 +169,7 @@ DomainExtent <- function(geo) {
     tail(border_top$x, -t1) <- tail(border_top$x, -t1) + 360
     if (any(border_top$x > 360)) border_top$x <- border_top$x - 360
   } else if (length(t1) > 1) {
-    stop("Multiple longitude jumps detected. Don't know how to handle.")
+    warning("Multiple longitude jumps detected. Don't know how to handle.")
   }
 
   t2 <- which(diff(border_bottom$x) < -300)
@@ -177,7 +177,7 @@ DomainExtent <- function(geo) {
     tail(border_bottom$x, -t2) <- tail(border_bottom$x, -t2) + 360
     if (any(border_bottom$x > 360)) border_bottom$x <- border_bottom$x - 360
   } else if (length(t2) > 1) {
-    stop("Multiple longitude jumps detected. Don't know how to handle.")
+    warning("Multiple longitude jumps detected. Don't know how to handle.")
   }
 
   lonlim <- range(c(border_top$x, border_right$x, border_bottom$x, border_left$x))
