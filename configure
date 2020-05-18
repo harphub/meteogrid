@@ -678,6 +678,7 @@ ac_user_opts='
 enable_option_checking
 with_proj_include
 with_proj_lib
+with_proj
 '
       ac_precious_vars='build_alias
 host_alias
@@ -1311,6 +1312,7 @@ Optional Packages:
                           the location of the proj header files
   --with-proj-lib=LIB_PATH
                           the location of the proj libraries
+  --with-proj=PROJ_PATH   the location of proj
 
 Some influential environment variables:
   CC          C compiler command
@@ -2061,10 +2063,26 @@ if test "${with_proj_lib+set}" = set; then :
 fi
 
 if test  -n "$proj_lib_path"  ; then
-  LIBS="-L${proj_lib_path} ${LIBS}"
+  LIBS="-L${proj_lib_path} -Wl,-rpath,${proj_lib_path} ${LIBS}"
 else
   if test  -n "${PROJ_LIBS}"  ; then
-    LIBS="-L${PROJ_LIBS} ${LIBS}"
+    LIBS="-L${PROJ_LIBS} -Wl,-rpath,${PROJ_LIBS} ${LIBS}"
+  fi
+fi
+
+
+# Check whether --with-proj was given.
+if test "${with_proj+set}" = set; then :
+  withval=$with_proj; proj_path=$withval
+fi
+
+if test  -n "$proj_path"  ; then
+  LIBS="-L${proj_path}/lib -Wl,-rpath,${proj_path}/lib ${LIBS}"
+  PROJ_CPPFLAGS="-I. -I${proj_path}/include"
+else
+  if test  -n "${PROJ}"  ; then
+    LIBS="-L${PROJ}/lib -Wl,-rpath,${PROJ}/lib ${LIBS}"
+    PROJ_CPPFLAGS="-I. -I${PROJ}/include"
   fi
 fi
 

@@ -18,10 +18,24 @@ AC_ARG_WITH([proj-lib],
                            [the location of the proj libraries]),
             [proj_lib_path=$withval])
 if test [ -n "$proj_lib_path" ] ; then
-  LIBS="-L${proj_lib_path} ${LIBS}"
+  LIBS="-L${proj_lib_path} -Wl,-rpath,${proj_lib_path} ${LIBS}"
 else
   if test [ -n "${PROJ_LIBS}" ] ; then
-    LIBS="-L${PROJ_LIBS} ${LIBS}"
+    LIBS="-L${PROJ_LIBS} -Wl,-rpath,${PROJ_LIBS} ${LIBS}"
+  fi
+fi
+
+AC_ARG_WITH([proj],
+            AC_HELP_STRING([--with-proj=PROJ_PATH],
+                           [the location of proj]),
+            [proj_path=$withval])
+if test [ -n "$proj_path" ] ; then
+  LIBS="-L${proj_path}/lib -Wl,-rpath,${proj_path}/lib ${LIBS}"
+  PROJ_CPPFLAGS="-I. -I${proj_path}/include"
+else
+  if test [ -n "${PROJ}" ] ; then
+    LIBS="-L${PROJ}/lib -Wl,-rpath,${PROJ}/lib ${LIBS}"
+    PROJ_CPPFLAGS="-I. -I${PROJ}/include"
   fi
 fi
 
