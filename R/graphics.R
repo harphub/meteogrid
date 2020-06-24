@@ -127,7 +127,7 @@ limage <-
       legw <- legend.width*(mapxlim[2]-mapxlim[1])
 
       legxlim <- mapxlim[2]+legw*legend.sep
-      ybreaks <- seq(ylim[1],ylim[2],length=ncol+1)
+      ybreaks <- seq(ylim[1],ylim[2],length.out=ncol+1)
       rect(xleft=rep(legxlim[1],ncol),xright=rep(legxlim[2],ncol),
            ybottom=ybreaks[1:ncol],ytop=ybreaks[2:(ncol+1)],
            col=col)
@@ -200,8 +200,8 @@ iview <- function(x, nlevels=15, color.palette=irainbow,
 #  if (missing(levels)) levels <- pretty(x[1:gdomain$nx,1:gdomain$ny], nlevels)
 #  if (missing(col)) col <- color.palette(length(levels) - 1)
 
-  limage(x=seq(glimits$x0,glimits$x1,length=glimits$nx),
-         y=seq(glimits$y0,glimits$y1,length=glimits$ny),
+  limage(x=seq(glimits$x0,glimits$x1,length.out=glimits$nx),
+         y=seq(glimits$y0,glimits$y1,length.out=glimits$ny),
          z=x[1:gdomain$nx,1:gdomain$ny],
          smooth=FALSE,
          plot.title=title(main=title),
@@ -233,8 +233,8 @@ fcview <- function(x,nlevels=15,color.palette=irainbow,
   gdomain <- attr(x,"domain")
   glimits <- DomainExtent(gdomain)
 
-  limage(x=seq(glimits$x0,glimits$x1,length=glimits$nx),
-         y=seq(glimits$y0,glimits$y1,length=glimits$ny),
+  limage(x=seq(glimits$x0,glimits$x1,length.out=glimits$nx),
+         y=seq(glimits$y0,glimits$y1,length.out=glimits$ny),
          z=x[1:gdomain$nx,1:gdomain$ny],
          smooth=TRUE,
          plot.title=title(main=title),
@@ -269,8 +269,8 @@ cview <- function(x,nlevels=15,
                               interior=interior, fill=fill,
                               map.database=map.database)
 
-  contour(x=seq(glimits$x0,glimits$x1,length=gdomain$nx),
-          y=seq(glimits$y0,glimits$y1,length=gdomain$ny),
+  contour(x=seq(glimits$x0,glimits$x1,length.out=gdomain$nx),
+          y=seq(glimits$y0,glimits$y1,length.out=gdomain$ny),
           z=x[1:gdomain$nx, 1:gdomain$ny],
           xlab = "", ylab = "", axes = FALSE, add = ifelse(drawmap,TRUE,add), ...)
 
@@ -288,8 +288,8 @@ vview <- function(U,V,add=FALSE,aspcorrect=TRUE,
   if (length(dim(U)) > 2) stop("vview currently only works for 2d geofields.")
   gdomain <- attr(U, "domain")
   glimits <- DomainExtent(gdomain)
-  x <- seq(glimits$x0,glimits$x1,length=gdomain$nx)
-  y <- seq(glimits$y0,glimits$y1,length=gdomain$ny)
+  x <- seq(glimits$x0,glimits$x1,length.out=gdomain$nx)
+  y <- seq(glimits$y0,glimits$y1,length.out=gdomain$ny)
 
 ### asp=1 assumes the co-ordinates of the map are proportional to those of the vector field
 ### this is WRONG in lat-lon maps! Actually you should rescale by cos(lat)!
@@ -356,8 +356,8 @@ plot.geodomain <- function(x=.Last.domain(),
   }
 
   if (!add){
-     x <- seq(glimits$x0, glimits$x1, length=glimits$nx)
-     y <- seq(glimits$y0, glimits$y1, length=glimits$ny)
+     x <- seq(glimits$x0, glimits$x1, length.out=glimits$nx)
+     y <- seq(glimits$y0, glimits$y1, length.out=glimits$ny)
      bg <- if (fill && length(mapfill)>1) mapfill[2] else getOption("bg")
      image(x, y, array(0,dim=c(glimits$nx, glimits$ny)),
            xlab="", ylab="", axes=FALSE, col=bg, useRaster=TRUE, asp=asp)
@@ -469,8 +469,8 @@ domainbox <-
     ylim <- c(glimits$y0, glimits$y1) + glimits$dy*c(-1,1)/2
   }
 
-  x <- seq(xlim[1], xlim[2], length = npoints)
-  y <- seq(ylim[1], ylim[2], length = npoints)
+  x <- seq(xlim[1], xlim[2], length.out = npoints)
+  y <- seq(ylim[1], ylim[2], length.out = npoints)
 
   domainframe <- cbind(c(rep(xlim[1],length(y)), x, rep(xlim[2],length(y)),rev(x)),
                        c(y,rep(ylim[2],length(x)), rev(y), rep(ylim[1],length(x)) ) )
@@ -543,8 +543,8 @@ DrawLatLon <- function(nx=9, ny=9, lines=TRUE, labels=TRUE,
   latlist <- y[which(y >= ylim[1] & y <= ylim[2])]
 
   if (lines) {
-    lonlines <- expand.grid(y=c(seq(ylim[1],ylim[2], len=npoints),NA), x=lonlist)
-    latlines <- expand.grid(x=c(seq(xlim[1],xlim[2], len=npoints),NA), y=latlist)
+    lonlines <- expand.grid(y=c(seq(ylim[1],ylim[2], length.out=npoints),NA), x=lonlist)
+    latlines <- expand.grid(x=c(seq(xlim[1],xlim[2], length.out=npoints),NA), y=latlist)
     lalolines <- rbind(latlines,lonlines)
     plines <- project(lalolines,proj=.Last.domain()$projection)
     plines <- map.restrict(plines, c(glimits$x0,glimits$x1),
@@ -558,12 +558,12 @@ DrawLatLon <- function(nx=9, ny=9, lines=TRUE, labels=TRUE,
     DX <- diff(glimits$lonlim)/(NN-1) # not a good criterion...
     DY <- diff(glimits$latlim)/(NN-1)
 
-    tx <- data.frame(x=seq(glimits$x0,glimits$x1,length=NN), y=rep(glimits$y0, NN))
+    tx <- data.frame(x=seq(glimits$x0,glimits$x1,length.out=NN), y=rep(glimits$y0, NN))
     ptx <- project(tx,proj=.Last.domain()$projection,inv=TRUE)
     zx <- vapply(lonlist,function(ll) which.min(abs(ptx$x-ll)),1)
     at.x <- ifelse(abs(ptx$x[zx]-lonlist) < DX, tx$x[zx], NA)
 
-    ty <- data.frame(x=rep(glimits$x0, NN), y=seq(glimits$y0,glimits$y1,length=NN))
+    ty <- data.frame(x=rep(glimits$x0, NN), y=seq(glimits$y0,glimits$y1,length.out=NN))
     pty <- project(ty,proj=.Last.domain()$projection,inv=TRUE)
     zy <- vapply(latlist,function(ll) which.min(abs(pty$y-ll)),1)
     at.y <- ifelse(abs(pty$y[zy]-latlist) < DY, ty$y[zy], NA)

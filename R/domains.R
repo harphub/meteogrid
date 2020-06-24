@@ -146,19 +146,19 @@ DomainExtent <- function(geo) {
     cll <- project(list(x=xc,y=yc), proj=domain$projection, inv=TRUE)
     clonlat <- c(cll$x, cll$y)
   }
-  border_bottom <- project(list(x=seq(x0, x1, length=domain$nx), y=rep(y0, domain$nx)),
+  border_bottom <- project(list(x=seq(x0, x1, length.out=domain$nx), y=rep(y0, domain$nx)),
                       proj=domain$projection, inv=TRUE)
-  border_right <- project(list(x=rep(x1, domain$ny), y=seq(y0, y1, length=domain$ny)),
+  border_right <- project(list(x=rep(x1, domain$ny), y=seq(y0, y1, length.out=domain$ny)),
                       proj=domain$projection, inv=TRUE)
-  border_top <- project(list(x=seq(x0, x1, length=domain$nx), y=rep(y1, domain$nx)),
+  border_top <- project(list(x=seq(x0, x1, length.out=domain$nx), y=rep(y1, domain$nx)),
                       proj=domain$projection, inv=TRUE)
-  border_left <- project(list(x=rep(x0, domain$ny), y=seq(y0, y1, length=domain$ny)),
+  border_left <- project(list(x=rep(x0, domain$ny), y=seq(y0, y1, length.out=domain$ny)),
                       proj=domain$projection, inv=TRUE)
 
-  borders <- project(list(x=c(seq(x0, x1, length=domain$nx), rep(x1,domain$ny),
-                              seq(x0, x1, length=domain$nx), rep(x0,domain$ny)),
-                          y=c(rep(y0, domain$nx), seq(y0,y1, length=domain$ny),
-                              rep(y1, domain$nx), seq(y0,y1, length=domain$ny))),
+  borders <- project(list(x=c(seq(x0, x1, length.out=domain$nx), rep(x1,domain$ny),
+                              seq(x0, x1, length.out=domain$nx), rep(x0,domain$ny)),
+                          y=c(rep(y0, domain$nx), seq(y0,y1, length.out=domain$ny),
+                              rep(y1, domain$nx), seq(y0,y1, length.out=domain$ny))),
                       proj=domain$projection, inv=TRUE)
 
   ### FIX ME: should we make sure that, before checking, all borders are in [-180, 180] ?
@@ -204,8 +204,8 @@ DomainPoints <- function (geo, type="lalo"){
     lalo <- list(x=c(domain$SW[1],domain$NE[1]),y=c(domain$SW[2],domain$NE[2]))
     xy <- project(lalo, proj = domain$projection)
   }
-  xydomain <- expand.grid(x = seq(xy$x[1], xy$x[2], length = domain$nx),
-                          y = seq(xy$y[1], xy$y[2], length = domain$ny))
+  xydomain <- expand.grid(x = seq(xy$x[1], xy$x[2], length.out = domain$nx),
+                          y = seq(xy$y[1], xy$y[2], length.out = domain$ny))
   if (type == "lalo") {
     lalolist <- project(xydomain, proj = domain$projection, inv = TRUE)
     list(lon = matrix(lalolist$x, ncol = domain$ny, nrow = domain$nx),

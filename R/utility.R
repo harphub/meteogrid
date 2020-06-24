@@ -94,6 +94,6 @@ col.cloud=function(n) rgb(1,1,1,(0:(n-1))/(n-1))
 ### grey scale rainbow (black=low,white=high)
 ### useful for B&W graphs in journals that charge extra for colour print :-)
 "grainbow" <- function (n) {
-  if (n<0) grey(seq(1,0,length=-n))
-  else grey(seq(0,1,length=n))
+  if (n<0) grey(seq(1,0,length.out=-n))
+  else grey(seq(0,1,length.out=n))
 }
