@@ -2080,9 +2080,9 @@ if test  -n "$proj_path"  ; then
   LIBS="-L${proj_path}/lib -Wl,-rpath,${proj_path}/lib ${LIBS}"
   PROJ_CPPFLAGS="-I. -I${proj_path}/include"
 else
-  if test  -n "${PROJ}"  ; then
-    LIBS="-L${PROJ}/lib -Wl,-rpath,${PROJ}/lib ${LIBS}"
-    PROJ_CPPFLAGS="-I. -I${PROJ}/include"
+  if test  -n "${PROJ4_DIR}"  ; then
+    LIBS="-L${PROJ4_DIR}/lib -Wl,-rpath,${PROJ4_DIR}/lib ${LIBS}"
+    PROJ_CPPFLAGS="-I. -I${PROJ4_DIR}/include"
   fi
 fi
 
