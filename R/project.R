@@ -60,7 +60,7 @@ project <- function(x, y, proj=.Last.domain()$projection, inv=FALSE)
         else y <- -y
       } 
     }
-    result <- .C("Rproj", u=x, v=y, npoints=npoints, parms=par,
+    result <- .C("Rproj", x=x, y=y, npoints=npoints, parms=par,
                  inv=as.integer(inv), NAOK=TRUE, PACKAGE="meteogrid")
 ### again the same proj.4 bug:
     if (!inv) {
