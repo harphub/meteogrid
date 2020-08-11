@@ -50,14 +50,9 @@ project <- function(x, y, proj=.Last.domain()$projection, inv=FALSE)
   } else  {
     npoints <- as.integer(length(x))
     npar <- as.integer(length(proj))
-    par <- proj4.list2str(proj)
-### SIMPLER: par=paste(names(proj),'=',proj,sep='')
-### but this doesn't allow options without =x value
+    par <- proj4.list2str(proj, join=TRUE)
 
-    if (!inv) {
-      x <- x/180*pi
-      y <- y/180*pi
-    }  else {
+    if (inv) {
 ### to circumvent some bugs [ot]merc inverse in PROJ4 (versions 4.7 - 4.9) 
 ### If they ever solve this bug, I'll have to change this!
       if (proj$proj=='omerc'){
@@ -65,8 +60,8 @@ project <- function(x, y, proj=.Last.domain()$projection, inv=FALSE)
         else y <- -y
       } 
     }
-    result <- .C("Rproj4",x=x,y=y,npoints=npoints,par=par,
-                 npar=npar,inv=as.integer(inv),NAOK=TRUE,PACKAGE="meteogrid")
+    result <- .C("Rproj", u=x, v=y, npoints=npoints, parms=par,
+                 inv=as.integer(inv), NAOK=TRUE, PACKAGE="meteogrid")
 ### again the same proj.4 bug:
     if (!inv) {
       if (proj$proj=='omerc') {
@@ -78,7 +73,7 @@ project <- function(x, y, proj=.Last.domain()$projection, inv=FALSE)
       if (proj$proj=="tmerc") {
         result$y[y<0] <- -result$y[y<0]
       }
-      data.frame(x=result$x*180/pi,y=result$y*180/pi)
+      data.frame(x=result$x,y=result$y)
     }
   }
 
@@ -137,6 +132,7 @@ periodicity <- function(domain=.Last.domain()){
 ### turn a proj4 string into a list
 proj4.str2list <- function(pp){
   tryNum <- function(x) if ( !is.na(suppressWarnings(as.numeric(x))) ) as.numeric(x) else x
+  # split at every + preceded by white space or at start of string
   p1 <- strsplit(pp,"[ ]+[+]|^[+]")[[1]][-1] # vector of "x=n" strings
   p2 <- gsub(' ','',p1) # remove all blanks
   p3 <- strsplit(p2,"=")
