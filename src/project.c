@@ -14,8 +14,6 @@ void Rproj(double *u, double *v, int *npoints,
   PJ_COORD data;
   int i;
 
-//  if ( !(P=proj_create_crs_to_crs(PJ_DEFAULT_CTX, "+proj=longlat", *parms, 0)) ){
-  Rprintf("Projection: %s\n ", *parms);
   if ( !(P=proj_create(PJ_DEFAULT_CTX, *parms)) ){
     Rprintf("ERROR: Projection Initialisation Error in\n");
     Rprintf("%s\n", *parms);
