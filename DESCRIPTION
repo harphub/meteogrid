@@ -1,11 +1,13 @@
-Package: meteogrid
-Version: 3.8.4.9005
-Date: 2020-08-11
+Package: meteogrid4
+Version: 0.0.0.9000
+Date: 2020-08-13
 Title: Geographical Grids - Mainly Meteorological
 Description: A toolbox for working with and viewing gridded data. 
 Author: Alex Deckmyn (Royal Meteorological Institute of Belgium) <Alex.Deckmyn@meteo.be> 
 Maintainer: Alex Deckmyn <Alex.Deckmyn@meteo.be>
 Depends: R(>= 3.0.0)
+Imports: Rcpp (>= 0.12.18)
+LinkingTo: Rcpp
 NeedsCompilation: yes
 Suggests: RColorBrewer, Rfa, Rgrib2, maps(>= 3.2.0), sf
 License: Apache License (>= 2.0)
