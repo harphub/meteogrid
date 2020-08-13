@@ -67,7 +67,7 @@ project <- function(x, y, proj=.Last.domain()$projection, inv=FALSE)
   }
 
   if (is.list(proj)) {
-    proj_string <- proj4.list2string(proj, join=TRUE)
+    proj_string <- proj4.list2str(proj, join=TRUE)
   } else if (length(proj) > 1) {
     proj_string <- paste("+", proj, collapse=" ")
   } else {
