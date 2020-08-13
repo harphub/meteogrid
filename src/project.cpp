@@ -10,7 +10,7 @@ using namespace Rcpp;
 #endif
 
 // [[Rcpp::export]]
-NumericMatrix mg_project( NumericVector x, NumericVector y, std::string proj_string,
+Rcpp::DataFrame mg_project( NumericVector x, NumericVector y, std::string proj_string,
             bool inverse=false){
 
 #ifdef PROJ5
@@ -23,10 +23,10 @@ NumericMatrix mg_project( NumericVector x, NumericVector y, std::string proj_str
 
   int i, npoints = x.length();
   const char *parms = proj_string.c_str();
-  NumericMatrix result(npoints, 2);
+  NumericVector result_x(npoints), result_y(npoints);
 
 #ifdef PROJ5
-  P = proj_create(PJ_DEFAULT_CTX, *parms);
+  P = proj_create(PJ_DEFAULT_CTX, parms);
 #else
   P = pj_init_plus(parms);
 #endif
@@ -38,60 +38,79 @@ NumericMatrix mg_project( NumericVector x, NumericVector y, std::string proj_str
   }
 
 #ifdef PROJ5
+  // NOTE: proj_torad(NA) seems to give 0
   if (! inverse) {
     for (i=0; i < npoints ; i++) {
-      if (R_FINITE(data.lp.lam = proj_torad(x[i])) &&
-          R_FINITE(data.lp.phi = proj_torad(y[i]))) {
+      if (R_FINITE(x[i]) && R_FINITE(y[i])) {
+        data.lp.lam = proj_torad(x[i]) ;
+        data.lp.phi = proj_torad(y[i]) ;
         data = proj_trans(P, PJ_FWD, data) ;
-        if (data.lp.lam == HUGE_VAL) result[i, 0] = result[i, 1] = NA_REAL;
+        if (data.xy.x == HUGE_VAL || data.xy.y == HUGE_VAL) {
+          result_x[i] = result_y[i] = NA_REAL;
+        }
         else {
-          result[i, 0] = data.xy.x;
-          result[i, 1] = data.xy.y;
+          result_x[i] = data.xy.x;
+          result_y[i] = data.xy.y;
         }
       }
+      else result_x[i] = result_y[i] = NA_REAL;
     }
   }
   else {
-    for (i=0; i < *npoints ; i++) {
-      if (R_FINITE(data.xy.x = x[i]) && R_FINITE(data.xy.y = y[i])) {
+    for (i=0; i < npoints ; i++) {
+      if (R_FINITE(x[i]) && R_FINITE(y[i])) {
+        data.xy.x = x[i] ;
+        data.xy.y = y[i] ;
         data = proj_trans(P, PJ_INV, data) ;
-        if (data.lp.lam == HUGE_VAL) result[i, 0] = result[i, 1] = NA_REAL;
+        if (data.lp.lam == HUGE_VAL || data.lp.phi == HUGE_VAL) {
+          result_x[i] = result_y[i] = NA_REAL;
+        }
         else {
-          result[i, 0] = proj_todeg(data.lp.lam);
-          result[i, 1] = proj_todeg(data.lp.phi);
+          result_x[i] = proj_todeg(data.lp.lam);
+          result_y[i] = proj_todeg(data.lp.phi);
         }
       }
+      else result_x[i] = result_y[i] = NA_REAL;
     }
   }
   proj_destroy(P);
 #else
   if (! inverse) {
     for (i=0; i < npoints ; i++) {
-      if (R_FINITE(data.u = DEG_TO_RAD * x[i]) &&
-          R_FINITE(data.v = DEG_TO_RAD * y[i])) {
+      if (R_FINITE(x[i]) && R_FINITE(y[i])) {
+        data.u = DEG_TO_RAD * x[i] ;
+        data.v = DEG_TO_RAD * y[i] ;
         data = pj_fwd(data, P) ;
-        if (data.u == HUGE_VAL) result[i, 0] = result[i, 1] = NA_REAL;
+        if (data.u == HUGE_VAL || data.v == HUGE_VAL) {
+          result_x[i] = result_y[i] = NA_REAL;
+        }
         else {
-          result[i, 0] = data.u;
-          result[i, 1] = data.v;
+          result_x[i] = data.u;
+          result_y[i] = data.v;
         }
       }
+      else result_x[i] = result_y[i] = NA_REAL;
     }
   }
   else {
     for (i=0; i < npoints ; i++) {
-      if (R_FINITE(data.u = x[i]) && R_FINITE(data.v = y[i])) {
+      if (R_FINITE(x[i]) && R_FINITE(y[i])) {
+        data.u = x[i] ;
+        data.v = y[i] ;
         data = pj_inv(data, P) ;
-        if (data.u == HUGE_VAL) result[i, 0] = result[i, 1] = NA_REAL;
+        if (data.u == HUGE_VAL || data.v == HUGE_VAL) {
+          result_x[i] = result_y[i] = NA_REAL;
+        }
         else {
-          result[i, 0] = data.u * RAD_TO_DEG;
-          result[i, 1] = data.v * RAD_TO_DEG;
+          result_x[i] = data.u * RAD_TO_DEG;
+          result_y[i] = data.v * RAD_TO_DEG;
         }
       }
+      else result_x[i] = result_y[i] = NA_REAL;
     }
   }
   pj_free(P);
 #endif
-  return result;
+  return Rcpp::DataFrame::create(Named("x") = result_x, Named("y") = result_y);
 }
 

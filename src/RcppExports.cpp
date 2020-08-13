@@ -6,7 +6,7 @@
 using namespace Rcpp;
 
 // mg_project
-NumericMatrix mg_project(NumericVector x, NumericVector y, std::string proj_string, bool inverse);
+Rcpp::DataFrame mg_project(NumericVector x, NumericVector y, std::string proj_string, bool inverse);
 RcppExport SEXP _meteogrid4_mg_project(SEXP xSEXP, SEXP ySEXP, SEXP proj_stringSEXP, SEXP inverseSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
