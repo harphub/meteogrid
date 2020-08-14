@@ -231,9 +231,11 @@ point.bilin.init <- function(domain=.Last.domain(), lon, lat,
 #  list(w00=w00, w10=w10, w01=w01, w11=w11,
 #       F00=cbind(fi,fj), F01=cbind(fi,cj),
 #       F10=cbind(ci,fj), F11=cbind(ci,cj))
+#  result <- data.frame(w00=w[,1], w01=w[,2], w10=w[,3], w11=w[,4],
+#      F00=I(cbind(fi,fj)), F01=I(cbind(fi,cj)),
+#      F10=I(cbind(ci,fj)), F11=I(cbind(ci,cj)))
   result <- data.frame(w00=w[,1], w01=w[,2], w10=w[,3], w11=w[,4],
-      F00=I(cbind(fi,fj)), F01=I(cbind(fi,cj)),
-      F10=I(cbind(ci,fj)), F11=I(cbind(ci,cj)))
+                       i0=fi, j0=fj, i1=ci, j1=cj) 
   attr(result, "method") <- "bilin"
   attr(result, "mask") <- is.null(mask)
   result

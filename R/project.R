@@ -1,7 +1,3 @@
-proj4_fix <- local({
-  lfix <- TRUE
-  function(new) if (!missing(new)) lfix <<- new else lfix
-})
 #' Projections
 #' 
 #' A wrapper for calling PROJ code for standard projections.
@@ -19,7 +15,8 @@ proj4_fix <- local({
 #' @keywords file
 #' @export project
 
-project <- function(x, y=NULL, proj=.Last.domain()$projection, inv=FALSE, proj4fix=proj4_fix())
+project <- function(x, y=NULL, proj=.Last.domain()$projection,
+                    inv=FALSE, proj4fix=proj_version()[0]==4)
 {
   if (is.null(y) && is.numeric(x) && length(x) == 2) {
     xy <- list(x=x[1], y=x[2])
@@ -43,19 +40,10 @@ project <- function(x, y=NULL, proj=.Last.domain()$projection, inv=FALSE, proj4f
     cat("Nothing to project!\n")
     return(data.frame(x=xy$x, y=xy$y))
   }
-
-### longitude should probably be in the interval [-180,180[
-### unless e.g. if my global data is on a globe [0,360[
-### we assume that the meridian = MinLon + 180
-### so meridian-180 must not be transported.
-## BUG: this may introduce wrapping problems
-#    meridian <- checknull(proj$lon0, default=0)
-#    x[x <  (meridian-180)] <- x[x <  (meridian-180)] + 360
-#    x[x >= (meridian+180)] <- x[x >= (meridian+180)] - 360
  
   if (proj4fix && inv && grepl("+proj=omerc", proj_string, fixed=TRUE)) {
 ### to circumvent some bugs [ot]merc inverse in PROJ.4 (versions 4.7 - 4.9) 
-### If they ever solve this bug, I'll have to change this!
+### DO NOT RUN THIS WITH LATER VERSION (>= v5.0)!
     if (proj4.str2list(proj_string)$alpha<0 ) xy$x <- -xy$x
     else xy$y <- -xy$y
   }

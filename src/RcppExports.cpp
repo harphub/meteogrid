@@ -5,6 +5,16 @@
 
 using namespace Rcpp;
 
+// proj_version
+NumericVector proj_version();
+RcppExport SEXP _meteogrid4_proj_version() {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    rcpp_result_gen = Rcpp::wrap(proj_version());
+    return rcpp_result_gen;
+END_RCPP
+}
 // mg_project
 Rcpp::DataFrame mg_project(NumericVector x, NumericVector y, std::string proj_string, bool inverse);
 RcppExport SEXP _meteogrid4_mg_project(SEXP xSEXP, SEXP ySEXP, SEXP proj_stringSEXP, SEXP inverseSEXP) {
@@ -36,6 +46,7 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
+    {"_meteogrid4_proj_version", (DL_FUNC) &_meteogrid4_proj_version, 0},
     {"_meteogrid4_mg_project", (DL_FUNC) &_meteogrid4_mg_project, 4},
     {"_meteogrid4_upscale_by_mean", (DL_FUNC) &_meteogrid4_upscale_by_mean, 5},
     {NULL, NULL, 0}
