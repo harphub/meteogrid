@@ -65,6 +65,7 @@ upscale_regrid <- function(infield, newdomain, method="mean", weights=NULL, ... 
   result <- upscale_by_mean( px=weights$px, py=weights$py, 
                              pval=as.numeric(infield),
                              gnx=newdomain$nx, gny=newdomain$ny)
+  print(dim(result))
 
   as.geofield(result, domain=newdomain)
 }

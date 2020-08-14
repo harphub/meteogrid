@@ -5,3 +5,7 @@ mg_project <- function(x, y, proj_string, inverse = FALSE) {
     .Call('_meteogrid4_mg_project', PACKAGE = 'meteogrid4', x, y, proj_string, inverse)
 }
 
+upscale_by_mean <- function(px, py, pval, gnx, gny) {
+    .Call('_meteogrid4_upscale_by_mean', PACKAGE = 'meteogrid4', px, py, pval, gnx, gny)
+}
+

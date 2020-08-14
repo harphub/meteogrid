@@ -21,22 +21,25 @@ NumericMatrix upscale_by_mean(NumericVector px, NumericVector py, NumericVector 
   //       check that gnx,gny are correctly set to integer
 
   //  Rprintf("Calculating.\n");
+//  Rcout << "npoints = " << npoints << "\n";
   for (i=0; i < npoints; i++) {
     // TODO: check for NA_REAL or NA_INTEGER ??
-    if (px[i] != NA_REAL && py[i]!= NA_REAL && R_FINITE(pval[i]) ) {
-      if ( px[i] > 0 && px[i] <= gnx && 
-           py[i] > 0 && py[i] <= gny  ) {
-        gcount[px[i]-1, py[i]-1] += 1;
-        gval[px[i]-1, py[i]-1] += pval[i];
+    if (px(i) != NA_REAL && py(i)!= NA_REAL && R_FINITE(pval(i)) ) {
+      if ( px(i) > 0 && px(i) <= gnx && 
+           py(i) > 0 && py(i) <= gny  ) {
+        gcount(px(i)-1, py(i)-1) += 1;
+        gval(px(i)-1, py(i)-1) += pval(i);
+//        Rcout << "point " << i << ": " << px(i) << " , " << py(i) << " : " << gval(px(i)-1, py(i)-1) << " : " << gcount(px(i)-1, py(i)-1) << "\n";
       }
     }
   }
 
 //  Rprintf("Normalising.\n");
-  for (i=0 ; i < gnx ; i++) 
+  for (i=0 ; i < gnx ; i++) {
     for (j=0 ; j < gny; j++) {
-    if (gcount[i,j] > 0 ) gval[i,j] /= gcount[i,j];
-    else gval[i,j] = NA_REAL;
+      if (gcount(i,j) > 0 ) gval(i,j) /= gcount(i,j);
+      else gval(i,j) = NA_REAL;
+    }
   }
   return gval;
 }

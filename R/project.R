@@ -54,7 +54,6 @@ project <- function(x, y=NULL, proj=.Last.domain()$projection, inv=FALSE, proj4f
 #    x[x >= (meridian+180)] <- x[x >= (meridian+180)] - 360
  
   if (proj4fix && inv && grepl("+proj=omerc", proj_string, fixed=TRUE)) {
-  # FIXME: we need proj$alpha, so this will break if proj is a proj4 string)
 ### to circumvent some bugs [ot]merc inverse in PROJ.4 (versions 4.7 - 4.9) 
 ### If they ever solve this bug, I'll have to change this!
     if (proj4.str2list(proj_string)$alpha<0 ) xy$x <- -xy$x
@@ -63,7 +62,6 @@ project <- function(x, y=NULL, proj=.Last.domain()$projection, inv=FALSE, proj4f
   result <- mg_project(x=xy$x, y=xy$y, proj_string, inv=inv)
 
 ### again the same proj.4 bug:
-  # FIXME: we need proj$alpha, so this will break if proj is a proj4 string)
   if (proj4fix && !inv && grepl("+proj=omerc", proj_string, fixed=TRUE)) {
     if (proj4.str2list(proj_string)$alpha<0 ) result$x <- -result$x
     else result$y <- -result$y

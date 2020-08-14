@@ -19,9 +19,25 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// upscale_by_mean
+NumericMatrix upscale_by_mean(NumericVector px, NumericVector py, NumericVector pval, int gnx, int gny);
+RcppExport SEXP _meteogrid4_upscale_by_mean(SEXP pxSEXP, SEXP pySEXP, SEXP pvalSEXP, SEXP gnxSEXP, SEXP gnySEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type px(pxSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type py(pySEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type pval(pvalSEXP);
+    Rcpp::traits::input_parameter< int >::type gnx(gnxSEXP);
+    Rcpp::traits::input_parameter< int >::type gny(gnySEXP);
+    rcpp_result_gen = Rcpp::wrap(upscale_by_mean(px, py, pval, gnx, gny));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_meteogrid4_mg_project", (DL_FUNC) &_meteogrid4_mg_project, 4},
+    {"_meteogrid4_upscale_by_mean", (DL_FUNC) &_meteogrid4_upscale_by_mean, 5},
     {NULL, NULL, 0}
 };
 
