@@ -3,25 +3,6 @@
 ### utilities ###
 #################
 
-### clip a map exactly to the domain borders:
-.map.restrict1 <- function(bx,by,xlim,xperiod=NA_real_,xfrac=0.5){
-  lx <- length(bx)
-
-#  result <- .C("maprestrict1",bx=as.double(bx),by=as.double(by),lx=as.integer(lx),
-#            x0=as.double(xlim[1]),x1=as.double(xlim[2]),
-#            nx=double(2*lx),ny=double(2*lx),
-#            newlen=integer(1),xperiod=as.numeric(xperiod),
-#            xfrac=as.numeric(xfrac),NAOK=TRUE)
-  data.frame(x=result$nx[2:result$newlen],y=result$ny[2:result$newlen])
-}
-
-map.restrict <- function(bxy,xlim,ylim,xperiod=NA_real_,xfrac=0.5,yperiod=NA_real_,yfrac=NA_real_){
-# This can be replaces by maps::map.clip.poly (maps >= 3.2.0)
-#  maps::map.clip.poly(as.list(bxy), xlim=xlim, ylim=ylim, poly=FALSE)
-  bxy <- .map.restrict1(bxy$x,bxy$y,xlim,xperiod,xfrac)
-  byx <- .map.restrict1(bxy$y, bxy$x, ylim, yperiod, yfrac)
-  list(x = byx$y, y = byx$x)
-}
 ######################
 ### periodicity depends on the projection
 ### may be 360, 2*pi or ~40.000 in Mercator !
@@ -62,7 +43,8 @@ proj4.str2list <- function(pp){
   prj
 }
 
-proj4.list2str <- function(pp, join=FALSE){
+#' export
+proj4.list2str <- function(pp, join=TRUE){
   result <- paste0(names(pp), 
                    lapply(pp, function(x) if (is.na(x)) "" else paste0("=",x)))
   if (join) result <- paste0("+", result, collapse=" ")

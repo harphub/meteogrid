@@ -1,3 +1,7 @@
+proj4_fix <- local({
+  lfix <- TRUE
+  function(new) if (!missing(new)) lfix <<- new else lfix
+})
 #' Projections
 #' 
 #' A wrapper for calling PROJ code for standard projections.
@@ -15,41 +19,31 @@
 #' @keywords file
 #' @export project
 
-project <- function(x, y, proj=.Last.domain()$projection, inv=FALSE)
+project <- function(x, y=NULL, proj=.Last.domain()$projection, inv=FALSE, proj4fix=proj4_fix())
 {
-  if (missing(y)) {
-# apparantly, is.list gives TRUE for data.frames, but let's be careful:
-    if (is.list(x) | is.data.frame(x)) {
-      if (all(is.element(c("x","y"), names(x)))) {
-        y <- x$y
-        x <- x$x
-    } else if (all(is.element(c("lon","lat"), tolower(substring(names(x), 1, 3))))) {
-        y <- x$lat
-        x <- x$lon
-    } else {
-### we assume the first two list elements are longitude & latitude
-### whatever the actual names
-        y <- as.numeric(x[[2]])
-        x <- as.numeric(x[[1]])
-      }
-      if (is.null(x) | is.null(y)) stop("No valid x and y co-ordinates found.")
-    }
-    else if (is.vector(x)) {
-      y <- x[2]
-      x <- x[1]
-    } else {
-      y <- x[,2]
-      x <- x[,1]
-    }
+  if (is.null(y) && is.numeric(x) && length(x) == 2) {
+    xy <- list(x=x[1], y=x[2])
+  } else {
+    xy <- xy.coords(x, y)
   }
-  if (length(x) != length(y)) stop("x and y don't have the same length.")
-  if (!is.numeric(x) | !is.numeric(y)) stop("Co-ordinates must be numeric values.")
-  if (missing(proj)) {
-    if(!is.null(.Last.domain())) proj <- .Last.domain()$projection
-    else return("No projection.")
+  if (is.null(proj)) {
+    stop("No projection.")
+  }
+  # projection may be a proj4 string or a list of named (proj4) options
+  if (is.list(proj)) {
+    proj_string <- proj4.list2str(proj, join=TRUE)
+  } else if (length(proj) > 1) {
+    proj_string <- paste("+", proj, collapse=" ")
+  } else {
+    proj_string <- proj
+  }
+  # FIXME:
+  # make sure it's not a *rotated* latlong !!!
+  if (grepl("+proj=latlong", proj_string, fixed=TRUE)) {
+    cat("Nothing to project!\n")
+    return(data.frame(x=xy$x, y=xy$y))
   }
 
-  if (proj$proj == "latlong") return(data.frame(x=x,y=y))
 ### longitude should probably be in the interval [-180,180[
 ### unless e.g. if my global data is on a globe [0,360[
 ### we assume that the meridian = MinLon + 180
@@ -59,32 +53,22 @@ project <- function(x, y, proj=.Last.domain()$projection, inv=FALSE)
 #    x[x <  (meridian-180)] <- x[x <  (meridian-180)] + 360
 #    x[x >= (meridian+180)] <- x[x >= (meridian+180)] - 360
  
-  if (inv && is.list(proj) && proj$proj=='omerc') {
+  if (proj4fix && inv && grepl("+proj=omerc", proj_string, fixed=TRUE)) {
+  # FIXME: we need proj$alpha, so this will break if proj is a proj4 string)
 ### to circumvent some bugs [ot]merc inverse in PROJ.4 (versions 4.7 - 4.9) 
 ### If they ever solve this bug, I'll have to change this!
-    if (proj$alpha<0 ) x <- -x
-    else y <- -y
+    if (proj4.str2list(proj_string)$alpha<0 ) xy$x <- -xy$x
+    else xy$y <- -xy$y
   }
-
-  if (is.list(proj)) {
-    proj_string <- proj4.list2str(proj, join=TRUE)
-  } else if (length(proj) > 1) {
-    proj_string <- paste("+", proj, collapse=" ")
-  } else {
-    proj_string <- proj
-  }
-  result <- mg_project(x=x, y=y, proj_string, inv=inv)
+  result <- mg_project(x=xy$x, y=xy$y, proj_string, inv=inv)
 
 ### again the same proj.4 bug:
-  if (!inv) {
-      if (is.list(proj) && proj$proj=='omerc') {
-        if (proj$alpha<0 ) result$x <- -result$x
-        else result$y <- -result$y
-      }
-  } else {
-    if (is.list(proj) && proj$proj=="tmerc") {
-      result$y[y<0] <- -result$y[y<0]
-    }
+  # FIXME: we need proj$alpha, so this will break if proj is a proj4 string)
+  if (proj4fix && !inv && grepl("+proj=omerc", proj_string, fixed=TRUE)) {
+    if (proj4.str2list(proj_string)$alpha<0 ) result$x <- -result$x
+    else result$y <- -result$y
+  } else if (proj4fix && inv && grepl("+proj=tmerc", proj_string, fixed=TRUE)) {
+    result$y[y<0] <- -result$y[y<0]
   }
 
   return(result)

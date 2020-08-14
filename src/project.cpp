@@ -1,7 +1,9 @@
 #include <Rcpp.h>
 #include <string.h>
 using namespace Rcpp;
-
+// The "proj_api.h" version is deprecated, but still available up to PROJ.7 (2020)
+// So the new API version is here for testing.
+// Only people using PROJ.8 or later will really need the new interface.
 #ifdef PROJ5
 #include "proj.h"
 #else
@@ -23,6 +25,7 @@ Rcpp::DataFrame mg_project( NumericVector x, NumericVector y, std::string proj_s
 
   int i, npoints = x.length();
   const char *parms = proj_string.c_str();
+  // NOTE: you could do inline replacements (i.e. use x and y for output, too)
   NumericVector result_x(npoints), result_y(npoints);
 
 #ifdef PROJ5

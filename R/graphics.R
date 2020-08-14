@@ -406,15 +406,9 @@ getmap <- function(domain=.Last.domain(), interior=TRUE,
     geo$names <- boundaries$names
     class(geo) <- "map"
   }
-  if (packageVersion("maps") < "3.2") {
-    if (fill) {
-     cat("maps version older than 3.2.0 does not support polygon clipping! Setting fill=FALSE.")
-    }
-    xyper <- periodicity(domain)
-    geo <- map.restrict(geo,xlim=xlim,ylim=ylim,xperiod=xyper$xper,yperiod=xyper$yper)
-  } else {
-    geo <- maps::map.clip.poly(as.list(geo), xlim=xlim, ylim=ylim, poly=fill)
-  }
+  # clip the map exactly to the domain 
+  # this requires maps >= 3.2.0
+  geo <- maps::map.clip.poly(geo, xlim=xlim, ylim=ylim, poly=fill)
   invisible(geo)
 }
 
@@ -527,6 +521,17 @@ obsplot <- function(x,y,z,breaks=5,pretty=TRUE,legend.pos=NULL,
 ### font, lab.x, lab.y not used
 ### the labels are not ideally placed... fixed with e.g. mgp[3]=.5
 ### fcview: dx/2 difference in limits
+
+#' Add latitude/longitude grid to a map
+#' @param nx, ny Approximate number of lines to be drawn
+#' @param labels If labels=TRUE, the latitude and longitude values are printed at the bottom and left of the map.
+#' @param lines If lines=FALSE, the lines are not drawn on the map, just tick marks at the boundaries.
+#' @param 
+#' @param col Colour used for lines and labels
+#' @param npoints The number of intermediate points used to draw every meridian and latitude line. If the lines are very curved and plot is at high resolution, increasing this will give smoother lines. 
+#' @param ... Passed to the "axis" command
+#' @return Lines of constant latitude and longitude are added to the current map. The lines are at regular intervals with appropriate values to get aproximately the wanted number of lines.
+#' @export 
 DrawLatLon <- function(nx=9, ny=9, lines=TRUE, labels=TRUE, 
                        lab.size=1, col="grey",
                        lty=2, font=2, lab.x=2, lab.y=2,
@@ -545,11 +550,15 @@ DrawLatLon <- function(nx=9, ny=9, lines=TRUE, labels=TRUE,
   if (lines) {
     lonlines <- expand.grid(y=c(seq(ylim[1],ylim[2], length.out=npoints),NA), x=lonlist)
     latlines <- expand.grid(x=c(seq(xlim[1],xlim[2], length.out=npoints),NA), y=latlist)
-    lalolines <- rbind(latlines,lonlines)
-    plines <- project(lalolines,proj=.Last.domain()$projection)
-    plines <- map.restrict(plines, c(glimits$x0,glimits$x1),
-                                   c(glimits$y0,glimits$y1),
-                                   xperiod=periodicity(.Last.domain())$xper)
+    lalolines <- rbind(latlines, lonlines)
+    splits <- apply(lalolines, 1, function(x) any(is.na(x)))
+    lalolines[splits, ] <- NA
+    plines <- project(lalolines, proj=.Last.domain()$projection)
+    # Is this OK in maps >=3.2.0 ???
+    plines <- maps::map.clip.poly(as.list(plines), 
+                                  xlim=c(glimits$x0,glimits$x1),
+                                  ylim=c(glimits$y0,glimits$y1),
+                                  poly=FALSE)
     lines(plines, col=col, lty=lty)
   }
   if (labels) {
@@ -559,7 +568,7 @@ DrawLatLon <- function(nx=9, ny=9, lines=TRUE, labels=TRUE,
     DY <- diff(glimits$latlim)/(NN-1)
 
     tx <- data.frame(x=seq(glimits$x0,glimits$x1,length.out=NN), y=rep(glimits$y0, NN))
-    ptx <- project(tx,proj=.Last.domain()$projection,inv=TRUE)
+    ptx <- project(tx, proj=.Last.domain()$projection, inv=TRUE)
     zx <- vapply(lonlist,function(ll) which.min(abs(ptx$x-ll)),1)
     at.x <- ifelse(abs(ptx$x[zx]-lonlist) < DX, tx$x[zx], NA)
 

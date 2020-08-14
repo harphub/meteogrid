@@ -55,54 +55,29 @@ upscale_factor <- function(infield, factor, method="mean", ... ){
 
 ### take the mean value of all cells whose centre falls in the new grid cell
 upscale_regrid <- function(infield, newdomain, method="mean", weights=NULL, ... ) {
+  if (method != "mean") stop("upscale_regrid only supports method=mean.")
   newdomain <- as.geodomain(newdomain)
 
-  gnx <- newdomain$nx
-  gny <- newdomain$ny
   if (is.null(weights)) {
-    if (method != "mean") stop("Only mean is available for upscale regridding.") 
-    opoints <- DomainPoints(infield)
-#  opoints$value <- as.vector(infield)
-    pind <- point.index(domain=newdomain, lon=as.vector(opoints$lon), lat=as.vector(opoints$lat), clip=FALSE)
-
-    result <- .C("upscale_by_mean", npoints=as.integer(prod(dim(infield))),
-                                    px=as.integer(round(pind$i)), py=as.integer(round(pind$j)), 
-                                    pval=as.numeric(infield),
-                                    gnx=as.integer(gnx), gny=as.integer(gny),
-                                    gcount=integer(gnx * gny),
-                                    gval=numeric(gnx * gny),
-                                    NAOK=TRUE, PACKAGE="meteogrid")
-# we don't really use gcount, but it is available if necessary...
-  } else {
-    result <- .C("upscale_by_mean_from_init", npoints=as.integer(weights$npoints),
-                                    pval=as.numeric(infield),
-                                    gnx=as.integer(weights$gnx), gny=as.integer(weights$gny),
-                                    gcount=as.integer(weights$gcount),
-                                    gcell=as.integer(weights$gcell),
-                                    gval=numeric(gnx * gny),
-                                    NAOK=TRUE, PACKAGE="meteogrid")
+    weights <- upscale_regrid_init(infield, newdomain)
   }
-  as.geofield(result$gval, domain=newdomain)
+
+  result <- upscale_by_mean( px=weights$px, py=weights$py, 
+                             pval=as.numeric(infield),
+                             gnx=newdomain$nx, gny=newdomain$ny)
+
+  as.geofield(result, domain=newdomain)
 }
 
+# initialising upscale_regrid: pre-calculate the grid indices
 upscale_regrid_init <- function(olddomain, newdomain) {
   olddomain <- as.geodomain(olddomain)
   newdomain <- as.geodomain(newdomain)
 
-  gnx <- newdomain$nx
-  gny <- newdomain$ny
   opoints <- DomainPoints(olddomain)
   npoints <- olddomain$nx * olddomain$ny
   pind <- point.index(domain=newdomain, lon=as.vector(opoints$lon), lat=as.vector(opoints$lat), clip=FALSE)
 
-  result <- .C("upscale_by_mean_init", npoints=as.integer(npoints),
-                                    px=as.integer(round(pind$i)), py=as.integer(round(pind$j)), 
-                                    gnx=as.integer(gnx), gny=as.integer(gny),
-                                    gcount=integer(gnx * gny),
-                                    gcell=integer(npoints),
-                                    NAOK=TRUE, PACKAGE="meteogrid"
-                                    )[c("npoints", "gnx", "gny", "gcount", "gcell")]
-  attr(result, "method") <- "mean"
-  result
+  return(data.frame(px = round(pind$i), py=round(pind$j)))
 }
 
