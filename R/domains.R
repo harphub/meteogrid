@@ -214,4 +214,29 @@ DomainPoints <- function (geo, type="lalo"){
   }
 }
 
+DomainCorners <- function(geo) {
+  domain <- as.geodomain(geo)
 
+  if (!is.null(domain$clonlat) && !is.null(domain$dx) && !is.null(domain$dy)) {
+    cxy <- project(domain$clonlat, proj=domain$projection)
+    x0  <- cxy$x - domain$dx*(domain$nx -1)/2
+    x1  <- cxy$x + domain$dx*(domain$nx -1)/2
+    y0  <- cxy$y - domain$dy*(domain$ny -1)/2
+    y1  <- cxy$y + domain$dy*(domain$ny -1)/2
+    SW <- project(x0, y0, proj=domain$projection, inv=TRUE)
+    NE <- project(x1, y1, proj=domain$projection, inv=TRUE)
+  } else {
+    xy <- project(list(x=c(domain$SW[1], domain$NE[1]),
+                       y=c(domain$SW[2], domain$NE[2])),
+                proj=domain$projection)
+    x0 <- xy$x[1]
+    y0 <- xy$y[1]
+    x1 <- xy$x[2]
+    y1 <- xy$y[2]
+    SW <- domain$SW
+    NE <- domain$NE
+  }
+  SE <- project(x1, y0, proj=domain$projection, inv=TRUE)
+  NW <- project(x0, y1, proj=domain$projection, inv=TRUE)
+  list(SW=SW, NE=NE, SE=SE, NW=NW)
+}
