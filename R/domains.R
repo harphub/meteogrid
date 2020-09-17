@@ -1,21 +1,16 @@
-compare.geodomain <- function(x, y, eps=1e-10){
+compare.geodomain <- function(x, y){
 ### TRUE if they are equal, FALSE if they are not
 ### this is not exhaustive, but I am in a hurry!
-### BUG: clonlat not yet considered
-  OK <- (x$nx == y$nx) &&  (x$ny == y$ny)
-  OK <- OK & (max(abs(x$NE-y$NE)) < eps) & (max(abs(x$SW-y$SW)) < eps)
-  if (!OK) return(FALSE)
+### BUG: clonlat OR SW-NE points may be known
+  checklist <- c("nx", "ny", "dx", "dy", "clonlat")
+  if (!isTRUE(all.equal(x[checklist], y[checklist]))) return(FALSE)
+  # $ex and $ey may be different, so ignore them
 ### compare the projection: may have a different order!
   n1 <- names(x$projection)
   n2 <- names(y$projection)
   ndif <- setdiff(n1,n2)
   if (length(ndif) > 0) return(FALSE)
-  for(nn in n1){
-    if (is.character(x[[nn]])) OK <- (x[[nn]]==y[[nn]])
-    else OK <- (abs(x[[nn]]-y[[nn]])<eps)
-    if (!OK) return (FALSE)
-  }
-  return(TRUE)
+  return(isTRUE(all.equal(x$projection, y$projection[n1])))
 }
 
 ###########################
@@ -219,4 +214,29 @@ DomainPoints <- function (geo, type="lalo"){
   }
 }
 
+DomainCorners <- function(geo) {
+  domain <- as.geodomain(geo)
 
+  if (!is.null(domain$clonlat) && !is.null(domain$dx) && !is.null(domain$dy)) {
+    cxy <- project(domain$clonlat, proj=domain$projection)
+    x0  <- cxy$x - domain$dx*(domain$nx -1)/2
+    x1  <- cxy$x + domain$dx*(domain$nx -1)/2
+    y0  <- cxy$y - domain$dy*(domain$ny -1)/2
+    y1  <- cxy$y + domain$dy*(domain$ny -1)/2
+    SW <- project(x0, y0, proj=domain$projection, inv=TRUE)
+    NE <- project(x1, y1, proj=domain$projection, inv=TRUE)
+  } else {
+    xy <- project(list(x=c(domain$SW[1], domain$NE[1]),
+                       y=c(domain$SW[2], domain$NE[2])),
+                proj=domain$projection)
+    x0 <- xy$x[1]
+    y0 <- xy$y[1]
+    x1 <- xy$x[2]
+    y1 <- xy$y[2]
+    SW <- domain$SW
+    NE <- domain$NE
+  }
+  SE <- project(x1, y0, proj=domain$projection, inv=TRUE)
+  NW <- project(x0, y1, proj=domain$projection, inv=TRUE)
+  list(SW=SW, NE=NE, SE=SE, NW=NW)
+}
