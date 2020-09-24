@@ -58,12 +58,13 @@ else
 fi
 
 # first check for the new proj.h interface (>=v5.0)
-# we then also need to add -DPROJ5 to the preprocessor
+# if we use the old interface, we need to add -DMETEOGRID_OLD_PROJ_API
 AC_CHECK_HEADERS(proj.h, proj_ok=yes, proj_ok=no)
 if test "${proj_ok}" = yes; then
-  PROJ_CPPFLAGS="${PROJ_CPPFLAGS} -DPROJ5"
+#  PROJ_CPPFLAGS="${PROJ_CPPFLAGS} -DPROJ5"
   AC_CHECK_LIB(proj, proj_create, , proj_ok=no)
 else
+  PROJ_CPPFLAGS="${PROJ_CPPFLAGS} -DMETEOGRID_OLD_PROJ_API"
   AC_CHECK_HEADERS(proj_api.h, proj_ok=yes, proj_ok=no)
   AC_CHECK_LIB(proj, pj_init, , proj_ok=no)
 fi

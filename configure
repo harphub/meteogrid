@@ -3029,7 +3029,7 @@ else
 fi
 
 # first check for the new proj.h interface (>=v5.0)
-# we then also need to add -DPROJ5 to the preprocessor
+# if we use the old interface, we need to add -DMETEOGRID_OLD_PROJ_API
 
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for grep that handles long lines and -e" >&5
@@ -3306,7 +3306,7 @@ fi
 done
 
 if test "${proj_ok}" = yes; then
-  PROJ_CPPFLAGS="${PROJ_CPPFLAGS} -DPROJ5"
+#  PROJ_CPPFLAGS="${PROJ_CPPFLAGS} -DPROJ5"
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking for proj_create in -lproj" >&5
 $as_echo_n "checking for proj_create in -lproj... " >&6; }
 if ${ac_cv_lib_proj_proj_create+:} false; then :
@@ -3355,6 +3355,7 @@ else
 fi
 
 else
+  PROJ_CPPFLAGS="${PROJ_CPPFLAGS} -DMETEOGRID_OLD_PROJ_API"
   for ac_header in proj_api.h
 do :
   ac_fn_c_check_header_mongrel "$LINENO" "proj_api.h" "ac_cv_header_proj_api_h" "$ac_includes_default"

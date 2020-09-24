@@ -4,7 +4,8 @@ using namespace Rcpp;
 // The "proj_api.h" version is deprecated, but still available up to PROJ.7 (2020)
 // So the new API version is here for testing.
 // Only people using PROJ.8 or later will really need the new interface.
-#ifdef PROJ5
+// but you might as well use proj.h if you have v5.0 or later
+#ifndef METEOGRID_OLD_PROJ_API
 #include "proj.h"
 #else
 #define ACCEPT_USE_OF_DEPRECATED_PROJ_API_H
@@ -15,24 +16,16 @@ using namespace Rcpp;
 Rcpp::DataFrame mg_project( NumericVector x, NumericVector y, std::string proj_string,
             bool inverse=false){
 
-#ifdef PROJ5
-  PJ *P;
-  PJ_COORD data;
-#else
-  projPJ P;
-  projUV data;
-#endif
-
   int i, npoints = x.length();
   const char *parms = proj_string.c_str();
   // NOTE: you could do inline replacements (i.e. use x and y for output, too)
   NumericVector result_x(npoints), result_y(npoints);
 
-#ifdef PROJ5
+#ifndef METEOGRID_OLD_PROJ_API
+  // The new interface (PROJ >= 5.0)
+  PJ *P;
+  PJ_COORD data;
   P = proj_create(PJ_DEFAULT_CTX, parms);
-#else
-  P = pj_init_plus(parms);
-#endif
 
   if ( !P ) {
     Rprintf("ERROR: Projection Initialisation Error in\n");
@@ -40,7 +33,6 @@ Rcpp::DataFrame mg_project( NumericVector x, NumericVector y, std::string proj_s
     Rf_error("Can not initialize projection.\n");
   }
 
-#ifdef PROJ5
   // NOTE: proj_torad(NA) seems to give 0
   if (! inverse) {
     for (i=0; i < npoints ; i++) {
@@ -77,7 +69,18 @@ Rcpp::DataFrame mg_project( NumericVector x, NumericVector y, std::string proj_s
     }
   }
   proj_destroy(P);
+
 #else
+  // old PROJ4 interface (proj_api,h)
+  projPJ P;
+  projUV data;
+  P = pj_init_plus(parms);
+
+  if ( !P ) {
+    Rprintf("ERROR: Projection Initialisation Error in\n");
+    Rprintf("%s\n", *parms);
+    Rf_error("Can not initialize projection.\n");
+  }
   if (! inverse) {
     for (i=0; i < npoints ; i++) {
       if (R_FINITE(x[i]) && R_FINITE(y[i])) {
@@ -114,6 +117,7 @@ Rcpp::DataFrame mg_project( NumericVector x, NumericVector y, std::string proj_s
   }
   pj_free(P);
 #endif
+
   return Rcpp::DataFrame::create(Named("x") = result_x, Named("y") = result_y);
 }
 
