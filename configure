@@ -3029,7 +3029,6 @@ else
 fi
 
 # first check for the new proj.h interface (>=v5.0)
-# if we use the old interface, we need to add -DMETEOGRID_OLD_PROJ_API
 
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for grep that handles long lines and -e" >&5
@@ -3355,7 +3354,11 @@ else
 fi
 
 else
-  PROJ_CPPFLAGS="${PROJ_CPPFLAGS} -DMETEOGRID_OLD_PROJ_API"
+# if we use the old interface, we need to add -DACCEPT_USE_OF_DEPRECATED_PROJ_API_H
+# also, AC_CHECK_LIB must then run with this setting
+  PROJ_CPPFLAGS="${PROJ_CPPFLAGS} -DACCEPT_USE_OF_DEPRECATED_PROJ_API_H"
+  $as_echo "#define ACCEPT_USE_OF_DEPRECATED_PROJ_API_H 1" >>confdefs.h
+
   for ac_header in proj_api.h
 do :
   ac_fn_c_check_header_mongrel "$LINENO" "proj_api.h" "ac_cv_header_proj_api_h" "$ac_includes_default"

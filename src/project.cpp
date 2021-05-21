@@ -5,10 +5,9 @@ using namespace Rcpp;
 // So the new API version is here for testing.
 // Only people using PROJ.8 or later will really need the new interface.
 // but you might as well use proj.h if you have v5.0 or later
-#ifndef METEOGRID_OLD_PROJ_API
+#ifndef ACCEPT_USE_OF_DEPRECATED_PROJ_API_H
 #include "proj.h"
 #else
-#define ACCEPT_USE_OF_DEPRECATED_PROJ_API_H
 #include "proj_api.h"
 #endif
 
@@ -21,7 +20,7 @@ Rcpp::DataFrame mg_project( NumericVector x, NumericVector y, std::string proj_s
   // NOTE: you could do inline replacements (i.e. use x and y for output, too)
   NumericVector result_x(npoints), result_y(npoints);
 
-#ifndef METEOGRID_OLD_PROJ_API
+#ifndef ACCEPT_USE_OF_DEPRECATED_PROJ_API_H
   // The new interface (PROJ >= 5.0)
   PJ *P;
   PJ_COORD data;
