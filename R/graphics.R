@@ -172,10 +172,21 @@ geofield_title <- function(x) {
   # don't use "with(attr(x, "info"), ...)
   # because that fails if an element does not exists
   # while now it just returns NULL...
-  mytitle <- sprintf("%s\n%s", attr(x, "info")$name, 
-                     format(attr(x, "info")$time$basedate, "%Y/%m/%d %H:%M"))
-  if (!is.null(attr(x, "info")$time$leadtime)) {
-    mytitle <- paste0(mytitle, " +", attr(x, "info")$time$leadtime)
+  # FIX: check that the attributes are non-null!
+  #      e.g. LFI fields have only validdate, no basedate!
+  mytitle <- trim(attr(x, "info")$name)
+  dt <- attr(x, "info")$time
+  if (!is.null(dt$basedate)) {
+    mytitle <- paste(mytitle,
+                     format(attr(x, "info")$time$basedate, "%Y/%m/%d %H:%M"),
+                     sep="\n")
+    if (!is.null(attr(x, "info")$time$leadtime)) {
+      mytitle <- paste0(mytitle, " +", attr(x, "info")$time$leadtime)
+    }
+  } else if (!is.null(dt$validdate)) {
+    mytitle <- paste(mytitle,
+                     format(attr(x, "info")$time$validdate, "%Y/%m/%d %H:%M"),
+                     sep="\n")
   }
   mytitle
 }

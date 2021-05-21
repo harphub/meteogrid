@@ -13,7 +13,10 @@
 ### 1. very basic functions for (u,v) <-> (wdir,wspeed) ###
 ###########################################################
 
-wind.dirspeed <- function(u, v, fieldname=c("Wind direction","Wind speed"),rad=FALSE, rotate_wind=FALSE){
+wind.dirspeed <- function(u, v, 
+                          fieldname=c("Wind direction", "Wind speed"),
+                          rad=FALSE,
+                          rotate_wind=FALSE){
   if (missing(v) && is.list(u)) {
     v <- u[[2]]
     u <- u[[1]]
@@ -43,8 +46,8 @@ wind.dirspeed <- function(u, v, fieldname=c("Wind direction","Wind speed"),rad=F
   else return(list(wdir=wdir,wspeed=wspeed))
 }
 
-wind.uv <- function(wspeed,wdir,fieldname=c("U","V"),rad=FALSE){
-  if (missing(wdir) & is.list(wspeed)){
+wind.uv <- function(wspeed, wdir, fieldname=c("U","V"), rad=FALSE){
+  if (missing(wdir) && is.list(wspeed)){
     wdir <- wspeed$wdir
     wspeed <- wspeed$wspeed
   }
@@ -114,8 +117,8 @@ geowind.init <- function(domain){
           "lcc" = .geowind.LCC(domain),
           "stere" = .geowind.PS(domain),
           "omerc" = .geowind.RM(domain),
-          "latlon" = list(angle=0, mapfactor=1),
-          stop(paste("unimplemented projection: ",domain$projection$proj))
+          "latlong" = list(angle=0, mapfactor=1),
+          stop(paste("unimplemented projection: ", domain$projection$proj))
         )
   ww
 }
