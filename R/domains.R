@@ -228,7 +228,7 @@ DomainCorners <- function(geo) {
   } else {
     xy <- project(list(x=c(domain$SW[1], domain$NE[1]),
                        y=c(domain$SW[2], domain$NE[2])),
-                proj=domain$projection)
+                  proj=domain$projection)
     x0 <- xy$x[1]
     y0 <- xy$y[1]
     x1 <- xy$x[2]

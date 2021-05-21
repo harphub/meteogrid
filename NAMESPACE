@@ -14,5 +14,6 @@ S3method(print,geofield)
 S3method(print,geodomain)
 S3method("[[", geofield, .subset.geofield)
 S3method("[[<-", geofield, .subset.assign.geofield)
+importFrom(Rcpp,sourceCpp)
 useDynLib("meteogrid")
 
