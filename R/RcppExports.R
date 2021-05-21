@@ -2,14 +2,14 @@
 # Generator token: 10BE3573-1514-4C36-9D1C-5A225CD40393
 
 proj_version <- function() {
-    .Call('_meteogrid4_proj_version', PACKAGE = 'meteogrid4')
+    .Call('_meteogrid_proj_version', PACKAGE = 'meteogrid')
 }
 
 mg_project <- function(x, y, proj_string, inverse = FALSE) {
-    .Call('_meteogrid4_mg_project', PACKAGE = 'meteogrid4', x, y, proj_string, inverse)
+    .Call('_meteogrid_mg_project', PACKAGE = 'meteogrid', x, y, proj_string, inverse)
 }
 
 upscale_by_mean <- function(px, py, pval, gnx, gny) {
-    .Call('_meteogrid4_upscale_by_mean', PACKAGE = 'meteogrid4', px, py, pval, gnx, gny)
+    .Call('_meteogrid_upscale_by_mean', PACKAGE = 'meteogrid', px, py, pval, gnx, gny)
 }
 

@@ -7,7 +7,7 @@ using namespace Rcpp;
 
 // proj_version
 NumericVector proj_version();
-RcppExport SEXP _meteogrid4_proj_version() {
+RcppExport SEXP _meteogrid_proj_version() {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -17,7 +17,7 @@ END_RCPP
 }
 // mg_project
 Rcpp::DataFrame mg_project(NumericVector x, NumericVector y, std::string proj_string, bool inverse);
-RcppExport SEXP _meteogrid4_mg_project(SEXP xSEXP, SEXP ySEXP, SEXP proj_stringSEXP, SEXP inverseSEXP) {
+RcppExport SEXP _meteogrid_mg_project(SEXP xSEXP, SEXP ySEXP, SEXP proj_stringSEXP, SEXP inverseSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -31,7 +31,7 @@ END_RCPP
 }
 // upscale_by_mean
 NumericMatrix upscale_by_mean(NumericVector px, NumericVector py, NumericVector pval, int gnx, int gny);
-RcppExport SEXP _meteogrid4_upscale_by_mean(SEXP pxSEXP, SEXP pySEXP, SEXP pvalSEXP, SEXP gnxSEXP, SEXP gnySEXP) {
+RcppExport SEXP _meteogrid_upscale_by_mean(SEXP pxSEXP, SEXP pySEXP, SEXP pvalSEXP, SEXP gnxSEXP, SEXP gnySEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -46,13 +46,13 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_meteogrid4_proj_version", (DL_FUNC) &_meteogrid4_proj_version, 0},
-    {"_meteogrid4_mg_project", (DL_FUNC) &_meteogrid4_mg_project, 4},
-    {"_meteogrid4_upscale_by_mean", (DL_FUNC) &_meteogrid4_upscale_by_mean, 5},
+    {"_meteogrid_proj_version", (DL_FUNC) &_meteogrid_proj_version, 0},
+    {"_meteogrid_mg_project", (DL_FUNC) &_meteogrid_mg_project, 4},
+    {"_meteogrid_upscale_by_mean", (DL_FUNC) &_meteogrid_upscale_by_mean, 5},
     {NULL, NULL, 0}
 };
 
-RcppExport void R_init_meteogrid4(DllInfo *dll) {
+RcppExport void R_init_meteogrid(DllInfo *dll) {
     R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
     R_useDynamicSymbols(dll, FALSE);
 }
