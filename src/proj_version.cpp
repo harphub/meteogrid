@@ -1,17 +1,16 @@
 #include <Rcpp.h>
 #include <string.h>
 using namespace Rcpp;
-#ifndef METEOGRID_OLD_PROJ_API
+#ifndef ACCEPT_USE_OF_DEPRECATED_PROJ_API_H
 #include "proj.h"
 #else
-#define ACCEPT_USE_OF_DEPRECATED_PROJ_API_H
 #include "proj_api.h"
 #endif
 // [[Rcpp::export]]
 NumericVector proj_version() {
   
   NumericVector result(3) ;
-#ifndef METEOGRID_OLD_PROJ_API
+#ifndef ACCEPT_USE_OF_DEPRECATED_PROJ_API_H
   result(0) = PROJ_VERSION_MAJOR ;
   result(1) = PROJ_VERSION_MINOR ;
   result(2) = PROJ_VERSION_PATCH ;
