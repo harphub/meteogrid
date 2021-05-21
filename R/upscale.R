@@ -38,8 +38,9 @@ upscale_factor <- function(infield, factor, method="mean", ... ){
   newdomain$NE <- as.numeric(project(ne1, proj=newdomain$projection, inv=TRUE))
 
 ## domains defined by their centre should also be supported...
-  if (!is.null(olddomain$clonlat)) newdomain$clonlat <- as.numeric(project( (ne1+sw1)/2, proj=newdomain$projection, inv=TRUE))
-
+  if (!is.null(olddomain$clonlat)) {
+    newdomain$clonlat <- as.numeric(project( (ne1+sw1)/2, proj=newdomain$projection, inv=TRUE))
+  }
 ### the actual data
 ### from Daan: we do this by reshaping the matrix to a 4d array
 ### notice that we drop a few points in some cases
@@ -62,10 +63,9 @@ upscale_regrid <- function(infield, newdomain, method="mean", weights=NULL, ... 
     weights <- upscale_regrid_init(infield, newdomain)
   }
 
-  result <- upscale_by_mean( px=weights$px, py=weights$py, 
+  result <- upscale_by_mean( px=weights$px, py=weights$py,
                              pval=as.numeric(infield),
                              gnx=newdomain$nx, gny=newdomain$ny)
-  print(dim(result))
 
   as.geofield(result, domain=newdomain)
 }
@@ -77,7 +77,10 @@ upscale_regrid_init <- function(olddomain, newdomain) {
 
   opoints <- DomainPoints(olddomain)
   npoints <- olddomain$nx * olddomain$ny
-  pind <- point.index(domain=newdomain, lon=as.vector(opoints$lon), lat=as.vector(opoints$lat), clip=FALSE)
+  pind <- point.index(domain=newdomain,
+                      lon=as.vector(opoints$lon),
+                      lat=as.vector(opoints$lat),
+                      clip=FALSE)
 
   return(data.frame(px = round(pind$i), py=round(pind$j)))
 }
