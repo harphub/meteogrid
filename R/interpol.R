@@ -254,14 +254,14 @@ point.bilin <- function(infield, lon=NULL, lat=NULL, mask=NULL,
   }
   ndim <- length(dim(infield))
   if (ndim==2) {
-    weights$w00*infield[weights$F00] + weights$w01*infield[weights$F01] +
-              weights$w10*infield[weights$F10] + weights$w11*infield[weights$F11]
+    result <-  weights$w00*infield[weights$i0, weights$j0] + weights$w01*infield[weights$i0, weights$j1] +
+               weights$w10*infield[weights$i1, weights$j0] + weights$w11*infield[weights$i1, weights$j1]
   } else {
     result <- apply(infield, 3:ndim, function(x)  
-                    weights$w00*x[weights$F00] + weights$w01*x[weights$F01] +
-                    weights$w10*x[weights$F10] + weights$w11*x[weights$F11])
-    result
+                    weights$w00*x[weights$i0, weights$j0] + weights$w01*x[weights$i0, weights$j1] +
+                    weights$w10*x[weights$i1, weights$j0] + weights$w11*x[weights$i1, weights$j1])
   }
+  result
 }
 
 ### nearest neighbour (closest point)
