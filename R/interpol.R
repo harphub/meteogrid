@@ -254,12 +254,12 @@ point.bilin <- function(infield, lon=NULL, lat=NULL, mask=NULL,
   }
   ndim <- length(dim(infield))
   if (ndim==2) {
-    result <-  weights$w00*infield[weights$i0, weights$j0] + weights$w01*infield[weights$i0, weights$j1] +
-               weights$w10*infield[weights$i1, weights$j0] + weights$w11*infield[weights$i1, weights$j1]
+    result <-  weights$w00*infield[cbind(weights$i0, weights$j0)] + weights$w01*infield[cbind(weights$i0, weights$j1)] +
+               weights$w10*infield[cbind(weights$i1, weights$j0)] + weights$w11*infield[cbind(weights$i1, weights$j1)]
   } else {
     result <- apply(infield, 3:ndim, function(x)  
-                    weights$w00*x[weights$i0, weights$j0] + weights$w01*x[weights$i0, weights$j1] +
-                    weights$w10*x[weights$i1, weights$j0] + weights$w11*x[weights$i1, weights$j1])
+                    weights$w00*x[cbind(weights$i0, weights$j0)] + weights$w01*x[cbind(weights$i0, weights$j1)] +
+                    weights$w10*x[cbind(weights$i1, weights$j0)] + weights$w11*x[cbind(weights$i1, weights$j1)])
   }
   result
 }
