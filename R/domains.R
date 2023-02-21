@@ -1,16 +1,22 @@
 compare.geodomain <- function(x, y){
 ### TRUE if they are equal, FALSE if they are not
 ### this is not exhaustive, but I am in a hurry!
-### BUG: clonlat OR SW-NE points may be known
-  checklist <- c("nx", "ny", "dx", "dy", "clonlat")
-  if (!isTRUE(all.equal(x[checklist], y[checklist]))) return(FALSE)
-  # $ex and $ey may be different, so ignore them
+
 ### compare the projection: may have a different order!
   n1 <- names(x$projection)
   n2 <- names(y$projection)
   ndif <- setdiff(n1,n2)
   if (length(ndif) > 0) return(FALSE)
-  return(isTRUE(all.equal(x$projection, y$projection[n1])))
+  if (!isTRUE(all.equal(x$projection, y$projection[n1]))) return(FALSE)
+
+### now the main domain specifiers
+### NOTE: clonlat OR SW-NE points may be known
+  checklist <- c("nx", "ny", "dx", "dy", "clonlat")
+  if (any(is.null(x[checklist]))) x <- DomainExtent(x)
+  if (any(is.null(y[checklist]))) y <- DomainExtent(y)
+  if (!isTRUE(all.equal(x[checklist], y[checklist]))) return(FALSE)
+  else return(TRUE)
+  # $ex and $ey may be different, so ignore them
 }
 
 ###########################
