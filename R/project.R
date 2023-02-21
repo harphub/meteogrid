@@ -34,10 +34,8 @@ project <- function(x, y=NULL, proj=.Last.domain()$projection,
   } else {
     proj_string <- proj
   }
-  # FIXME:
-  # make sure it's not a *rotated* latlong !!!
   if (grepl("+proj=latlong", proj_string, fixed=TRUE)) {
-    cat("Nothing to project!\n")
+    # OK: a rotated latlong will have +proj=ob_tran +o_proj=latlong
     return(data.frame(x=xy$x, y=xy$y))
   }
  
