@@ -33,7 +33,10 @@ Make.domain <- function(projtype="lambert", clonlat, nxny, dxdy, exey=NULL,
   if (projtype %in% c("lcc", "lambert")) {
 ### Lambert (as used in ALADIN: only 1 reference latitude)
     projection <- list(proj="lcc", lon_0=reflon, lat_1=reflat, lat_2=reflat)
-  } else if (projtype %in% c("merc", "omerc", "tmerc", "mercator")){
+  } else if (projtype %in% c("merc", "mercator")){
+### Mercator
+    projection <- list(proj="merc",lon_0=clonlat[1])
+  } else if (projtype %in% c("omerc", "tmerc")){
 ### Rotated & tilted Mercator
 ### as used in ALADIN: reflon=clon, reflat=clat !!!
 ### we simply *ignore* reflon and reflat (coming from FA file they are 0 !)
