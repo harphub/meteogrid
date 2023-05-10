@@ -16,7 +16,7 @@
 #' @export project
 
 project <- function(x, y=NULL, proj=.Last.domain()$projection,
-                    inv=FALSE, proj4fix=proj_version()[0]==4)
+                    inv=FALSE, proj4fix=proj_version()[1]==4)
 {
   if (is.null(y) && is.numeric(x) && length(x) == 2) {
     xy <- list(x=x[1], y=x[2])
