@@ -112,7 +112,7 @@ as.geofield <- function (x=NA, domain,
     }
   }
   if (!is.null(collapse[["prm"]]))   info$name <- paste0(collapse$prm, info$name)
-  if (!is.null(collapse[["name"]]))   info$name <- paste0(collapse$name, info$name)
+  if (!is.null(collapse[["name"]]))  info$name <- paste0(collapse$name, info$name)
   if (!is.null(collapse[["hPa"]]))   info$name <- paste0(info$name, " ", collapse[["hPa"]], "hPa")
   if (!is.null(collapse[["mbr"]]))   info$name <- paste0(info$name, " mbr", collapse[["mbr"]])
   if (!is.null(collapse[["level"]])) info$name <- paste0(info$name, " level ", collapse[["level"]])

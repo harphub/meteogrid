@@ -177,11 +177,11 @@ geofield_title <- function(x) {
   mytitle <- trim(attr(x, "info")$name)
   dt <- attr(x, "info")$time
   if (!is.null(dt$basedate)) {
-    mytitle <- paste(mytitle,
+    mytitle <- paste(sprintf("%s [%s]", mytitle, attr(x, "info")$unit),
                      format(attr(x, "info")$time$basedate, "%Y/%m/%d %H:%M"),
                      sep="\n")
-    if (!is.null(attr(x, "info")$time$leadtime)) {
-      mytitle <- paste0(mytitle, " +", attr(x, "info")$time$leadtime)
+    if (!is.null(attr(x, "info")$steprange)) {
+      mytitle <- paste0(mytitle, " + ", attr(x, "info")$steprange, " ", attr(x, "info")$time$stepUnit)
     }
   } else if (!is.null(dt$validdate)) {
     mytitle <- paste(mytitle,
