@@ -11,3 +11,5 @@ LinkingTo: Rcpp
 NeedsCompilation: yes
 Suggests: RColorBrewer, Rfa, Rgrib2 (>= 1.4.0), maps(>= 3.2.0), sf
 License: Apache License (>= 2.0)
+URL: https://github.com/harphub/meteogrid
+BugReports: https://github.com/harphub/meteogrid/issues
