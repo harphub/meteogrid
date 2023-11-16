@@ -7,4 +7,6 @@ autom4te.cache
 
 .Rproj.user
 .Rhistory
-
+src/Makevars
+config.log
+config.status
