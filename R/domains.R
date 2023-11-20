@@ -44,7 +44,7 @@ Make.domain <- function(projtype="lambert", clonlat, nxny, dxdy, exey=NULL,
     rlon <- clonlat[1]
     rlat <- clonlat[2]
     if (abs(rlat) < 0.01 && abs(tilt) < 0.01) {
-# not necessary: this is OK in "omerc"
+# not necessary: this is OK now in "omerc"
       projection <- list(proj="merc",lon_0=rlon)
     } else if (abs(abs(tilt)-90) < 1.0E-5) {
 # this would crash in "omerc" (alpha ~ 0)
@@ -58,7 +58,7 @@ Make.domain <- function(projtype="lambert", clonlat, nxny, dxdy, exey=NULL,
       projection <- list(proj = "omerc", lonc = rlon,
                             lat_0 = rlat, alpha = 90 + tilt, no_rot=NA)
     }
-  } else if (projtype %in% c("latlong")) {
+  } else if (projtype %in% c("latlong", "lalo", "lonlat")) {
     projection=list(proj="latlong")
   } else if (projtype %in% c("ob_tran", "RotLatLon")){
     projection <- list(proj="ob_tran","o_proj"="latlong",

@@ -10,9 +10,9 @@ Make.domain(projtype="lambert", clonlat, nxny, dxdy, exey=NULL,
 Make.domain.RLL(Lon1, Lat1, SPlon, SPlat, SPangle=0, nxny, dxdy)
 }
 \arguments{
-  \item{projtype}{The projection type. Possible values are
+  \item{projtype}{The projection type. Possible values include
     \code{"lambert"},\code{"mercator"}, \code{"omerc"} (oblique
-    mercator) and \code{"lalo"}.}
+    mercator) and \code{"lonlat"}.}
   \item{clonlat}{ The c(lon,lat) co-ordinates of the center point of the domain.}
   \item{nxny}{The c(nx,ny) number of grid points, i.e. the dimensions of
     the required grid.}
