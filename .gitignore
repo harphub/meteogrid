@@ -11,4 +11,3 @@ autom4te.cache
 src/Makevars
 config.log
 config.status
-configure
