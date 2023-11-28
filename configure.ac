@@ -54,7 +54,7 @@ else
     LIBS="-L${proj_lib_path} -Wl,-rpath,${proj_lib_path} ${LIBS}"
   elif test [ -n "${PROJ_LIB_PATH}" ] ; then
     AC_MSG_NOTICE([Using PROJ_LIB_PATH=${PROJ_LIB_PATH}])
-    LIBS="${PROJ_LIB_PATH} -Wl,-rpath,${PROJ_LIB_PATH} ${LIBS}"
+    LIBS="-L${PROJ_LIB_PATH} -Wl,-rpath,${PROJ_LIB_PATH} ${LIBS}"
   fi
 fi
 CPPFLAGS="${PROJ_CPPFLAGS} ${CPPFLAGS}"
