@@ -31,7 +31,7 @@ wind.dirspeed <- function(u, v,
     domain <- attr(u, "domain")
     if (is.null(domain)) stop("rotate_wind requires geodomain information!")
     ww <- geowind.init(domain)
-    wdir <- wdir + ww$angle
+    wdir <- wdir + ww$angle * 180./pi
 #    wspeed <- wspeed * ww$mapfactor
   }
 
