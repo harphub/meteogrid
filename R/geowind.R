@@ -175,7 +175,7 @@ geowind.init <- function(domain){
 
   lalo <- DomainPoints(domain,"lalo")
   # FIXME: do we really need the mapfactor?
-  mapfactor <- (refcos/cos(lalo$lat * rad))^(1 - refcos) * ((1 + refsin)/(1 + sin(lalo$lat * rad)))^refsin
+  mapfactor <- (refcos/cos(lalo$lat * rad))^(1 - refsin) * ((1 + refsin)/(1 + sin(lalo$lat * rad)))^refsin
   angle <- refsin * (lalo$lon - reflon) * rad
   list(angle = as.geofield(angle, domain=domain, 
                            info=list(name="Model wind angle correction", time=list())),
