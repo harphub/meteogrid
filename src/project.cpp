@@ -23,7 +23,7 @@ Rcpp::DataFrame mg_project( NumericVector x, NumericVector y, std::string proj_s
 #ifndef ACCEPT_USE_OF_DEPRECATED_PROJ_API_H
   // The new interface (PROJ >= 5.0)
   PJ *P;
-  PJ_COORD data;
+  PJ_COORD input, output;
   P = proj_create(PJ_DEFAULT_CTX, parms);
 
   if ( !P ) {
@@ -36,15 +36,18 @@ Rcpp::DataFrame mg_project( NumericVector x, NumericVector y, std::string proj_s
   if (! inverse) {
     for (i=0; i < npoints ; i++) {
       if (R_FINITE(x[i]) && R_FINITE(y[i])) {
-        data.lp.lam = proj_torad(x[i]) ;
-        data.lp.phi = proj_torad(y[i]) ;
-        data = proj_trans(P, PJ_FWD, data) ;
-        if (data.xy.x == HUGE_VAL || data.xy.y == HUGE_VAL) {
+        input.lp.lam = proj_torad(x[i]) ;
+        input.lp.phi = proj_torad(y[i]) ;
+        output = proj_trans(P, PJ_FWD, input) ;
+        if (output.xy.x == HUGE_VAL || output.xy.y == HUGE_VAL || proj_errno(P) > 0) {
+          //Rprintf("ERROR %i %lf %lf\n", i, x[i], y[i]);
+          //Rprintf("Resetting P: %i\n", proj_errno(P));
+          proj_errno_reset(P);
           result_x[i] = result_y[i] = NA_REAL;
         }
         else {
-          result_x[i] = data.xy.x;
-          result_y[i] = data.xy.y;
+          result_x[i] = output.xy.x;
+          result_y[i] = output.xy.y;
         }
       }
       else result_x[i] = result_y[i] = NA_REAL;
@@ -53,15 +56,16 @@ Rcpp::DataFrame mg_project( NumericVector x, NumericVector y, std::string proj_s
   else {
     for (i=0; i < npoints ; i++) {
       if (R_FINITE(x[i]) && R_FINITE(y[i])) {
-        data.xy.x = x[i] ;
-        data.xy.y = y[i] ;
-        data = proj_trans(P, PJ_INV, data) ;
-        if (data.lp.lam == HUGE_VAL || data.lp.phi == HUGE_VAL) {
+        input.xy.x = x[i] ;
+        input.xy.y = y[i] ;
+        output = proj_trans(P, PJ_INV, input) ;
+        if (output.lp.lam == HUGE_VAL || output.lp.phi == HUGE_VAL || proj_errno(P) > 0) {
           result_x[i] = result_y[i] = NA_REAL;
+          proj_errno_reset(P);
         }
         else {
-          result_x[i] = proj_todeg(data.lp.lam);
-          result_y[i] = proj_todeg(data.lp.phi);
+          result_x[i] = proj_todeg(output.lp.lam);
+          result_y[i] = proj_todeg(output.lp.phi);
         }
       }
       else result_x[i] = result_y[i] = NA_REAL;
@@ -72,7 +76,7 @@ Rcpp::DataFrame mg_project( NumericVector x, NumericVector y, std::string proj_s
 #else
   // old PROJ4 interface (proj_api,h)
   projPJ P;
-  projUV data;
+  projUV input, output;
   P = pj_init_plus(parms);
 
   if ( !P ) {
@@ -83,15 +87,15 @@ Rcpp::DataFrame mg_project( NumericVector x, NumericVector y, std::string proj_s
   if (! inverse) {
     for (i=0; i < npoints ; i++) {
       if (R_FINITE(x[i]) && R_FINITE(y[i])) {
-        data.u = DEG_TO_RAD * x[i] ;
-        data.v = DEG_TO_RAD * y[i] ;
-        data = pj_fwd(data, P) ;
-        if (data.u == HUGE_VAL || data.v == HUGE_VAL) {
+        input.u = DEG_TO_RAD * x[i] ;
+        input.v = DEG_TO_RAD * y[i] ;
+        output = pj_fwd(input, P) ;
+        if (output.u == HUGE_VAL || output.v == HUGE_VAL) {
           result_x[i] = result_y[i] = NA_REAL;
         }
         else {
-          result_x[i] = data.u;
-          result_y[i] = data.v;
+          result_x[i] = output.u;
+          result_y[i] = output.v;
         }
       }
       else result_x[i] = result_y[i] = NA_REAL;
@@ -100,15 +104,15 @@ Rcpp::DataFrame mg_project( NumericVector x, NumericVector y, std::string proj_s
   else {
     for (i=0; i < npoints ; i++) {
       if (R_FINITE(x[i]) && R_FINITE(y[i])) {
-        data.u = x[i] ;
-        data.v = y[i] ;
-        data = pj_inv(data, P) ;
-        if (data.u == HUGE_VAL || data.v == HUGE_VAL) {
+        input.u = x[i] ;
+        input.v = y[i] ;
+        output = pj_inv(input, P) ;
+        if (output.u == HUGE_VAL || output.v == HUGE_VAL) {
           result_x[i] = result_y[i] = NA_REAL;
         }
         else {
-          result_x[i] = data.u * RAD_TO_DEG;
-          result_y[i] = data.v * RAD_TO_DEG;
+          result_x[i] = output.u * RAD_TO_DEG;
+          result_y[i] = output.v * RAD_TO_DEG;
         }
       }
       else result_x[i] = result_y[i] = NA_REAL;
