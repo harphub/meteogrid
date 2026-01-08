@@ -1,6 +1,6 @@
 Package: meteogrid
-Version: 3.9.3.9003
-Date: 2024-12-05
+Version: 3.9.4
+Date: 2026-01-08
 Title: Gridded meteorological data
 Description: A toolbox for working with and viewing gridded (meteorological) data. 
 Author: Alex Deckmyn (Royal Meteorological Institute of Belgium) <Alex.Deckmyn@meteo.be> 
